@@ -10,9 +10,9 @@ class InfoScreen extends StatelessWidget {
       ),
       body: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 400),
-        child: Container(
+        child: SingleChildScrollView(
           padding: EdgeInsets.all(20),
-          child: ListView(
+          child: Column(
             children: [
               SizedBox(height: 20),
               Center(
