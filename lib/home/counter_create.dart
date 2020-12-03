@@ -33,7 +33,7 @@ class CounterCreate extends StatelessWidget {
           height: 20,
         ),
         RaisedButton.icon(
-          onPressed: enabled ? onSubmit() : null,
+          onPressed: enabled ? onSubmit : null,
           label: Text('Crea nuovo contapersone'),
           icon: Icon(Icons.add),
           color: Theme.of(context).primaryColor,
