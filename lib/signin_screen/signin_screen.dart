@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -187,10 +188,13 @@ class _SignInScreenState extends State<SignInScreen> {
       _isLoading = true;
     });
     if (_validateAndSave()) {
+      FirebaseAnalytics().logEvent(name: 'signin_attempt', parameters: null);
       setState(() {
         _isLoading = false;
       });
       try {
+        FirebaseAnalytics()
+            .logEvent(name: 'signin_successful', parameters: null);
         // Firebase sign-in
         await widget.auth.signIn(_email, _password);
         print('Signed in.');
@@ -222,11 +226,14 @@ class _SignInScreenState extends State<SignInScreen> {
             message =
                 "Impossibile connettersi al server. Verifica la connessione di rete e riprova.";
         }
+        FirebaseAnalytics()
+            .logEvent(name: 'signin_error', parameters: {'code': message});
         setState(() {
           _isLoading = false;
           _errorMessage = message;
         });
       } catch (error) {
+        FirebaseAnalytics().logEvent(name: 'signin_error', parameters: null);
         print(error);
         print('Unexpected sign-in error.');
       }

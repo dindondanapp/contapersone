@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contapersone/signin_screen/signin_screen.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -104,6 +105,7 @@ class _HomeState extends State<Home> {
   }
 
   void _startSubcounter({@required CounterToken token}) {
+    FirebaseAnalytics().logEvent(name: 'start_subcounter', parameters: null);
     Navigator.of(context).popUntil((route) => route.isFirst);
     print('Starting subcounter for id $token');
     Navigator.of(context).push(
@@ -116,11 +118,13 @@ class _HomeState extends State<Home> {
   /// Open the scanner screen, acquire and follow a deep link QR code
   void scan() async {
     try {
+      FirebaseAnalytics().logEvent(name: 'scan', parameters: null);
       Uri uri = await scanUriQRCode(context);
       PendingDynamicLinkData data =
           await FirebaseDynamicLinks.instance.getDynamicLink(uri);
       _followDeepLink(data.link);
     } catch (error) {
+      FirebaseAnalytics().logEvent(name: 'scan_fail', parameters: null);
       print('Invalid code scanned.');
       // TODO: Provide visual feedback
     }
@@ -196,7 +200,7 @@ class _HomeState extends State<Home> {
                     value: 'signout',
                   ),
                 ],
-                onSelected: (value) => widget.auth.signOut(),
+                onSelected: (value) => _signOut(),
               )
             ]
           : <Widget>[
@@ -209,7 +213,7 @@ class _HomeState extends State<Home> {
                   ),
                 ],
                 onSelected: (value) => _openSignInScreen(),
-              )
+              ),
             ],
     );
   }
@@ -234,11 +238,17 @@ class _HomeState extends State<Home> {
   }
 
   void _openInfoScreen() {
+    FirebaseAnalytics().logEvent(name: 'open_info', parameters: null);
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => InfoScreen(),
       ),
     );
+  }
+
+  void _signOut() {
+    FirebaseAnalytics().logEvent(name: 'signout', parameters: null);
+    widget.auth.signOut();
   }
 
   Widget _buildScanQRCard() {
@@ -276,6 +286,8 @@ class _HomeState extends State<Home> {
   }
 
   void _createCounter() {
+    FirebaseAnalytics().logEvent(name: 'create_counter', parameters: null);
+
     setState(() {
       _status = HomeStatus.creating_counter;
     });
@@ -375,6 +387,7 @@ class _HomeState extends State<Home> {
   }
 
   void _showConnectionError() {
+    FirebaseAnalytics().logEvent(name: 'connection_error', parameters: null);
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -415,6 +428,8 @@ class _HomeState extends State<Home> {
   }
 
   void _showIncompleteSignupError() {
+    FirebaseAnalytics()
+        .logEvent(name: 'incomplete_signup_error', parameters: null);
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -422,7 +437,7 @@ class _HomeState extends State<Home> {
         return WillPopScope(
           onWillPop: () async => false,
           child: AlertDialog(
-            title: Text('Errore di connessione'),
+            title: Text('Registrazione incompleta'),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[

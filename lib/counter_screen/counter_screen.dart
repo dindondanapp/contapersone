@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 
 import '../common/entities.dart';
@@ -83,6 +84,8 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   void _submitEntranceName(String text) {
+    FirebaseAnalytics()
+        .logEvent(name: 'submit_entrance_name', parameters: null);
     _label = text != '' ? text : null;
     FirebaseFirestore.instance
         .collection('counters')
@@ -287,6 +290,8 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   void _openShareScreen() {
+    FirebaseAnalytics()
+        .logEvent(name: 'open_share_from_counter', parameters: null);
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ShareScreen(
