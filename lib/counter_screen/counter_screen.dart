@@ -142,27 +142,15 @@ class _CounterScreenState extends State<CounterScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               StreamBuilder<int>(
-                stream: _capacity,
-                builder: (context, capacity) => StreamBuilder<int>(
-                  stream: _counterTotal,
-                  builder: (BuildContext context, total) {
-                    return RichText(
-                      text: TextSpan(
-                        text: total.data == null ? '0' : total.data.toString(),
-                        children: [
-                          TextSpan(
-                            text: capacity.data != null
-                                ? '/${capacity.data.toString()}'
-                                : '',
-                            style:
-                                TextStyle(fontSize: 50, color: Palette.primary),
-                          ),
-                        ],
-                        style: TextStyle(fontSize: 50, color: Colors.black),
-                      ),
-                      textAlign: TextAlign.center,
-                    );
-                  },
+                stream: _counterTotal,
+                initialData: 0,
+                builder: (BuildContext context, total) => StreamBuilder<int>(
+                  stream: _capacity,
+                  builder: (BuildContext context, capacity) =>
+                      _buildStyledTotal(
+                    total.data,
+                    capacity: capacity.data,
+                  ),
                 ),
               ),
               Text(
@@ -216,18 +204,11 @@ class _CounterScreenState extends State<CounterScreen> {
                         return Column(
                           children: [
                             StreamBuilder<int>(
-                                stream: _subcounterTotal,
-                                builder: (BuildContext context, total) {
-                                  return Text(
-                                    total.data != null
-                                        ? total.data.toString()
-                                        : '',
-                                    style: TextStyle(
-                                      fontSize: 40,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  );
-                                }),
+                              stream: _subcounterTotal,
+                              initialData: 0,
+                              builder: (BuildContext context, total) =>
+                                  _buildStyledTotal(total.data),
+                            ),
                             Text(
                               _label == null ? 'Questo ingresso' : _label,
                             ),
@@ -277,6 +258,31 @@ class _CounterScreenState extends State<CounterScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStyledTotal(int total, {int capacity}) {
+    Color color = Colors.black;
+    if (capacity != null) {
+      if (total >= capacity) {
+        color = Colors.red;
+      } else if (total >= 0.9 * capacity) {
+        color = Colors.orange;
+      }
+    }
+
+    return RichText(
+      text: TextSpan(
+        text: total.toString(),
+        children: [
+          TextSpan(
+            text: capacity != null ? '/$capacity' : '',
+            style: TextStyle(fontSize: 50, color: Palette.primary),
+          ),
+        ],
+        style: TextStyle(fontSize: 50, color: color),
+      ),
+      textAlign: TextAlign.center,
     );
   }
 
