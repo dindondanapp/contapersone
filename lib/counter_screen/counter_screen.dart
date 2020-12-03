@@ -190,7 +190,7 @@ class _CounterScreenState extends State<CounterScreen> {
                               onSubmitted: _submitEntranceName,
                               controller: _controller,
                               decoration: InputDecoration(
-                                hintText: 'Nome del contatore',
+                                hintText: 'Nome del contatore (facoltativo)',
                               ),
                             ),
                             Container(
