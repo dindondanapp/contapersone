@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 extension ColorToMaterialColor on Color {
+  /// Converts the color into a [MaterialColor], creating variations based on brightness
   MaterialColor toMaterialColor() {
     final base = HSLColor.fromColor(this);
 
@@ -18,8 +21,24 @@ extension ColorToMaterialColor on Color {
     };
 
     return MaterialColor(
-        this.value,
-        lightnessMap.map<int, Color>((key, multiplier) => MapEntry(
-            key, base.withLightness(base.lightness * multiplier).toColor())));
+      this.value,
+      lightnessMap.map<int, Color>(
+        (key, multiplier) => MapEntry(
+          key,
+          base
+              .withLightness((base.lightness * multiplier)
+                  .sat(lower: 0, upper: 1)
+                  .toDouble())
+              .toColor(),
+        ),
+      ),
+    );
+  }
+}
+
+extension Saturation on num {
+  /// Saturates the number between given [lower] and [upper] bounds, if provided.
+  num sat({num lower, num upper}) {
+    return min(upper ?? double.infinity, max(lower ?? -double.infinity, this));
   }
 }
