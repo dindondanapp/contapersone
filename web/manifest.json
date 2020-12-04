@@ -1,15 +1,14 @@
 {
-    "name": "contapersone",
-    "short_name": "contapersone",
+    "name": "Contapersone",
+    "short_name": "Contapersone",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Uno strumento semplice ed efficace per contare gli accessi a eventi, esercizi commerciali, celebrazioni religiose e tanto altro, anche i presenza di ingressi multipli",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
-    "icons": [
-        {
+    "icons": [{
             "src": "icons/Icon-192.png",
             "sizes": "192x192",
             "type": "image/png"
