@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -36,13 +38,18 @@ Il servizio nasce in particolare per il monitoraggio degli accessi in chiesa, ma
 Contapersone è un progetto open source offerto gratuitamente dall'associazione DinDonDan App.''',
                   textAlign: TextAlign.justify,
                 ),
-                SizedBox(height: 40),
-                RaisedButton(
-                  child: Text('Sostienici con una donazione'),
-                  onPressed: () => launch('https://dindondan.app/donate.php'),
-                  textTheme: ButtonTextTheme.primary,
-                  color: Theme.of(context).primaryColor,
-                )
+                ...(!Platform.isIOS
+                    ? [
+                        SizedBox(height: 40),
+                        RaisedButton(
+                          child: Text('Sostienici con una donazione'),
+                          onPressed: () =>
+                              launch('https://dindondan.app/donate.php'),
+                          textTheme: ButtonTextTheme.primary,
+                          color: Theme.of(context).primaryColor,
+                        )
+                      ]
+                    : []),
               ],
             ),
           ),
