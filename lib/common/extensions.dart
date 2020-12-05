@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+// This file contains miscellaneous extensions
+
 extension ColorToMaterialColor on Color {
   /// Converts the color into a [MaterialColor], creating variations based on brightness
   MaterialColor toMaterialColor() {

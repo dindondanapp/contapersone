@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:contapersone/common/show_error_dialog.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 
@@ -19,6 +20,7 @@ class CounterScreen extends StatefulWidget {
 class _CounterScreenState extends State<CounterScreen> {
   var _subcounterTotal = Stream.value(0);
   var _status = CounterScreenStatus.set_name;
+  var _disconnected = false;
   var _controller = TextEditingController();
   String _subcounterId;
   String _label;
@@ -28,11 +30,9 @@ class _CounterScreenState extends State<CounterScreen> {
 
   @override
   void initState() {
-    print("Subcounter intialized for:");
-    print("CounterID ${widget._counterToken}");
     super.initState();
 
-    var documentStream = FirebaseFirestore.instance
+    final documentStream = FirebaseFirestore.instance
         .collection('counters')
         .doc(widget._counterToken.toString())
         .snapshots();
@@ -44,13 +44,36 @@ class _CounterScreenState extends State<CounterScreen> {
     _capacity = documentStream
         .map<int>((DocumentSnapshot event) => event['capacity'])
         .distinct();
+
+    _counterTotal.listen((event) {
+      if (_disconnected) {
+        setState(() {
+          _disconnected = false;
+        });
+      }
+    });
   }
 
-  void _incrementCounter() {
+  // Send a +1 event to firestore
+  void _updateCounter(int increment) {
     setState(() {
       if (_subcounterId == null) {
         return;
       }
+
+      if (increment == 0) {
+        return;
+      }
+
+      final update = increment > 0
+          ? {
+              "add_events": FieldValue.arrayUnion(
+                  List.filled(increment.abs(), Timestamp.now().toString()))
+            }
+          : {
+              "subtract_events": FieldValue.arrayUnion(
+                  List.filled(increment.abs(), Timestamp.now().toString()))
+            };
 
       // TODO: Timestamp.now() should be passed directly, without converting to string
       // waiting for fix (https://github.com/flutter/flutter/issues/15252)
@@ -59,45 +82,37 @@ class _CounterScreenState extends State<CounterScreen> {
           .doc(widget._counterToken.toString())
           .collection('subcounters')
           .doc(_subcounterId)
-          .update({
-        "add_events": FieldValue.arrayUnion([Timestamp.now().toString()])
-      });
+          .update(update)
+          .timeout(Duration(seconds: 10))
+          .then((value) => setState(() => _disconnected = false))
+          .catchError((error) => setState(() => _disconnected = true));
     });
   }
 
-  void _decrementCounter() {
-    setState(() {
-      if (_subcounterId == null) {
-        return;
-      }
-
-      // TODO: same as before
-      FirebaseFirestore.instance
-          .collection('counters')
-          .doc(widget._counterToken.toString())
-          .collection('subcounters')
-          .doc(_subcounterId)
-          .update({
-        "subtract_events": FieldValue.arrayUnion([Timestamp.now().toString()])
-      });
-    });
-  }
-
-  void _submitEntranceName(String text) {
+  // Create a new subcounter and initialize the total stream
+  void _submitEntranceName(String text) async {
     FirebaseAnalytics()
         .logEvent(name: 'submit_entrance_name', parameters: null);
     _label = text != '' ? text : null;
-    FirebaseFirestore.instance
-        .collection('counters')
-        .doc(widget._counterToken.toString())
-        .collection('subcounters')
-        .add({'label': _label, 'add_events': [], 'subtract_events': []}).then(
-            (ref) {
-      _subcounterId = ref.id;
-      print("New subcounter created.");
-      print(_subcounterId);
 
-      var documentStream = FirebaseFirestore.instance
+    setState(() {
+      _status = CounterScreenStatus.loading;
+    });
+
+    try {
+      final ref = await FirebaseFirestore.instance
+          .collection('counters')
+          .doc(widget._counterToken.toString())
+          .collection('subcounters')
+          .add({
+        'label': _label,
+        'add_events': [],
+        'subtract_events': []
+      }).timeout(Duration(seconds: 10));
+
+      _subcounterId = ref.id;
+
+      final documentStream = FirebaseFirestore.instance
           .collection('counters')
           .doc(widget._counterToken.toString())
           .collection('subcounters')
@@ -110,12 +125,18 @@ class _CounterScreenState extends State<CounterScreen> {
       });
 
       setState(() {
-        _status = CounterScreenStatus.loaded;
+        _status = CounterScreenStatus.ready;
       });
-    }).catchError((e) {
-      print('Firestore error');
-      print(e);
-    });
+    } catch (error) {
+      print(error);
+
+      showErrorDialog(
+        context: context,
+        title: 'Errore di connessione',
+        text: 'Verifica la connessione di rete e riprova.',
+        onRetry: () => _submitEntranceName(text),
+      );
+    }
   }
 
   @override
@@ -144,15 +165,19 @@ class _CounterScreenState extends State<CounterScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              StreamBuilder<int>(
-                stream: _counterTotal,
-                initialData: 0,
-                builder: (BuildContext context, total) => StreamBuilder<int>(
-                  stream: _capacity,
-                  builder: (BuildContext context, capacity) =>
-                      _buildStyledTotal(
-                    total.data,
-                    capacity: capacity.data,
+              Container(
+                height: 60,
+                child: StreamBuilder<int>(
+                  stream: _counterTotal,
+                  initialData: 0,
+                  builder: (BuildContext context, total) => StreamBuilder<int>(
+                    stream: _capacity,
+                    builder: (BuildContext context, capacity) =>
+                        _buildStyledTotal(
+                      total.data,
+                      capacity: capacity.data,
+                      disconnected: _disconnected,
+                    ),
                   ),
                 ),
               ),
@@ -168,7 +193,21 @@ class _CounterScreenState extends State<CounterScreen> {
                 child: Container(
                     padding: EdgeInsets.all(20),
                     child: () {
-                      if (_status == CounterScreenStatus.set_name) {
+                      if (_status == CounterScreenStatus.ready) {
+                        return Column(
+                          children: [
+                            StreamBuilder<int>(
+                              stream: _subcounterTotal,
+                              initialData: 0,
+                              builder: (BuildContext context, total) =>
+                                  _buildStyledTotal(total.data),
+                            ),
+                            Text(
+                              _label == null ? 'Questo ingresso' : _label,
+                            ),
+                          ],
+                        );
+                      } else {
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -197,23 +236,9 @@ class _CounterScreenState extends State<CounterScreen> {
                                 style: TextStyle(color: Colors.white),
                               ),
                               color: Palette.primary,
-                              onPressed: () {
-                                _submitEntranceName(_controller.text);
-                              },
-                            ),
-                          ],
-                        );
-                      } else {
-                        return Column(
-                          children: [
-                            StreamBuilder<int>(
-                              stream: _subcounterTotal,
-                              initialData: 0,
-                              builder: (BuildContext context, total) =>
-                                  _buildStyledTotal(total.data),
-                            ),
-                            Text(
-                              _label == null ? 'Questo ingresso' : _label,
+                              onPressed: _status == CounterScreenStatus.set_name
+                                  ? () => _submitEntranceName(_controller.text)
+                                  : null,
                             ),
                           ],
                         );
@@ -224,7 +249,7 @@ class _CounterScreenState extends State<CounterScreen> {
                 height: 10,
               ),
               () {
-                if (_status == CounterScreenStatus.loaded) {
+                if (_status == CounterScreenStatus.ready) {
                   return Expanded(
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -232,7 +257,7 @@ class _CounterScreenState extends State<CounterScreen> {
                         Expanded(
                           child: RaisedButton(
                             child: Icon(Icons.remove),
-                            onPressed: _decrementCounter,
+                            onPressed: () => _updateCounter(-1),
                             color: Colors.grey[300],
                           ),
                           flex: 3,
@@ -245,7 +270,7 @@ class _CounterScreenState extends State<CounterScreen> {
                               color: Colors.white,
                               size: 50,
                             ),
-                            onPressed: _incrementCounter,
+                            onPressed: () => _updateCounter(1),
                             color: Palette.primary,
                           ),
                           flex: 7,
@@ -264,8 +289,9 @@ class _CounterScreenState extends State<CounterScreen> {
     );
   }
 
-  Widget _buildStyledTotal(int total, {int capacity}) {
-    Color color = Colors.black;
+  Widget _buildStyledTotal(int total,
+      {int capacity, bool disconnected = false}) {
+    Color color = disconnected ? Colors.grey : Colors.black;
     if (capacity != null) {
       if (total >= capacity) {
         color = Colors.red;
@@ -274,18 +300,35 @@ class _CounterScreenState extends State<CounterScreen> {
       }
     }
 
-    return RichText(
-      text: TextSpan(
-        text: total.toString(),
-        children: [
-          TextSpan(
-            text: capacity != null ? '/$capacity' : '',
-            style: TextStyle(fontSize: 50, color: Palette.primary),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        RichText(
+          text: TextSpan(
+            text: total.toString(),
+            children: [
+              TextSpan(
+                text: capacity != null ? '/$capacity' : '',
+                style: TextStyle(fontSize: 50, color: Palette.primary),
+              ),
+            ],
+            style: TextStyle(fontSize: 50, color: color),
           ),
-        ],
-        style: TextStyle(fontSize: 50, color: color),
-      ),
-      textAlign: TextAlign.center,
+          textAlign: TextAlign.center,
+        ),
+        ...(disconnected
+            ? [
+                SizedBox(
+                  width: 20,
+                ),
+                Icon(
+                  Icons.cloud_off,
+                  color: Colors.grey,
+                  size: 40,
+                )
+              ]
+            : []),
+      ],
     );
   }
 
@@ -303,4 +346,4 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 }
 
-enum CounterScreenStatus { set_name, loading, loaded }
+enum CounterScreenStatus { set_name, loading, ready }

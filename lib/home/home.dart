@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:contapersone/common/show_error_dialog.dart';
 import 'package:contapersone/signin_screen/signin_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
@@ -132,6 +133,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    print('Building for status ${_status}');
     return new ValueListenableBuilder<AuthValue>(
       valueListenable: widget.auth,
       builder: (context, auth, _) {
@@ -268,7 +270,7 @@ class _HomeState extends State<Home> {
             () {
               if (kIsWeb) {
                 return Text(
-                    'Chiedi al creatore del contapersone di inviarti il link, oppure scarica la versione mobile di DinDonDan contapersone per inquadrare il codice QR');
+                    'Chiedi al creatore del contapersone di inviarti il link, oppure scarica la versione mobile di Contapersone da App Store o Play Store per inquadrare il codice QR');
               } else {
                 return RaisedButton.icon(
                   onPressed: _status == HomeStatus.loaded ? scan : null,
@@ -285,11 +287,12 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _createCounter() {
+  void _createCounter() async {
     FirebaseAnalytics().logEvent(name: 'create_counter', parameters: null);
 
     setState(() {
       _status = HomeStatus.creating_counter;
+      print('Now creating counter.');
     });
 
     int capacity;
@@ -303,33 +306,46 @@ class _HomeState extends State<Home> {
 
     _token = CounterToken();
 
-    print("Creating counter for token $_token and capacity $capacity…");
-    FirebaseFirestore.instance
-        .collection('counters')
-        .doc(_token.toString())
-        .set({
-      'total': 0,
-      'church_uuid': '',
-      'user_id': widget.auth.getCurrentUser().uid,
-      'capacity': capacity
-    }).then((value) {
-      print("Navigating to share screen…");
-      return Navigator.of(context).push(
+    try {
+      print('Attempting to create counter');
+      await widget.auth.refreshState();
+
+      print('Authentication status refreshed');
+
+      final newCounterData = {
+        'total': 0,
+        'church_uuid': '',
+        'user_id': widget.auth.getCurrentUser().uid,
+        'capacity': capacity
+      };
+
+      await FirebaseFirestore.instance
+          .collection('counters')
+          .doc(_token.toString())
+          .set(newCounterData)
+          .timeout(Duration(seconds: 10));
+
+      print('Counter created.');
+
+      Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ShareScreen(_token),
         ),
       );
-    }).then((r) {
+
       setState(() {
         _status = HomeStatus.loaded;
       });
-    }).catchError((e) {
-      print('Authentication error');
-      print(e);
-      setState(() {
-        _status = HomeStatus.error;
-      });
-    });
+    } catch (error) {
+      FirebaseAnalytics()
+          .logEvent(name: 'counter_creation_error', parameters: null);
+      showErrorDialog(
+        context: context,
+        title: 'Impossibile creare il contapersone condiviso',
+        text: 'Verifica la connessione di rete e riprova.',
+        onRetry: _createCounter,
+      );
+    }
   }
 
   void _refreshUserData() async {
@@ -365,7 +381,6 @@ class _HomeState extends State<Home> {
           print('User data refreshed!');
           _title = result["church_name"].toString();
           _capacityController.text = result["capacity"].toString();
-          _status = HomeStatus.loaded;
         });
       } catch (e) {
         print('User data fetch error.');
@@ -373,7 +388,7 @@ class _HomeState extends State<Home> {
         if (e == 'INCOMPLETE_SIGNUP') {
           _showIncompleteSignupError();
         } else {
-          _showConnectionError();
+          _showAccountError();
         }
         return;
       }
@@ -381,49 +396,20 @@ class _HomeState extends State<Home> {
       setState(() {
         print('Anonymous user data refreshed!');
         _title = null;
-        _status = HomeStatus.loaded;
       });
     }
   }
 
-  void _showConnectionError() {
+  void _showAccountError() {
     FirebaseAnalytics().logEvent(name: 'connection_error', parameters: null);
-    showDialog<void>(
+
+    showErrorDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return WillPopScope(
-          onWillPop: () async => false,
-          child: AlertDialog(
-            title: Text('Errore di connessione'),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  Text('Verifica che il dispositivo sia connesso.'),
-                  Text(
-                      'Se il problema persiste tocca "esci" e prova a ripetere l\'accesso.'),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Riprova'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _refreshUserData();
-                },
-              ),
-              FlatButton(
-                child: Text('Esci'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  widget.auth.signOut();
-                },
-              ),
-            ],
-          ),
-        );
-      },
+      title: 'Errore di connessione',
+      text:
+          'Non è stato possibile ottenere i dati del tuo account.\n\nSe il problema persiste tocca "esci" e prova a ripetere l\'accesso.',
+      onRetry: _refreshUserData,
+      onExit: widget.auth.signOut,
     );
   }
 
@@ -474,8 +460,8 @@ class _HomeState extends State<Home> {
           child: Container(
             constraints: BoxConstraints(maxWidth: 400),
             child: MaterialButton(
-              onPressed: () => launch(
-                  'https://play.google.com/store/apps/details?id=app.dindondan.contapersone'),
+              onPressed: () =>
+                  launch('https://www.dindondan.app/contapersone/'),
               child: Container(
                 padding: EdgeInsets.all(10),
                 child: Row(
@@ -487,7 +473,7 @@ class _HomeState extends State<Home> {
                     ),
                     Expanded(
                       child: Text(
-                          'Stai usando l\'app in versione web. Se hai un dispositivo Android scarica la versione nativa dal Play Store!'),
+                          'Stai usando l\'app in versione web. Se hai un dispositivo Android o iOS scarica la versione nativa!'),
                     ),
                   ],
                 ),
@@ -499,6 +485,12 @@ class _HomeState extends State<Home> {
     } else {
       return null;
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _capacityController.dispose();
   }
 }
 

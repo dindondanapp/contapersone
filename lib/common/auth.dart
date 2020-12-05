@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
@@ -12,10 +14,13 @@ class Auth extends ValueNotifier<AuthValue> {
   /// Create an authentication controller and retrieve the authentication status.
   /// If the user is not signed-in, sign in anonymously.
   Auth() : super(AuthValue(status: AuthStatus.undefined)) {
-    final user = _firebaseAuth.currentUser;
+    refreshState();
+  }
 
+  FutureOr<void> refreshState() {
+    final user = _firebaseAuth.currentUser;
     if (user == null) {
-      signInAnonymously();
+      return signInAnonymously();
     } else {
       if (_firebaseAuth.currentUser.isAnonymous) {
         this.value = AuthValue(status: AuthStatus.loggedInAnonymously);
@@ -32,6 +37,7 @@ class Auth extends ValueNotifier<AuthValue> {
       this.value = AuthValue(status: AuthStatus.loggedInAnonymously);
     } catch (error) {
       this.value = AuthValue(status: AuthStatus.notLoggedIn);
+      throw error;
     }
   }
 

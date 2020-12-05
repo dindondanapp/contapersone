@@ -1,4 +1,5 @@
 import 'package:contapersone/common/entities.dart';
+import 'package:contapersone/common/show_error_dialog.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -103,6 +104,8 @@ class _ShareScreenState extends State<ShareScreen> {
                             _startSubcounter(counterId: widget._token);
                           },
                           label: Text('Avvia su questo dispositivo'),
+                          color: Theme.of(context).primaryColor,
+                          textColor: Colors.white,
                           icon: Icon(Icons.arrow_forward),
                         )
                       : Container(),
@@ -123,40 +126,52 @@ class _ShareScreenState extends State<ShareScreen> {
   }
 
   void _buildDynamicLink() async {
-    print("Generating link…");
-    final uriString = '${Secret.baseShareURL}?token=${widget._token}';
-    String link = kIsWeb
-        ? _manualDynamicLink(uriString)
-        : await _shortDynamicLink(uriString);
-    setState(() {
-      _url = link.toString();
-      print("Link generated: $_url");
-    });
+    try {
+      print("Generating link…");
+      final uriString = '${Secret.baseShareURL}?token=${widget._token}';
+      String link = kIsWeb
+          ? _manualDynamicLink(uriString)
+          : await _shortDynamicLink(uriString);
+      setState(() {
+        _url = link.toString();
+        print("Link generated: $_url");
+      });
+    } catch (error) {
+      showErrorDialog(
+        context: context,
+        title: 'Impossibile ottenere il link di condivisione',
+        text: 'Verifica la connessione di rete e riprova.',
+        onRetry: _buildDynamicLink,
+      );
+    }
   }
 
   String _manualDynamicLink(String uriString) {
     final encodedUri = Uri.encodeComponent(uriString);
-    return 'https://dindondan.page.link/?link=$encodedUri&apn=app.dindondan.contapersone&afl=$encodedUri&ibi=app.dindondan.contapersone&ifl=$encodedUri';
+    return 'https://dindondan.page.link/?link=$encodedUri&apn=app.dindondan.contapersone&afl=$encodedUri&ibi=app.dindondan.contapersone&ifl=$encodedUri&isi=1513235116';
   }
 
   Future<String> _shortDynamicLink(String uriString) async {
     final DynamicLinkParameters parameters = DynamicLinkParameters(
-        uriPrefix: 'https://dindondan.page.link',
-        link: Uri.parse(uriString),
-        androidParameters: AndroidParameters(
-            packageName: 'app.dindondan.contapersone',
-            minimumVersion: 0,
-            fallbackUrl: Uri.parse(uriString)),
-        iosParameters: IosParameters(
-            bundleId: 'app.dindondan.contapersone',
-            appStoreId: '1513235116',
-            minimumVersion: '0.0.0',
-            fallbackUrl: Uri.parse(uriString)),
-        dynamicLinkParametersOptions: DynamicLinkParametersOptions(
-            shortDynamicLinkPathLength:
-                ShortDynamicLinkPathLength.unguessable));
+      uriPrefix: 'https://dindondan.page.link',
+      link: Uri.parse(uriString),
+      androidParameters: AndroidParameters(
+          packageName: 'app.dindondan.contapersone',
+          minimumVersion: 0,
+          fallbackUrl: Uri.parse(uriString)),
+      iosParameters: IosParameters(
+          bundleId: 'app.dindondan.contapersone',
+          appStoreId: '1513235116',
+          minimumVersion: '0.0.0',
+          fallbackUrl: Uri.parse(uriString)),
+      dynamicLinkParametersOptions: DynamicLinkParametersOptions(
+          shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
+    );
 
-    return (await parameters.buildShortLink()).shortUrl.toString();
+    ShortDynamicLink shortLink =
+        await parameters.buildShortLink().timeout(Duration(seconds: 10));
+
+    return shortLink.shortUrl.toString();
   }
 
   Widget _buildShareButtons() {
