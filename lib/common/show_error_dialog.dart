@@ -1,12 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
-void showErrorDialog(
+Future<void> showErrorDialog(
     {@required BuildContext context,
     @required String title,
     String text,
     void onRetry(),
-    void onExit()}) {
+    void onExit(),
+    void onContinue()}) {
   final actions = List<Widget>();
+
+  final completer = Completer<void>();
 
   if (onRetry != null) {
     actions.add(
@@ -15,18 +20,34 @@ void showErrorDialog(
         onPressed: () {
           Navigator.of(context).pop();
           onRetry();
+          completer.complete();
         },
       ),
     );
   }
 
   if (onExit != null) {
-    FlatButton(
-      child: Text('Esci'),
-      onPressed: () {
-        Navigator.of(context).pop();
-        onExit();
-      },
+    actions.add(
+      FlatButton(
+        child: Text('Esci'),
+        onPressed: () {
+          Navigator.of(context).pop();
+          onExit();
+          completer.complete();
+        },
+      ),
+    );
+  }
+
+  if (onContinue != null) {
+    actions.add(
+      FlatButton(
+        child: Text('Continua'),
+        onPressed: () {
+          onContinue();
+          completer.complete();
+        },
+      ),
     );
   }
 
@@ -52,4 +73,6 @@ void showErrorDialog(
       );
     },
   );
+
+  return completer.future;
 }

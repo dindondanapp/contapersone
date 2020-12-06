@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contapersone/common/show_error_dialog.dart';
 import 'package:contapersone/signin_screen/signin_screen.dart';
@@ -7,7 +5,6 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_location_href/window_location_href.dart';
 
@@ -21,30 +18,33 @@ import '../share_screen/share_screen.dart';
 import 'counter_create.dart';
 
 class Home extends StatefulWidget {
-  final Auth auth;
-
-  Home({this.auth});
-
   @override
   State<StatefulWidget> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
+  final auth = Auth();
   HomeStatus _status = HomeStatus.loaded;
   CounterToken _token = CounterToken();
   final _capacityController = TextEditingController();
-  String _title;
+  String get _title => auth.status == AuthStatus.loggedIn
+      ? auth.churchName ?? 'Accesso in corso…'
+      : 'Contapersone';
+  bool _modalOpen = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Load user data and handle authentication status changes
-    _refreshUserData();
-    widget.auth.addListener(() {
-      if (widget.auth.status == AuthStatus.loggedIn ||
-          widget.auth.status == AuthStatus.loggedInAnonymously) {
-        _refreshUserData();
+    auth.addListener(() {
+      if (!_modalOpen) {
+        if (auth.apiError == ApiError.other) {
+          _modalOpen = true;
+          _showAccountError().then((value) => _modalOpen = false);
+        } else if (auth.apiError == ApiError.incompleteSignup) {
+          _modalOpen = true;
+          _showIncompleteSignupError().then((value) => _modalOpen = false);
+        }
       }
     });
 
@@ -134,8 +134,9 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     print('Building for status ${_status}');
+
     return new ValueListenableBuilder<AuthValue>(
-      valueListenable: widget.auth,
+      valueListenable: auth,
       builder: (context, auth, _) {
         return Scaffold(
           appBar: _buildAppBar(auth),
@@ -185,9 +186,7 @@ class _HomeState extends State<Home> {
 
   Widget _buildAppBar(AuthValue auth) {
     return AppBar(
-      title: auth.status == AuthStatus.loggedIn
-          ? Text(_title ?? '')
-          : Text('Contapersone'),
+      title: Text(_title),
       leading: IconButton(
         icon: Icon(Icons.info_outline),
         onPressed: _openInfoScreen,
@@ -233,7 +232,7 @@ class _HomeState extends State<Home> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => SignInScreen(
-          auth: widget.auth,
+          auth: auth,
         ),
       ),
     );
@@ -250,7 +249,7 @@ class _HomeState extends State<Home> {
 
   void _signOut() {
     FirebaseAnalytics().logEvent(name: 'signout', parameters: null);
-    widget.auth.signOut();
+    auth.signOut();
   }
 
   Widget _buildScanQRCard() {
@@ -307,15 +306,10 @@ class _HomeState extends State<Home> {
     _token = CounterToken();
 
     try {
-      print('Attempting to create counter');
-      await widget.auth.refreshState();
-
-      print('Authentication status refreshed');
-
       final newCounterData = {
         'total': 0,
         'church_uuid': '',
-        'user_id': widget.auth.getCurrentUser().uid,
+        'user_id': auth.getCurrentUser().uid,
         'capacity': capacity
       };
 
@@ -324,8 +318,6 @@ class _HomeState extends State<Home> {
           .doc(_token.toString())
           .set(newCounterData)
           .timeout(Duration(seconds: 10));
-
-      print('Counter created.');
 
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -348,107 +340,30 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void _refreshUserData() async {
-    if (widget.auth.status == AuthStatus.loggedIn) {
-      setState(() {
-        _title = 'Accesso in corso…';
-      });
-      try {
-        //Fetch data
-        String url = '${Secret.baseAPIURL}?key=${Secret.secretAPIKey}';
-        Map<String, String> headers = {
-          "Content-type": "application/x-www-form-urlencoded"
-        };
-        var user = widget.auth.getCurrentUser();
-        var token = await user.getIdToken();
-        String body = 'idToken=$token';
-
-        Response response = await post(url, headers: headers, body: body);
-
-        if (response.statusCode != 200) {
-          throw 'REQUEST_ERROR_${response.statusCode}';
-        }
-
-        // Parse
-        Map<String, dynamic> result = jsonDecode(response.body);
-        if (result["error"] != null ||
-            result["church_name"] == null ||
-            result["capacity"] == null) {
-          throw result["error"];
-        }
-
-        setState(() {
-          print('User data refreshed!');
-          _title = result["church_name"].toString();
-          _capacityController.text = result["capacity"].toString();
-        });
-      } catch (e) {
-        print('User data fetch error.');
-        print(e);
-        if (e == 'INCOMPLETE_SIGNUP') {
-          _showIncompleteSignupError();
-        } else {
-          _showAccountError();
-        }
-        return;
-      }
-    } else {
-      setState(() {
-        print('Anonymous user data refreshed!');
-        _title = null;
-      });
-    }
-  }
-
-  void _showAccountError() {
+  Future<void> _showAccountError() {
     FirebaseAnalytics().logEvent(name: 'connection_error', parameters: null);
 
-    showErrorDialog(
+    return showErrorDialog(
       context: context,
       title: 'Errore di connessione',
       text:
           'Non è stato possibile ottenere i dati del tuo account.\n\nSe il problema persiste tocca "esci" e prova a ripetere l\'accesso.',
-      onRetry: _refreshUserData,
-      onExit: widget.auth.signOut,
+      onRetry: auth.refreshUserData,
+      onExit: auth.signOut,
     );
   }
 
-  void _showIncompleteSignupError() {
+  Future<void> _showIncompleteSignupError() {
     FirebaseAnalytics()
         .logEvent(name: 'incomplete_signup_error', parameters: null);
-    showDialog<void>(
+
+    return showErrorDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return WillPopScope(
-          onWillPop: () async => false,
-          child: AlertDialog(
-            title: Text('Registrazione incompleta'),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  Text('Sembra che tu non abbia completato la registrazione.'),
-                  Text(
-                      'Per accedere devi fornire ancora alcuni dati. Tocca "continua" per concludere accedere ai servizi web e completare la registrazione.'),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Riprova'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _refreshUserData();
-                },
-              ),
-              FlatButton(
-                child: Text('Continua'),
-                onPressed: () => launch(Secret.incompleteSignUpURL),
-              ),
-            ],
-          ),
-        );
-      },
+      title: 'Registrazione incompleta',
+      text:
+          'Sembra che tu non abbia completato la registrazione.\n\nPer accedere devi fornire ancora alcuni dati. Tocca "continua" per concludere accedere ai servizi web e completare la registrazione.',
+      onContinue: () => launch(Secret.incompleteSignUpURL),
+      onExit: () => auth.signOut(),
     );
   }
 
