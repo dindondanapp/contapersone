@@ -20,9 +20,8 @@ class Auth extends ValueNotifier<AuthValue> {
   set churchName(String newValue) =>
       value = value.rebuildWith(churchName: newValue);
 
-  get apiError => value.apiError;
-  set apiError(ApiError newValue) =>
-      value = value.rebuildWith(apiError: newValue);
+  get error => value.error;
+  set error(AuthError newValue) => value = value.rebuildWith(error: newValue);
 
   /// Create an authentication controller and retrieve the authentication status.
   /// If the user is not signed-in, sign in anonymously.
@@ -48,13 +47,11 @@ class Auth extends ValueNotifier<AuthValue> {
   /// Sign in anonymously with Firebase Authentication
   FutureOr<void> signInAnonymously() async {
     try {
-      print('loggininAnonym');
       await _firebaseAuth.signInAnonymously().timeout(Duration(seconds: 10));
       this.status = AuthStatus.loggedInAnonymously;
-      print('loggedInAnonym');
     } catch (error) {
-      print('anonymLoginError');
       this.status = AuthStatus.notLoggedIn;
+      this.error = AuthError.anonymous;
       throw error;
     }
   }
@@ -79,6 +76,7 @@ class Auth extends ValueNotifier<AuthValue> {
   /// Sign out
   void signOut() async {
     await _firebaseAuth.signOut();
+    refreshState();
     this.value = AuthValue(status: AuthStatus.notLoggedIn);
   }
 
@@ -114,13 +112,13 @@ class Auth extends ValueNotifier<AuthValue> {
         this.churchName = null;
       }
 
-      this.apiError = null;
+      this.error = null;
     } catch (error) {
       if (error == 'INCOMPLETE_SIGNUP') {
-        this.apiError = ApiError.incompleteSignup;
+        this.error = AuthError.apiIncompleteSignup;
       }
 
-      this.apiError = ApiError.other;
+      this.error = AuthError.apiGeneric;
       this.churchName = null;
       print(error);
     }
@@ -131,16 +129,16 @@ class Auth extends ValueNotifier<AuthValue> {
 class AuthValue {
   final AuthStatus status;
   final String churchName;
-  final ApiError apiError;
+  final AuthError error;
 
-  AuthValue({this.churchName, @required this.status, this.apiError});
+  AuthValue({this.churchName, @required this.status, this.error});
 
   AuthValue rebuildWith(
-      {String churchName, AuthStatus status, ApiError apiError}) {
+      {String churchName, AuthStatus status, AuthError error}) {
     return AuthValue(
       churchName: churchName ?? this.churchName,
       status: status ?? this.status,
-      apiError: apiError ?? this.apiError,
+      error: error ?? this.error,
     );
   }
 }
@@ -152,4 +150,4 @@ enum AuthStatus {
   loggedInAnonymously,
 }
 
-enum ApiError { incompleteSignup, other }
+enum AuthError { apiIncompleteSignup, apiGeneric, anonymous }

@@ -24,13 +24,17 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final _auth = Auth();
-  HomeStatus _status = HomeStatus.loaded;
   CounterToken _token = CounterToken();
+  HomeStatus _status = HomeStatus.ready;
   final _capacityController = TextEditingController();
   String get _title => _auth.status == AuthStatus.loggedIn
       ? _auth.churchName ?? 'Accesso in corso…'
       : 'Contapersone';
   bool _modalOpen = false;
+  bool get _buttonsEnabled =>
+      _status == HomeStatus.ready &&
+      (_auth.status == AuthStatus.loggedIn ||
+          _auth.status == AuthStatus.loggedInAnonymously);
 
   @override
   void initState() {
@@ -38,12 +42,14 @@ class _HomeState extends State<Home> {
 
     _auth.addListener(() {
       if (!_modalOpen) {
-        if (_auth.apiError == ApiError.other) {
+        if (_auth.error == AuthError.apiGeneric) {
           _modalOpen = true;
           _showAccountError().then((value) => _modalOpen = false);
-        } else if (_auth.apiError == ApiError.incompleteSignup) {
+        } else if (_auth.error == AuthError.apiIncompleteSignup) {
           _modalOpen = true;
           _showIncompleteSignupError().then((value) => _modalOpen = false);
+        } else if (_auth.error == AuthError.anonymous) {
+          _showNetworkError().then((value) => _modalOpen = false);
         }
       }
     });
@@ -136,8 +142,6 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    print('Building for status ${_status}');
-
     return new ValueListenableBuilder<AuthValue>(
       valueListenable: _auth,
       builder: (context, auth, _) {
@@ -149,36 +153,25 @@ class _HomeState extends State<Home> {
               child: Container(
                 margin: EdgeInsets.all(30),
                 constraints: BoxConstraints(maxWidth: 350),
-                child: Column(
-                  children: () {
-                    if (_status == HomeStatus.loading) {
-                      return [_buildLoadingIndicator()];
-                    } else if (_status == HomeStatus.loaded ||
-                        _status == HomeStatus.creating_counter) {
-                      return [
-                        Card(
-                          child: Padding(
-                            padding: EdgeInsets.all(20),
-                            child: CounterCreate(
-                              capacityController: _capacityController,
-                              onSubmit: _createCounter,
-                              enabled: _status == HomeStatus.loaded,
-                            ),
-                          ),
-                        ),
-                        Container(height: 20),
-                        Text(
-                          '– oppure –',
-                          textAlign: TextAlign.center,
-                        ),
-                        Container(height: 20),
-                        _buildScanQRCard(),
-                      ];
-                    } else {
-                      return [Text('Errore sconosciuto')];
-                    }
-                  }(),
-                ),
+                child: Column(children: [
+                  Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CounterCreate(
+                        capacityController: _capacityController,
+                        onSubmit: _createCounter,
+                        enabled: _buttonsEnabled,
+                      ),
+                    ),
+                  ),
+                  Container(height: 20),
+                  Text(
+                    '– oppure –',
+                    textAlign: TextAlign.center,
+                  ),
+                  Container(height: 20),
+                  _buildScanQRCard(),
+                ]),
               ),
             ),
           ),
@@ -275,7 +268,7 @@ class _HomeState extends State<Home> {
                     'Chiedi al creatore del contapersone di inviarti il link, oppure scarica la versione mobile di Contapersone da App Store o Play Store per inquadrare il codice QR');
               } else {
                 return RaisedButton.icon(
-                  onPressed: _status == HomeStatus.loaded ? scan : null,
+                  onPressed: _buttonsEnabled ? scan : null,
                   label: Text('Inquadra il codice QR'),
                   icon: Icon(Icons.camera_alt),
                   color: Theme.of(context).primaryColor,
@@ -330,7 +323,7 @@ class _HomeState extends State<Home> {
       );
 
       setState(() {
-        _status = HomeStatus.loaded;
+        _status = HomeStatus.ready;
       });
     } catch (error) {
       FirebaseAnalytics()
@@ -345,7 +338,7 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _showAccountError() {
-    FirebaseAnalytics().logEvent(name: 'connection_error', parameters: null);
+    FirebaseAnalytics().logEvent(name: 'account_error', parameters: null);
 
     return showErrorDialog(
       context: context,
@@ -354,6 +347,18 @@ class _HomeState extends State<Home> {
           'Non è stato possibile ottenere i dati del tuo account.\n\nSe il problema persiste tocca "esci" e prova a ripetere l\'accesso.',
       onRetry: _auth.refreshUserData,
       onExit: _auth.signOut,
+    );
+  }
+
+  Future<void> _showNetworkError() {
+    FirebaseAnalytics().logEvent(name: 'connection_error', parameters: null);
+
+    return showErrorDialog(
+      context: context,
+      title: 'Errore di connessione',
+      text:
+          'Non è stato possibile connettersi al server. Controlla la connessione di rete e riprova.',
+      onRetry: _auth.refreshState,
     );
   }
 
@@ -414,4 +419,4 @@ class _HomeState extends State<Home> {
   }
 }
 
-enum HomeStatus { loading, loaded, creating_counter, error }
+enum HomeStatus { ready, creating_counter, error }
