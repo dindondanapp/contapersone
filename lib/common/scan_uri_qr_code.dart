@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
-Future<Uri> scanUriQRCode(BuildContext context) async {
+Future<Uri> scanUriQRCode(BuildContext context) {
   Completer<Uri> completer = new Completer();
 
   Navigator.of(context).push(

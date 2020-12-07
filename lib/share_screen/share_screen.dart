@@ -1,3 +1,4 @@
+import 'package:contapersone/common/auth.dart';
 import 'package:contapersone/common/entities.dart';
 import 'package:contapersone/common/show_error_dialog.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
@@ -15,12 +16,16 @@ import '../counter_screen/counter_screen.dart';
 
 /// A screen that displays a QR code and sharable link for a given counter
 class ShareScreen extends StatefulWidget {
-  final CounterToken _token;
+  final CounterToken token;
+  final Auth auth;
   final bool startCounterButton;
 
   /// Create a new [ShareScreen] given the [CounterToken] that has to be shared.
   /// If [startCounterButton] is true a button is displayed to start the counter
-  ShareScreen(this._token, {this.startCounterButton = false});
+  ShareScreen(
+      {@required this.token,
+      @required this.auth,
+      this.startCounterButton = false});
 
   @override
   State<StatefulWidget> createState() => _ShareScreenState();
@@ -101,7 +106,7 @@ class _ShareScreenState extends State<ShareScreen> {
                           !widget.startCounterButton
                       ? RaisedButton.icon(
                           onPressed: () {
-                            _startSubcounter(counterId: widget._token);
+                            _startSubcounter(counterId: widget.token);
                           },
                           label: Text('Avvia su questo dispositivo'),
                           color: Theme.of(context).primaryColor,
@@ -121,14 +126,16 @@ class _ShareScreenState extends State<ShareScreen> {
   void _startSubcounter({@required CounterToken counterId}) {
     Navigator.of(context).popUntil(ModalRoute.withName('/'));
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => CounterScreen(counterId)),
+      MaterialPageRoute(
+          builder: (context) =>
+              CounterScreen(token: counterId, auth: widget.auth)),
     );
   }
 
   void _buildDynamicLink() async {
     try {
       print("Generating link…");
-      final uriString = '${Secret.baseShareURL}?token=${widget._token}';
+      final uriString = '${Secret.baseShareURL}?token=${widget.token}';
       String link = kIsWeb
           ? _manualDynamicLink(uriString)
           : await _shortDynamicLink(uriString);

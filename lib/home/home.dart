@@ -23,12 +23,12 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final auth = Auth();
+  final _auth = Auth();
   HomeStatus _status = HomeStatus.loaded;
   CounterToken _token = CounterToken();
   final _capacityController = TextEditingController();
-  String get _title => auth.status == AuthStatus.loggedIn
-      ? auth.churchName ?? 'Accesso in corso…'
+  String get _title => _auth.status == AuthStatus.loggedIn
+      ? _auth.churchName ?? 'Accesso in corso…'
       : 'Contapersone';
   bool _modalOpen = false;
 
@@ -36,12 +36,12 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
 
-    auth.addListener(() {
+    _auth.addListener(() {
       if (!_modalOpen) {
-        if (auth.apiError == ApiError.other) {
+        if (_auth.apiError == ApiError.other) {
           _modalOpen = true;
           _showAccountError().then((value) => _modalOpen = false);
-        } else if (auth.apiError == ApiError.incompleteSignup) {
+        } else if (_auth.apiError == ApiError.incompleteSignup) {
           _modalOpen = true;
           _showIncompleteSignupError().then((value) => _modalOpen = false);
         }
@@ -111,7 +111,10 @@ class _HomeState extends State<Home> {
     print('Starting subcounter for id $token');
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => CounterScreen(token),
+        builder: (context) => CounterScreen(
+          token: token,
+          auth: _auth,
+        ),
       ),
     );
   }
@@ -136,7 +139,7 @@ class _HomeState extends State<Home> {
     print('Building for status ${_status}');
 
     return new ValueListenableBuilder<AuthValue>(
-      valueListenable: auth,
+      valueListenable: _auth,
       builder: (context, auth, _) {
         return Scaffold(
           appBar: _buildAppBar(auth),
@@ -232,7 +235,7 @@ class _HomeState extends State<Home> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => SignInScreen(
-          auth: auth,
+          auth: _auth,
         ),
       ),
     );
@@ -249,7 +252,7 @@ class _HomeState extends State<Home> {
 
   void _signOut() {
     FirebaseAnalytics().logEvent(name: 'signout', parameters: null);
-    auth.signOut();
+    _auth.signOut();
   }
 
   Widget _buildScanQRCard() {
@@ -309,7 +312,8 @@ class _HomeState extends State<Home> {
       final newCounterData = {
         'total': 0,
         'church_uuid': '',
-        'user_id': auth.getCurrentUser().uid,
+        'user_id': _auth.getCurrentUser().uid,
+        'lastUpdated': Timestamp.now(),
         'capacity': capacity
       };
 
@@ -321,7 +325,7 @@ class _HomeState extends State<Home> {
 
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => ShareScreen(_token),
+          builder: (context) => ShareScreen(token: _token, auth: _auth),
         ),
       );
 
@@ -348,8 +352,8 @@ class _HomeState extends State<Home> {
       title: 'Errore di connessione',
       text:
           'Non è stato possibile ottenere i dati del tuo account.\n\nSe il problema persiste tocca "esci" e prova a ripetere l\'accesso.',
-      onRetry: auth.refreshUserData,
-      onExit: auth.signOut,
+      onRetry: _auth.refreshUserData,
+      onExit: _auth.signOut,
     );
   }
 
@@ -363,7 +367,7 @@ class _HomeState extends State<Home> {
       text:
           'Sembra che tu non abbia completato la registrazione.\n\nPer accedere devi fornire ancora alcuni dati. Tocca "continua" per concludere accedere ai servizi web e completare la registrazione.',
       onContinue: () => launch(Secret.incompleteSignUpURL),
-      onExit: () => auth.signOut(),
+      onExit: () => _auth.signOut(),
     );
   }
 
@@ -406,6 +410,7 @@ class _HomeState extends State<Home> {
   void dispose() {
     super.dispose();
     _capacityController.dispose();
+    _auth.dispose();
   }
 }
 

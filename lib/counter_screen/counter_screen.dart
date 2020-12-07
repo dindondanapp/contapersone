@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:contapersone/common/show_error_dialog.dart';
+import 'package:contapersone/common/auth.dart';
+import 'package:contapersone/counter_screen/count_display.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 
@@ -9,134 +12,150 @@ import '../share_screen/share_screen.dart';
 
 /// A screen with a simple counter, synchronized with Firebase Cloud Firestore
 class CounterScreen extends StatefulWidget {
-  final CounterToken _counterToken;
+  final CounterToken token;
+  final Auth auth;
 
-  CounterScreen(this._counterToken);
+  CounterScreen({@required this.token, @required this.auth});
 
   @override
   _CounterScreenState createState() => _CounterScreenState();
 }
 
 class _CounterScreenState extends State<CounterScreen> {
-  var _subcounterTotal = Stream.value(0);
-  var _status = CounterScreenStatus.set_name;
   var _disconnected = false;
   var _controller = TextEditingController();
   String _subcounterId;
-  String _label;
+  String _subcounterLabel;
 
-  var _counterTotal = Stream.value(0);
-  var _capacity = Stream<int>.value(null);
+  int _counterTotal = 0;
+  int _capacity;
+  List<SubcounterData> _otherSubCounters = [];
+  List<dynamic> _addEvents = [];
+  List<dynamic> _subtractEvents = [];
+  int get _subcounterCount => _addEvents.length - _subtractEvents.length;
+
+  final listeners = List<StreamSubscription>();
 
   @override
   void initState() {
     super.initState();
 
-    final documentStream = FirebaseFirestore.instance
-        .collection('counters')
-        .doc(widget._counterToken.toString())
-        .snapshots();
+    _subcounterId = widget.auth.getCurrentUser().uid;
 
-    _counterTotal = documentStream
-        .map<int>((DocumentSnapshot event) => event['total'])
-        .distinct();
-
-    _capacity = documentStream
-        .map<int>((DocumentSnapshot event) => event['capacity'])
-        .distinct();
-
-    _counterTotal.listen((event) {
-      if (_disconnected) {
-        setState(() {
-          _disconnected = false;
-        });
-      }
-    });
-  }
-
-  // Send a +1 event to firestore
-  void _updateCounter(int increment) {
-    setState(() {
-      if (_subcounterId == null) {
-        return;
-      }
-
-      if (increment == 0) {
-        return;
-      }
-
-      final update = increment > 0
-          ? {
-              "add_events": FieldValue.arrayUnion(
-                  List.filled(increment.abs(), Timestamp.now().toString()))
-            }
-          : {
-              "subtract_events": FieldValue.arrayUnion(
-                  List.filled(increment.abs(), Timestamp.now().toString()))
-            };
-
-      // TODO: Timestamp.now() should be passed directly, without converting to string
-      // waiting for fix (https://github.com/flutter/flutter/issues/15252)
+    listeners.add(
       FirebaseFirestore.instance
           .collection('counters')
-          .doc(widget._counterToken.toString())
+          .doc(widget.token.toString())
+          .snapshots()
+          .distinct()
+          .listen((event) {
+        setState(() {
+          _counterTotal = event['total'];
+          _capacity = event['capacity'];
+          _disconnected = false;
+
+          if (event.data().containsKey('subtotals')) {
+            _otherSubCounters = (event.data()['subtotals']
+                    as Map<String, dynamic>)
+                .map(
+                  (id, value) => MapEntry(
+                    id,
+                    SubcounterData(
+                      id: id,
+                      count: value['count'] as int,
+                      label: value['label'] as String,
+                      lastUpdated: value['lastUpdated'] as Timestamp,
+                    ),
+                  ),
+                )
+                .values
+                .where((element) => element.id != _subcounterId)
+                .toList()
+                  ..sort(
+                      (a, b) => b.lastUpdated.seconds - a.lastUpdated.seconds);
+
+            final thisSubconterData = _otherSubCounters.firstWhere(
+                (element) => element.id == _subcounterId,
+                orElse: () => null);
+            if (thisSubconterData != null) {
+              _subcounterLabel = thisSubconterData.label;
+            }
+          }
+        });
+      }),
+    );
+
+    listeners.add(
+      FirebaseFirestore.instance
+          .collection('counters')
+          .doc(widget.token.toString())
           .collection('subcounters')
           .doc(_subcounterId)
-          .update(update)
-          .timeout(Duration(seconds: 10))
-          .then((value) => setState(() => _disconnected = false))
-          .catchError((error) => setState(() => _disconnected = true));
-    });
+          .snapshots()
+          .distinct()
+          .listen((event) {
+        if (event.exists) {
+          setState(() {
+            _addEvents = event.data()['add_events'] as List<dynamic> ?? [];
+            _subtractEvents =
+                event.data()['subtract_events'] as List<dynamic> ?? [];
+            _subcounterLabel = event.data()['label'] as String ?? null;
+          });
+        }
+      }),
+    );
+  }
+
+  // Send an increment event to firestore
+  void _updateCounter(int increment) {
+    if (_subcounterId == null) {
+      return;
+    }
+
+    if (increment == 0) {
+      return;
+    }
+
+    Map<String, dynamic> update = increment > 0
+        ? {
+            "add_events": [
+              ..._addEvents,
+              ...List.filled(increment.abs(), Timestamp.now())
+            ],
+          }
+        : {
+            "subtract_events": [
+              ..._subtractEvents,
+              ...List.filled(increment.abs(), Timestamp.now())
+            ],
+          };
+
+    FirebaseFirestore.instance
+        .collection('counters')
+        .doc(widget.token.toString())
+        .collection('subcounters')
+        .doc(_subcounterId)
+        .set(update, SetOptions(merge: true))
+        .timeout(Duration(seconds: 10))
+        .then((value) => setState(() => _disconnected = false))
+        .catchError((error) => setState(() => _disconnected = true));
   }
 
   // Create a new subcounter and initialize the total stream
-  void _submitEntranceName(String text) async {
-    FirebaseAnalytics()
-        .logEvent(name: 'submit_entrance_name', parameters: null);
-    _label = text != '' ? text : null;
+  void _submitEntranceName(String label) async {
+    print('Entrance submitted');
 
-    setState(() {
-      _status = CounterScreenStatus.loading;
-    });
+    FirebaseAnalytics().logEvent(name: 'submit_entrance_name');
 
-    try {
-      final ref = await FirebaseFirestore.instance
-          .collection('counters')
-          .doc(widget._counterToken.toString())
-          .collection('subcounters')
-          .add({
-        'label': _label,
-        'add_events': [],
-        'subtract_events': []
-      }).timeout(Duration(seconds: 10));
-
-      _subcounterId = ref.id;
-
-      final documentStream = FirebaseFirestore.instance
-          .collection('counters')
-          .doc(widget._counterToken.toString())
-          .collection('subcounters')
-          .doc(_subcounterId)
-          .snapshots();
-
-      _subcounterTotal = documentStream.map<int>((DocumentSnapshot event) {
-        return (event['add_events'] as List).length -
-            (event['subtract_events'] as List).length;
-      });
-
-      setState(() {
-        _status = CounterScreenStatus.ready;
-      });
-    } catch (error) {
-      print(error);
-
-      showErrorDialog(
-        context: context,
-        title: 'Errore di connessione',
-        text: 'Verifica la connessione di rete e riprova.',
-        onRetry: () => _submitEntranceName(text),
-      );
-    }
+    FirebaseFirestore.instance
+        .collection('counters')
+        .doc(widget.token.toString())
+        .collection('subcounters')
+        .doc(_subcounterId)
+        .set(
+      {'label': label},
+      SetOptions(merge: true),
+    );
   }
 
   @override
@@ -158,178 +177,104 @@ class _CounterScreenState extends State<CounterScreen> {
           },
         ),
       ),
-      body: Center(
-        child: Container(
-          padding: EdgeInsets.all(10),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                height: 60,
-                child: StreamBuilder<int>(
-                  stream: _counterTotal,
-                  initialData: 0,
-                  builder: (BuildContext context, total) => StreamBuilder<int>(
-                    stream: _capacity,
-                    builder: (BuildContext context, capacity) =>
-                        _buildStyledTotal(
-                      total.data,
-                      capacity: capacity.data,
-                      disconnected: _disconnected,
+      body: Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            CountDisplay(
+              otherSubcounters: _otherSubCounters,
+              thisSubcounter: SubcounterData(
+                id: _subcounterId,
+                count: _subcounterCount,
+                label: _subcounterLabel,
+                lastUpdated: Timestamp.now(),
+              ),
+              isDisconnected: _disconnected,
+              total: _counterTotal,
+              capacity: _capacity,
+              onEditLabel: _openEditLabelDialog,
+            ),
+            Container(
+              height: 20,
+            ),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: RaisedButton(
+                      child: Icon(Icons.remove),
+                      onPressed: () => _updateCounter(-1),
+                      color: Colors.grey[300],
                     ),
+                    flex: 3,
                   ),
-                ),
-              ),
-              Text(
-                'Conteggio totale',
-                textAlign: TextAlign.center,
-              ),
-              Container(
-                height: 20,
-              ),
-              Card(
-                margin: EdgeInsets.all(0),
-                child: Container(
-                    padding: EdgeInsets.all(20),
-                    child: () {
-                      if (_status == CounterScreenStatus.ready) {
-                        return Column(
-                          children: [
-                            StreamBuilder<int>(
-                              stream: _subcounterTotal,
-                              initialData: 0,
-                              builder: (BuildContext context, total) =>
-                                  _buildStyledTotal(total.data),
-                            ),
-                            Text(
-                              _label == null ? 'Questo ingresso' : _label,
-                            ),
-                          ],
-                        );
-                      } else {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Prima di iniziare il conteggio, scegli un nome per questo contatore:',
-                              softWrap: true,
-                            ),
-                            TextField(
-                              onSubmitted: _submitEntranceName,
-                              controller: _controller,
-                              decoration: InputDecoration(
-                                hintText: 'Nome del contatore (facoltativo)',
-                              ),
-                            ),
-                            Container(
-                              height: 20,
-                            ),
-                            RaisedButton.icon(
-                              icon: Icon(
-                                Icons.check,
-                                color: Colors.white,
-                              ),
-                              label: Text(
-                                'Avvia',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              color: Palette.primary,
-                              onPressed: _status == CounterScreenStatus.set_name
-                                  ? () => _submitEntranceName(_controller.text)
-                                  : null,
-                            ),
-                          ],
-                        );
-                      }
-                    }()),
-              ),
-              Container(
-                height: 10,
-              ),
-              () {
-                if (_status == CounterScreenStatus.ready) {
-                  return Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: RaisedButton(
-                            child: Icon(Icons.remove),
-                            onPressed: () => _updateCounter(-1),
-                            color: Colors.grey[300],
-                          ),
-                          flex: 3,
-                        ),
-                        Container(width: 10),
-                        Expanded(
-                          child: RaisedButton(
-                            child: Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: 50,
-                            ),
-                            onPressed: () => _updateCounter(1),
-                            color: Palette.primary,
-                          ),
-                          flex: 7,
-                        ),
-                      ],
+                  Container(width: 10),
+                  Expanded(
+                    child: RaisedButton(
+                      child: Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 50,
+                      ),
+                      onPressed: () => _updateCounter(1),
+                      color: Palette.primary,
                     ),
-                  );
-                } else {
-                  return Container();
-                }
-              }()
-            ],
-          ),
+                    flex: 7,
+                  ),
+                ],
+              ),
+            )
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildStyledTotal(int total,
-      {int capacity, bool disconnected = false}) {
-    Color color = disconnected ? Colors.grey : Colors.black;
-    if (capacity != null) {
-      if (total >= capacity) {
-        color = Colors.red;
-      } else if (total >= 0.9 * capacity) {
-        color = Colors.orange;
-      }
-    }
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        RichText(
-          text: TextSpan(
-            text: total.toString(),
-            children: [
-              TextSpan(
-                text: capacity != null ? '/$capacity' : '',
-                style: TextStyle(fontSize: 50, color: Palette.primary),
+  void _openEditLabelDialog() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Modifica nome dell\'ingresso'),
+          content: new Row(
+            children: <Widget>[
+              new Expanded(
+                child: TextField(
+                  controller: _controller,
+                  onSubmitted: (_) => _submitEditLabelDialog(),
+                  decoration: InputDecoration(
+                    hintText: 'Nome dell\'ingresso',
+                    prefixIcon: Icon(Icons.edit),
+                  ),
+                ),
               ),
             ],
-            style: TextStyle(fontSize: 50, color: color),
           ),
-          textAlign: TextAlign.center,
-        ),
-        ...(disconnected
-            ? [
-                SizedBox(
-                  width: 20,
-                ),
-                Icon(
-                  Icons.cloud_off,
-                  color: Colors.grey,
-                  size: 40,
-                )
-              ]
-            : []),
-      ],
+          actions: [
+            FlatButton(
+              child: Text('Annulla'),
+              onPressed: _dismissEditLabelDialog,
+            ),
+            FlatButton(
+              child: Text('Conferma'),
+              onPressed: _submitEditLabelDialog,
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  void _submitEditLabelDialog() {
+    _submitEntranceName(_controller.text);
+    Navigator.of(context).pop();
+  }
+
+  void _dismissEditLabelDialog() {
+    Navigator.of(context).pop();
   }
 
   void _openShareScreen() {
@@ -338,12 +283,30 @@ class _CounterScreenState extends State<CounterScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ShareScreen(
-          widget._counterToken,
+          token: widget.token,
+          auth: widget.auth,
           startCounterButton: true,
         ),
       ),
     );
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    listeners.forEach((element) => element.cancel());
+  }
 }
 
-enum CounterScreenStatus { set_name, loading, ready }
+class SubcounterData {
+  final String label;
+  final String id;
+  final int count;
+  final Timestamp lastUpdated;
+
+  SubcounterData(
+      {@required this.lastUpdated,
+      @required this.label,
+      @required this.id,
+      @required this.count});
+}
