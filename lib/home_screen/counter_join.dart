@@ -6,13 +6,22 @@ import 'package:flutter/material.dart';
 
 import '../common/scan_uri_qr_code.dart';
 
+/// A simple form to join a shared counter by scanning a QR code
 class CounterJoinForm extends StatelessWidget {
   final bool enabled;
   final void Function(CounterToken token) onSuccess;
   final void Function() onError;
 
+  /// Creates a simple form to join a shared counter by scanning a QR code.
+  ///
+  /// An `onSuccess` callback must be specified to handle successful counter
+  /// token aquisition. The `onError` callback is called in case of any error
+  /// during scanning or token acquisition. If `onError` is not provided, an
+  /// Exception will be thrown instead.
+  ///
+  /// The argument `enabled` can be set to `false` to grey out the actions.
   const CounterJoinForm(
-      {Key key, @required this.enabled, @required this.onSuccess, this.onError})
+      {Key key, this.enabled = true, @required this.onSuccess, this.onError})
       : super(key: key);
 
   @override

@@ -6,8 +6,10 @@ class CounterCreateForm extends StatelessWidget {
   final Function onSubmit;
   final bool enabled;
 
-  /// Create a new counter creation form
-  CounterCreateForm({this.capacityController, this.onSubmit, this.enabled});
+  /// Creates a new counter creation form
+  /// The argument `enabled` can be set to `false` to grey out the actions.
+  CounterCreateForm(
+      {this.capacityController, @required this.onSubmit, this.enabled});
 
   @override
   Widget build(BuildContext context) {
