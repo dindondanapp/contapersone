@@ -1,18 +1,28 @@
 import 'package:contapersone/counter_screen/counter_screen.dart';
 import 'package:flutter/material.dart';
 
+/// A widget that displays the overall status of a counter, including its
+/// subcounters
 class CountDisplay extends StatelessWidget {
-  final List<SubcounterData> otherSubcounters;
-  final SubcounterData thisSubcounter;
+  final List<SubcounterData> otherSubcountersData;
+  final SubcounterData thisSubcounterData;
   final bool isDisconnected;
   final int total;
   final int capacity;
   final void Function() onEditLabel;
 
+  /// Creates a widget that displays the status of a counter, given its `total`
+  /// count, the [SubcounterData] `thisSubcounterData` of the subcounter for
+  /// the current device and a [List] of [SubcounterData] `otherSubcountersData`
+  /// for the subcounters of other devices that share the same counter.
+  ///
+  /// Additionally, a `capacity` can provided to be displayed along with the
+  /// total count and an `onEditCallback`can be used to allow the user to change
+  /// tha label of the subcounter by pressing on it.
   const CountDisplay(
       {Key key,
-      @required this.otherSubcounters,
-      @required this.thisSubcounter,
+      @required this.otherSubcountersData,
+      @required this.thisSubcounterData,
       @required this.isDisconnected,
       @required this.total,
       this.onEditLabel,
@@ -23,14 +33,14 @@ class CountDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: () {
-        if (otherSubcounters.length == 0) {
+        if (otherSubcountersData.length == 0) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildStyledCount(
                 context: context,
-                count: thisSubcounter.count,
+                count: thisSubcounterData.count,
                 capacity: capacity,
                 disconnected: isDisconnected,
               ),
@@ -71,10 +81,10 @@ class CountDisplay extends StatelessWidget {
                       children: [
                         _buildMainSubcounter(
                           context: context,
-                          count: thisSubcounter.count,
-                          label: thisSubcounter.label ?? 'Questo ingresso',
+                          count: thisSubcounterData.count,
+                          label: thisSubcounterData.label ?? 'Questo ingresso',
                         ),
-                        ...otherSubcounters.map(
+                        ...otherSubcountersData.map(
                           (e) => _buildOtherSubcounter(
                             count: e.count,
                             label: e.label ?? '',
@@ -227,7 +237,7 @@ class CountDisplay extends StatelessWidget {
       {Brightness brightness = Brightness.light,
       @required String defaultValue}) {
     final labelUndefined =
-        thisSubcounter.label == null || thisSubcounter.label == '';
+        thisSubcounterData.label == null || thisSubcounterData.label == '';
     return FlatButton.icon(
       icon: Opacity(
         opacity: 0.5,
@@ -237,7 +247,7 @@ class CountDisplay extends StatelessWidget {
         ),
       ),
       label: Text(
-        labelUndefined ? defaultValue : thisSubcounter.label,
+        labelUndefined ? defaultValue : thisSubcounterData.label,
         style: TextStyle(
           color: brightness == Brightness.dark ? Colors.white : null,
           fontStyle: labelUndefined ? FontStyle.italic : null,

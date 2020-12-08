@@ -183,8 +183,8 @@ class _CounterScreenState extends State<CounterScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             CountDisplay(
-              otherSubcounters: _otherSubCounters,
-              thisSubcounter: SubcounterData(
+              otherSubcountersData: _otherSubCounters,
+              thisSubcounterData: SubcounterData(
                 id: _subcounterId,
                 count: _subcounterCount,
                 label: _subcounterLabel,
@@ -298,12 +298,14 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 }
 
+/// All the data about the current state of a subcounter
 class SubcounterData {
   final String label;
   final String id;
   final int count;
   final Timestamp lastUpdated;
 
+  /// Create an object with all the data about the current state of a subcounter
   SubcounterData(
       {@required this.lastUpdated,
       @required this.label,

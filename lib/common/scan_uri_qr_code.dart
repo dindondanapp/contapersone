@@ -3,12 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
+/// Asynchronously open a scanning interface from the provided [context] to
+/// aquire a [Uri] from a QR code. When the user scans a QR code the interface
+/// closes and the future completes.
 Future<Uri> scanUriQRCode(BuildContext context) {
   Completer<Uri> completer = new Completer();
 
   Navigator.of(context).push(
     MaterialPageRoute(
-      builder: (context) => ScanScreen(
+      builder: (context) => _ScanScreen(
         scanCallback: (result) {
           try {
             final uri = Uri.parse(result);
@@ -24,18 +27,18 @@ Future<Uri> scanUriQRCode(BuildContext context) {
   return completer.future;
 }
 
-class ScanScreen extends StatefulWidget {
+class _ScanScreen extends StatefulWidget {
   final void Function(String result) scanCallback;
   final bool closeOnScan;
 
-  const ScanScreen({Key key, this.scanCallback, this.closeOnScan = true})
+  const _ScanScreen({Key key, this.scanCallback, this.closeOnScan = true})
       : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ScanScreenState();
 }
 
-class _ScanScreenState extends State<ScanScreen> {
+class _ScanScreenState extends State<_ScanScreen> {
   bool flashOn = false;
 
   QRViewController controller;

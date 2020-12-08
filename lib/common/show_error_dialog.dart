@@ -2,16 +2,27 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-Future<void> showErrorDialog(
-    {@required BuildContext context,
-    @required String title,
-    String text,
-    void onRetry(),
-    void onExit(),
-    void onContinue()}) {
-  final actions = List<Widget>();
-
+/// Display a simnplified error dialog and returns a [Future] that completes
+/// when the dialog is dismissed
+///
+/// This function takes a `context` to identify the current [Navigator], a
+/// `title` for the dialog, and optional `text` and three optional callbacks
+/// for user actions on the dialog: `onRetry`, `onExit` and `onContinue`. If any
+/// of the callbacks is [null], the correspondiong button will not be displayed.
+///
+/// Any action will also dismiss the dialog.
+Future<void> showErrorDialog({
+  @required BuildContext context,
+  @required String title,
+  String text,
+  void onRetry(),
+  void onExit(),
+  void onContinue(),
+}) {
+  // Future Completer
   final completer = Completer<void>();
+
+  final actions = List<Widget>();
 
   if (onRetry != null) {
     actions.add(
@@ -44,6 +55,7 @@ Future<void> showErrorDialog(
       FlatButton(
         child: Text('Continua'),
         onPressed: () {
+          Navigator.of(context).pop();
           onContinue();
           completer.complete();
         },
