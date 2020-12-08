@@ -17,12 +17,12 @@ import '../info_screen/info_screen.dart';
 import '../share_screen/share_screen.dart';
 import 'counter_create.dart';
 
-class Home extends StatefulWidget {
+class HomeScreen extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _HomeState();
+  State<StatefulWidget> createState() => _HomeScreenState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeScreenState extends State<HomeScreen> {
   final _auth = Auth();
   CounterToken _token = CounterToken();
   HomeStatus _status = HomeStatus.ready;

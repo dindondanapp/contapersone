@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'common/extensions.dart';
 import 'common/palette.dart';
-import 'home/home.dart';
+import 'home_screen/home_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: '/',
         routes: {
-          '/': (context) => Home(),
+          '/': (context) => HomeScreen(),
         },
       ),
     );
