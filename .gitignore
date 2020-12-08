@@ -48,7 +48,7 @@ app.*.map.json
 # Secret keys and other private data
 **/GoogleService-Info.plist
 **/google-services.json
-lib/secret.dart
+**/secret.dart
 **/key.properties
 **/key.jks
 
