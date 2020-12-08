@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contapersone/common/show_error_dialog.dart';
+import 'package:contapersone/home_screen/counter_join.dart';
 import 'package:contapersone/signin_screen/signin_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
@@ -10,7 +11,6 @@ import 'package:window_location_href/window_location_href.dart';
 
 import '../common/auth.dart';
 import '../common/entities.dart';
-import '../common/scan_uri_qr_code.dart';
 import '../common/secret.dart';
 import '../counter_screen/counter_screen.dart';
 import '../info_screen/info_screen.dart';
@@ -103,8 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _followDeepLink(Uri uri) {
-    if (uri.queryParameters['token'] != null) {
-      print('Starting subcounter from deep link.');
+    if (uri.queryParameters.containsKey('token')) {
       _startSubcounter(
         token: CounterToken.fromString(uri.queryParameters['token']),
       );
@@ -125,21 +124,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Open the scanner screen, acquire and follow a deep link QR code
-  void scan() async {
-    try {
-      FirebaseAnalytics().logEvent(name: 'scan', parameters: null);
-      Uri uri = await scanUriQRCode(context);
-      PendingDynamicLinkData data =
-          await FirebaseDynamicLinks.instance.getDynamicLink(uri);
-      _followDeepLink(data.link);
-    } catch (error) {
-      FirebaseAnalytics().logEvent(name: 'scan_fail', parameters: null);
-      print('Invalid code scanned.');
-      // TODO: Provide visual feedback
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return new ValueListenableBuilder<AuthValue>(
@@ -157,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Card(
                     child: Padding(
                       padding: EdgeInsets.all(20),
-                      child: CounterCreate(
+                      child: CounterCreateForm(
                         capacityController: _capacityController,
                         onSubmit: _createCounter,
                         enabled: _buttonsEnabled,
@@ -170,7 +154,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     textAlign: TextAlign.center,
                   ),
                   Container(height: 20),
-                  _buildScanQRCard(),
+                  Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CounterJoinForm(
+                        enabled: _buttonsEnabled,
+                        onSuccess: (token) => _startSubcounter(token: token),
+                        onError: () => {
+                          //TODO: Handle
+                        },
+                      ),
+                    ),
+                  ),
                 ]),
               ),
             ),
@@ -215,15 +210,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildLoadingIndicator() {
-    return Center(
-      child: Container(
-        child: CircularProgressIndicator(),
-        padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
-      ),
-    );
-  }
-
   void _openSignInScreen() {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -246,40 +232,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void _signOut() {
     FirebaseAnalytics().logEvent(name: 'signout', parameters: null);
     _auth.signOut();
-  }
-
-  Widget _buildScanQRCard() {
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Partecipa ad un contapersone condiviso esistente',
-              textAlign: TextAlign.center,
-            ),
-            Container(
-              height: 20,
-            ),
-            () {
-              if (kIsWeb) {
-                return Text(
-                    'Chiedi al creatore del contapersone di inviarti il link, oppure scarica la versione mobile di Contapersone da App Store o Play Store per inquadrare il codice QR');
-              } else {
-                return RaisedButton.icon(
-                  onPressed: _buttonsEnabled ? scan : null,
-                  label: Text('Inquadra il codice QR'),
-                  icon: Icon(Icons.camera_alt),
-                  color: Theme.of(context).primaryColor,
-                  textColor: Colors.white,
-                );
-              }
-            }(),
-          ],
-        ),
-      ),
-    );
   }
 
   void _createCounter() async {

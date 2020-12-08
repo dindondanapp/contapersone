@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 /// A simple form to create a new counter, possibly specifying capacity
-class CounterCreate extends StatelessWidget {
+class CounterCreateForm extends StatelessWidget {
   final TextEditingController capacityController;
   final Function onSubmit;
   final bool enabled;
 
   /// Create a new counter creation form
-  CounterCreate({this.capacityController, this.onSubmit, this.enabled});
+  CounterCreateForm({this.capacityController, this.onSubmit, this.enabled});
 
   @override
   Widget build(BuildContext context) {
