@@ -128,9 +128,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return new ValueListenableBuilder<AuthValue>(
       valueListenable: _auth,
-      builder: (context, auth, _) {
+      builder: (context, authValue, _) {
         return Scaffold(
-          appBar: _buildAppBar(auth),
+          appBar: _buildAppBar(authValue),
           bottomNavigationBar: _buildBottomNavigationBar(),
           body: SingleChildScrollView(
             child: Center(
@@ -166,6 +166,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
+                  /*History(
+                      auth: _auth,
+                      resumeCounter: (token) => _startSubcounter(token: token)),*/
                 ]),
               ),
             ),

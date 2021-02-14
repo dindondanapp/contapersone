@@ -16,6 +16,9 @@ class Auth extends ValueNotifier<AuthValue> {
   set status(AuthStatus newValue) =>
       value = value.rebuildWith(status: newValue);
 
+  get userId => value.userId;
+  set userId(String newValue) => value = value.rebuildWith(userId: newValue);
+
   get churchName => value.churchName;
   set churchName(String newValue) =>
       value = value.rebuildWith(churchName: newValue);
@@ -39,6 +42,7 @@ class Auth extends ValueNotifier<AuthValue> {
       } else {
         this.status = AuthStatus.loggedIn;
       }
+      this.userId = user.uid;
     }
 
     refreshUserData();
@@ -49,9 +53,11 @@ class Auth extends ValueNotifier<AuthValue> {
     try {
       await _firebaseAuth.signInAnonymously().timeout(Duration(seconds: 10));
       this.status = AuthStatus.loggedInAnonymously;
+      this.userId = getCurrentUser().uid;
     } catch (error) {
       this.status = AuthStatus.notLoggedIn;
       this.error = AuthError.anonymous;
+      this.userId = null;
       throw error;
     }
   }
@@ -66,6 +72,7 @@ class Auth extends ValueNotifier<AuthValue> {
     refreshState();
 
     this.status = AuthStatus.loggedIn;
+    this.userId = getCurrentUser().uid;
   }
 
   /// Get current user
@@ -77,7 +84,8 @@ class Auth extends ValueNotifier<AuthValue> {
   void signOut() async {
     await _firebaseAuth.signOut();
     refreshState();
-    this.value = AuthValue(status: AuthStatus.notLoggedIn);
+    this.status = AuthStatus.notLoggedIn;
+    this.userId = null;
   }
 
   /// Load user data from custom API
@@ -127,18 +135,20 @@ class Auth extends ValueNotifier<AuthValue> {
 
 /// An object that describes the authentication status
 class AuthValue {
-  final AuthStatus status;
+  final String userId;
   final String churchName;
+  final AuthStatus status;
   final AuthError error;
 
-  AuthValue({this.churchName, @required this.status, this.error});
+  AuthValue({this.churchName, this.userId, @required this.status, this.error});
 
   AuthValue rebuildWith(
-      {String churchName, AuthStatus status, AuthError error}) {
+      {String churchName, String userId, AuthStatus status, AuthError error}) {
     return AuthValue(
       churchName: churchName ?? this.churchName,
       status: status ?? this.status,
       error: error ?? this.error,
+      userId: userId ?? this.userId,
     );
   }
 }
