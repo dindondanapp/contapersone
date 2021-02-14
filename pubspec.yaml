@@ -24,29 +24,25 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  cloud_firestore: ^0.14.4
   cupertino_icons: ^1.0.0
-  firebase_core: ^0.5.3
   firebase_analytics: ^6.3.0
   firebase_auth: ^0.18.4+1
-  cloud_firestore: ^0.14.4
+  firebase_core: ^0.5.3
+  firebase_dynamic_links: ^0.6.2
+  fluttertoast: ^7.1.5
+  http: ^0.12.2
   package_info: 0.4.3+2
   qr_code_scanner: ^0.0.13
-  firebase_dynamic_links: ^0.6.2
-  http: ^0.12.2
-  url_launcher: ^5.7.10
-  window_location_href: ^0.0.2
-  fluttertoast: ^7.1.5
   qr_flutter: ^3.2.0
   share: ^0.6.5+4
+  url_launcher: ^5.7.10
+  window_location_href: ^0.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons:
+  flutter_launcher_icons: null
 
 flutter_icons:
   android: "launcher_icon"
@@ -56,7 +52,6 @@ flutter_icons:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
 # The following section is specific to Flutter.
 flutter:
 
@@ -66,4 +61,4 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/ 
+    - assets/
