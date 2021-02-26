@@ -74,5 +74,6 @@
     "minute": "{num, plural, =0 {less than one minute ago} =1 {one minute ago} other {{num} minutes ago}}",
     "hour": "{num, plural, =0 {less than one hour ago} =1 {one hour ago} other {{num} hours ago}}",
     "day": "{num, plural, =0 {less than one day ago} =1 {one day ago} other {{num} days ago}}",
-    "week": "{num, plural, =0 {less than one week ago} =1 {one week ago} other {{num} weeks ago}}"
+    "week": "{num, plural, =0 {less than one week ago} =1 {one week ago} other {{num} weeks ago}}",
+    "subcounters": "{num, plural, =0 {no entrance} =1 {one entrance} other {{num} entrances}}"
 }

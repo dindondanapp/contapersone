@@ -170,5 +170,11 @@
         "placeholders": {
             "num": {}
         }
+    },
+    "subcounters": "{num, plural, =0 {nessun ingresso} =1 {un ingresso} other {{num} ingressi}}",
+    "@subcounters": {
+        "placeholders": {
+            "num": {}
+        }
     }
 }

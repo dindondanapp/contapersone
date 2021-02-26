@@ -84,11 +84,17 @@ extension DateToHuman on DateTime {
       maximumDuration = Duration(days: 7);
     }
 
-    if (elapsed <= maximumDuration) {
+    if (elapsed.inMilliseconds > 0 && elapsed <= maximumDuration) {
       return elapsed.toHuman(context: context);
     } else {
       return DateFormat.yMMMMd(AppLocalizations.of(context).localeName)
           .format(this);
     }
   }
+
+  DateTime asStrictlyPast() =>
+      this.isBefore(DateTime.now()) ? this : DateTime.now();
+
+  DateTime asStrictlyFuture() =>
+      this.isAfter(DateTime.now()) ? this : DateTime.now();
 }

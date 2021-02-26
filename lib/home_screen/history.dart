@@ -134,56 +134,105 @@ class HistoryState extends State<History> {
   }
 
   Widget _buildCounterTile(CounterData data) {
-    final count = data.capacity != null
-        ? '${data.total ?? 0} / ${data.capacity}'
-        : (data.total ?? 0).toString();
-
-    final time = data.lastUpdated == null
+    final timeString = data.lastUpdated == null
         ? ''
-        : data.lastUpdated.toDate().toHumanString(context: context);
+        : data.lastUpdated
+            .toDate()
+            .asStrictlyPast()
+            .toHumanString(context: context);
+
+    final subtitle = data.subcounters.length == 1 &&
+            data.subcounters.first.label != null &&
+            data.subcounters.first.label != ''
+        ? '${data.subcounters.first.label}'
+        : '';
 
     return StreamBuilder(
       stream: Stream.periodic(Duration(seconds: 1)),
       builder: (context, _) {
-        return ExpansionTile(
-          title: Text(count, style: TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Text(time),
-          children: [
-            ...(data.subcounters != null && data.subcounters.length > 1
-                ? data.subcounters.map(
-                    (e) => ListTile(
-                      title: Text(e.count.toString()),
-                      subtitle: e.label != null ? Text(e.label) : null,
+        return Card(
+          child: Container(
+            child: Theme(
+              data:
+                  Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: EdgeInsets.only(left: 20, right: 20, top: 20),
+                    child: Column(
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            text: data.total.toString(),
+                            children: [
+                              TextSpan(
+                                text: data.capacity != null
+                                    ? '/${data.capacity}'
+                                    : '',
+                                style: TextStyle(
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                            ],
+                            style: TextStyle(fontSize: 25, color: Colors.black),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        subtitle != ''
+                            ? Container(
+                                child: Text(subtitle),
+                                padding: EdgeInsets.only(bottom: 10),
+                              )
+                            : Container(),
+                        timeString != ''
+                            ? Text(
+                                timeString,
+                                style: TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              )
+                            : Container(),
+                      ],
                     ),
-                  )
-                : []),
-            ButtonBar(
-              buttonTextTheme: ButtonTextTheme.accent,
-              alignment: MainAxisAlignment.spaceBetween,
-              children: [
-                FlatButton(
-                  child: Row(
+                  ),
+                  ...(data.subcounters != null && data.subcounters.length > 1
+                      ? data.subcounters.map(
+                          (e) => ListTile(
+                            title: Text(e.count.toString()),
+                            subtitle: e.label != null ? Text(e.label) : null,
+                          ),
+                        )
+                      : []),
+                  ButtonBar(
+                    buttonTextTheme: ButtonTextTheme.accent,
+                    alignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.delete),
-                      SizedBox(width: 10),
-                      Text(AppLocalizations.of(context).delete),
+                      FlatButton(
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete),
+                            SizedBox(width: 10),
+                            Text(AppLocalizations.of(context).delete),
+                          ],
+                        ),
+                        onPressed: () => _deleteFromHistory(data.token),
+                      ),
+                      FlatButton(
+                        child: Row(
+                          children: [
+                            Text(AppLocalizations.of(context).continueButton),
+                            SizedBox(width: 10),
+                            Icon(Icons.arrow_forward),
+                          ],
+                        ),
+                        onPressed: () => widget.resumeCounter(data.token),
+                      ),
                     ],
                   ),
-                  onPressed: () => _deleteFromHistory(data.token),
-                ),
-                FlatButton(
-                  child: Row(
-                    children: [
-                      Text(AppLocalizations.of(context).continueButton),
-                      SizedBox(width: 10),
-                      Icon(Icons.arrow_forward),
-                    ],
-                  ),
-                  onPressed: () => widget.resumeCounter(data.token),
-                ),
-              ],
+                ],
+              ),
             ),
-          ],
+          ),
         );
       },
     );
