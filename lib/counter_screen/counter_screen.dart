@@ -24,16 +24,26 @@ class CounterScreen extends StatefulWidget {
 
 class _CounterScreenState extends State<CounterScreen> {
   var _disconnected = false;
-  var _controller = TextEditingController();
+  var _subcounterLabelController = TextEditingController();
   String _subcounterId;
-  String _subcounterLabel;
+
+  /// Lock used to prevent remote updates of the subcounter label while editing
+  bool _subcounterLabelLock = false;
 
   int _counterTotal = 0;
   int _capacity;
   List<SubcounterData> _otherSubCounters = [];
   List<dynamic> _addEvents = [];
   List<dynamic> _subtractEvents = [];
+
   int get _subcounterCount => _addEvents.length - _subtractEvents.length;
+
+  String get _subcounterLabel => _subcounterLabelController.text;
+  set _subcounterLabel(String label) {
+    if (!_subcounterLabelLock) {
+      _subcounterLabelController.text = label;
+    }
+  }
 
   final listeners = List<StreamSubscription>();
 
@@ -234,44 +244,54 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   void _openEditLabelDialog() {
+    // Lock label remote updates
+    _subcounterLabelLock = true;
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(AppLocalizations.of(context).editEntranceLabelTitle),
-          content: new Row(
-            children: <Widget>[
-              new Expanded(
-                child: TextField(
-                  controller: _controller,
-                  onSubmitted: (_) => _submitEditLabelDialog(),
-                  decoration: InputDecoration(
-                    hintText:
-                        AppLocalizations.of(context).editEntranceLabelHint,
-                    prefixIcon: Icon(Icons.edit),
+        return WillPopScope(
+          onWillPop: () async {
+            _subcounterLabelLock = false; // Release the lock before popping
+            return true;
+          },
+          child: AlertDialog(
+            title: Text(AppLocalizations.of(context).editEntranceLabelTitle),
+            content: new Row(
+              children: <Widget>[
+                new Expanded(
+                  child: FocusScope(
+                    child: TextField(
+                      controller: _subcounterLabelController,
+                      onSubmitted: (_) => _submitEditLabelDialog(),
+                      decoration: InputDecoration(
+                        hintText:
+                            AppLocalizations.of(context).editEntranceLabelHint,
+                        prefixIcon: Icon(Icons.edit),
+                      ),
+                    ),
                   ),
                 ),
+              ],
+            ),
+            actions: [
+              FlatButton(
+                child: Text(AppLocalizations.of(context).cancel),
+                onPressed: _dismissEditLabelDialog,
+              ),
+              FlatButton(
+                child: Text(AppLocalizations.of(context).confirm),
+                onPressed: _submitEditLabelDialog,
               ),
             ],
           ),
-          actions: [
-            FlatButton(
-              child: Text(AppLocalizations.of(context).cancel),
-              onPressed: _dismissEditLabelDialog,
-            ),
-            FlatButton(
-              child: Text(AppLocalizations.of(context).confirm),
-              onPressed: _submitEditLabelDialog,
-            ),
-          ],
         );
       },
     );
   }
 
   void _submitEditLabelDialog() {
-    _submitEntranceName(_controller.text);
+    _submitEntranceName(_subcounterLabelController.text);
     Navigator.of(context).pop();
   }
 
