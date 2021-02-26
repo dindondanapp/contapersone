@@ -134,13 +134,6 @@ class HistoryState extends State<History> {
   }
 
   Widget _buildCounterTile(CounterData data) {
-    final timeString = data.lastUpdated == null
-        ? ''
-        : data.lastUpdated
-            .toDate()
-            .asStrictlyPast()
-            .toHumanString(context: context);
-
     final subtitle = data.subcounters.length == 1 &&
             data.subcounters.first.label != null &&
             data.subcounters.first.label != ''
@@ -149,7 +142,15 @@ class HistoryState extends State<History> {
 
     return StreamBuilder(
       stream: Stream.periodic(Duration(seconds: 1)),
-      builder: (context, _) {
+      initialData: 0,
+      builder: (context, snapshot) {
+        final timeString = data.lastUpdated == null
+            ? ''
+            : data.lastUpdated
+                .toDate()
+                .asStrictlyPast()
+                .toHumanString(context: context);
+
         return Card(
           child: Container(
             child: Theme(
