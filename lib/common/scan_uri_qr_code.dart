@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 /// Asynchronously open a scanning interface from the provided [context] to
@@ -50,7 +51,7 @@ class _ScanScreenState extends State<_ScanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Scansiona codice QR'),
+        title: Text(AppLocalizations.of(context).scanQrButton),
         actions: [
           IconButton(
             icon: Icon(flashOn ? Icons.flash_off : Icons.flash_on),
@@ -58,14 +59,16 @@ class _ScanScreenState extends State<_ScanScreen> {
               controller.toggleFlash();
               setState(() => flashOn = !flashOn);
             },
-            tooltip: flashOn ? 'Accendi flash' : 'Spegni flash',
+            tooltip: flashOn
+                ? AppLocalizations.of(context).turnOnFlash
+                : AppLocalizations.of(context).turnOffFlash,
           ),
           IconButton(
             icon: Icon(Icons.flip_camera_android),
             onPressed: () {
               controller.flipCamera();
             },
-            tooltip: 'Cambia fotocamera',
+            tooltip: AppLocalizations.of(context).switchCamera,
           ),
         ],
       ),

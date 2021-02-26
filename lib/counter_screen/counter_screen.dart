@@ -5,6 +5,7 @@ import 'package:contapersone/common/auth.dart';
 import 'package:contapersone/counter_screen/count_display.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../common/entities.dart';
 import '../common/palette.dart';
@@ -162,7 +163,7 @@ class _CounterScreenState extends State<CounterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Contapersone'),
+        title: Text(AppLocalizations.of(context).appBarDefault),
         backgroundColor: Palette.primary,
         actions: [
           IconButton(
@@ -238,7 +239,7 @@ class _CounterScreenState extends State<CounterScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Modifica nome dell\'ingresso'),
+          title: Text(AppLocalizations.of(context).editEntranceLabelTitle),
           content: new Row(
             children: <Widget>[
               new Expanded(
@@ -246,7 +247,8 @@ class _CounterScreenState extends State<CounterScreen> {
                   controller: _controller,
                   onSubmitted: (_) => _submitEditLabelDialog(),
                   decoration: InputDecoration(
-                    hintText: 'Nome dell\'ingresso',
+                    hintText:
+                        AppLocalizations.of(context).editEntranceLabelHint,
                     prefixIcon: Icon(Icons.edit),
                   ),
                 ),
@@ -255,11 +257,11 @@ class _CounterScreenState extends State<CounterScreen> {
           ),
           actions: [
             FlatButton(
-              child: Text('Annulla'),
+              child: Text(AppLocalizations.of(context).cancel),
               onPressed: _dismissEditLabelDialog,
             ),
             FlatButton(
-              child: Text('Conferma'),
+              child: Text(AppLocalizations.of(context).confirm),
               onPressed: _submitEditLabelDialog,
             ),
           ],

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Display a simnplified error dialog and returns a [Future] that completes
 /// when the dialog is dismissed
@@ -27,7 +28,7 @@ Future<void> showErrorDialog({
   if (onRetry != null) {
     actions.add(
       FlatButton(
-        child: Text('Riprova'),
+        child: Text(AppLocalizations.of(context).tryAgain),
         onPressed: () {
           Navigator.of(context).pop();
           onRetry();
@@ -40,7 +41,7 @@ Future<void> showErrorDialog({
   if (onExit != null) {
     actions.add(
       FlatButton(
-        child: Text('Esci'),
+        child: Text(AppLocalizations.of(context).quit),
         onPressed: () {
           Navigator.of(context).pop();
           onExit();
@@ -53,7 +54,7 @@ Future<void> showErrorDialog({
   if (onContinue != null) {
     actions.add(
       FlatButton(
-        child: Text('Continua'),
+        child: Text(AppLocalizations.of(context).continueButton),
         onPressed: () {
           Navigator.of(context).pop();
           onContinue();

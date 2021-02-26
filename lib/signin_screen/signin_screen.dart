@@ -2,6 +2,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../common/auth.dart';
@@ -32,7 +33,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Accedi come parrocchia'),
+        title: Text(AppLocalizations.of(context).signInScreenTitle),
       ),
       body: Stack(
         children: <Widget>[
@@ -51,13 +52,14 @@ class _SignInScreenState extends State<SignInScreen> {
         keyboardType: TextInputType.emailAddress,
         autofocus: false,
         decoration: new InputDecoration(
-            hintText: 'Email',
+            hintText: AppLocalizations.of(context).signInEmailHint,
             icon: new Icon(
               Icons.mail,
               color: Colors.grey,
             )),
-        validator: (value) =>
-            value.isEmpty ? 'Inserisci l\'indirizzo e-mail' : null,
+        validator: (value) => value.isEmpty
+            ? AppLocalizations.of(context).signInEmailValidator
+            : null,
         onSaved: (value) => _email = value.trim(),
       ),
     );
@@ -71,12 +73,14 @@ class _SignInScreenState extends State<SignInScreen> {
         obscureText: true,
         autofocus: false,
         decoration: new InputDecoration(
-            hintText: 'Password',
+            hintText: AppLocalizations.of(context).signInPasswordHint,
             icon: new Icon(
               Icons.lock,
               color: Colors.grey,
             )),
-        validator: (value) => value.isEmpty ? 'Inserisci la password' : null,
+        validator: (value) => value.isEmpty
+            ? AppLocalizations.of(context).signInPasswordValidator
+            : null,
         onSaved: (value) => _password = value,
       ),
     );
@@ -89,7 +93,7 @@ class _SignInScreenState extends State<SignInScreen> {
           height: 40.0,
           child: new RaisedButton(
             elevation: 5.0,
-            child: new Text('Accedi'),
+            child: new Text(AppLocalizations.of(context).signInSubmit),
             color: Theme.of(context).primaryColor,
             textColor: Colors.white,
             onPressed: _validateAndSubmit,
@@ -109,14 +113,14 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Widget _showSignupButton() {
     return new FlatButton(
-        child: new Text('Non hai un account? Registrati ora!',
-            style: new TextStyle(fontSize: 16.0)),
+        child: new Text(AppLocalizations.of(context).signUpButton,
+            textAlign: TextAlign.center, style: new TextStyle(fontSize: 16.0)),
         onPressed: () => launch(Secret.signUpURL));
   }
 
   Widget _showPasswordRecovery() {
     return new FlatButton(
-        child: new Text('Ho dimenticato la password',
+        child: new Text(AppLocalizations.of(context).forgotPasswordButton,
             style: new TextStyle(fontSize: 16.0)),
         onPressed: () => launch(Secret.recoverPasswordURL));
   }
@@ -150,7 +154,7 @@ class _SignInScreenState extends State<SignInScreen> {
               child: Column(
                 children: [
                   Text(
-                    'Attenzione! Il login è riservato alle parrocchie.',
+                    AppLocalizations.of(context).signInReservedWarning,
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).primaryColor),
@@ -158,7 +162,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   Text(''),
                   Text(
-                    'Per raccogliere statistiche sui conteggi per la tua parrocchia accedi con il tuo account DinDonDan:',
+                    AppLocalizations.of(context).signInFormCaption,
                     textAlign: TextAlign.center,
                   ),
                   _showEmailInput(),
@@ -201,30 +205,26 @@ class _SignInScreenState extends State<SignInScreen> {
         Navigator.of(context).pop();
       } on FirebaseAuthException catch (error) {
         print('Error: ${error.code}');
-        String message =
-            "Si è verificato un errore sconosciuto. Riprova più tardi e, se il problema persiste, scrivi a feedback@dindondan.app.";
+        String message = AppLocalizations.of(context).signInUnknownErrorMessage;
 
         switch (error.code) {
           case "invalid-email":
-            message =
-                "L'indirizzo e-mail non è valido. Controlla che sia scritto correttamente e riprova.";
+            message = AppLocalizations.of(context).signInInvalidEmailError;
             break;
           case "wrong-password":
-            message = "La password inserita è errata.";
+            message = AppLocalizations.of(context).signInWrongPasswordError;
             break;
           case "user-not-found":
-            message = "Questo indirizzo non corrisponde ad alcun utente.";
+            message = AppLocalizations.of(context).signInUserNotFoundError;
             break;
           case "user-disabled":
-            message =
-                "Questo utente è stato disabilitato. Per ulteriori informazioni scrivi a feedback@dindondan.app.";
+            message = AppLocalizations.of(context).signInUserDisabledError;
             break;
           case "too-many-requests":
-            message = "Hai effettuato troppi tentativi. Riprova più tardi.";
+            message = AppLocalizations.of(context).signInTooManyAttemptsError;
             break;
           case "network-request-failed":
-            message =
-                "Impossibile connettersi al server. Verifica la connessione di rete e riprova.";
+            message = AppLocalizations.of(context).signInNetworkError;
         }
         FirebaseAnalytics()
             .logEvent(name: 'signin_error', parameters: {'code': message});

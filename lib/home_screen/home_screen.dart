@@ -6,6 +6,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_location_href/window_location_href.dart';
 
@@ -16,6 +17,7 @@ import '../counter_screen/counter_screen.dart';
 import '../info_screen/info_screen.dart';
 import '../share_screen/share_screen.dart';
 import 'counter_create.dart';
+import 'history.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -28,8 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
   HomeStatus _status = HomeStatus.ready;
   final _capacityController = TextEditingController();
   String get _title => _auth.status == AuthStatus.loggedIn
-      ? _auth.churchName ?? 'Accesso in corso…'
-      : 'Contapersone';
+      ? _auth.churchName ?? AppLocalizations.of(context).appBarLoginInProgress
+      : AppLocalizations.of(context).appBarDefault;
   bool _modalOpen = false;
   bool get _buttonsEnabled =>
       _status == HomeStatus.ready &&
@@ -150,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Container(height: 20),
                   Text(
-                    '– oppure –',
+                    AppLocalizations.of(context).orDivider,
                     textAlign: TextAlign.center,
                   ),
                   Container(height: 20),
@@ -166,9 +168,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  /*History(
-                      auth: _auth,
-                      resumeCounter: (token) => _startSubcounter(token: token)),*/
+                  History(
+                    auth: _auth,
+                    resumeCounter: (token) => _startSubcounter(token: token),
+                  ),
                 ]),
               ),
             ),
@@ -191,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icon(Icons.more_vert),
                 itemBuilder: (BuildContext context) => [
                   PopupMenuItem(
-                    child: Text('Disconnetti'),
+                    child: Text(AppLocalizations.of(context).parishSignOut),
                     value: 'signout',
                   ),
                 ],
@@ -203,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icon(Icons.more_vert),
                 itemBuilder: (BuildContext context) => [
                   PopupMenuItem(
-                    child: Text('Area riservata parrocchie'),
+                    child: Text(AppLocalizations.of(context).parishSignIn),
                     value: 'signin',
                   ),
                 ],
@@ -262,7 +265,8 @@ class _HomeScreenState extends State<HomeScreen> {
         'church_uuid': '',
         'user_id': _auth.getCurrentUser().uid,
         'lastUpdated': Timestamp.now(),
-        'capacity': capacity
+        'capacity': capacity,
+        'deleted': null
       };
 
       await FirebaseFirestore.instance
@@ -285,8 +289,8 @@ class _HomeScreenState extends State<HomeScreen> {
           .logEvent(name: 'counter_creation_error', parameters: null);
       showErrorDialog(
         context: context,
-        title: 'Impossibile creare il contapersone condiviso',
-        text: 'Verifica la connessione di rete e riprova.',
+        title: AppLocalizations.of(context).createCounterErrorTitle,
+        text: AppLocalizations.of(context).createCounterErrorMessage,
         onRetry: _createCounter,
       );
     }
@@ -297,9 +301,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return showErrorDialog(
       context: context,
-      title: 'Errore di connessione',
-      text:
-          'Non è stato possibile ottenere i dati del tuo account.\n\nSe il problema persiste tocca "esci" e prova a ripetere l\'accesso.',
+      title: AppLocalizations.of(context).accountErrorTitle,
+      text: AppLocalizations.of(context).accountErrorMessage,
       onRetry: _auth.refreshUserData,
       onExit: _auth.signOut,
     );
@@ -310,9 +313,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return showErrorDialog(
       context: context,
-      title: 'Errore di connessione',
-      text:
-          'Non è stato possibile connettersi al server. Controlla la connessione di rete e riprova.',
+      title: AppLocalizations.of(context).networkErrorTitle,
+      text: AppLocalizations.of(context).networkErrorMessage,
       onRetry: _auth.refreshState,
     );
   }
@@ -323,9 +325,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return showErrorDialog(
       context: context,
-      title: 'Registrazione incompleta',
-      text:
-          'Sembra che tu non abbia completato la registrazione.\n\nPer accedere devi fornire ancora alcuni dati. Tocca "continua" per concludere accedere ai servizi web e completare la registrazione.',
+      title: AppLocalizations.of(context).incompleteSignUpErrorTitle,
+      text: "",
       onContinue: () => launch(Secret.incompleteSignUpURL),
       onExit: () => _auth.signOut(),
     );

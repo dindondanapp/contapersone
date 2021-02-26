@@ -1,10 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:contapersone/common/auth.dart';
-import 'package:contapersone/common/entities.dart';
-import 'package:contapersone/counter_screen/counter_screen.dart';
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../common/auth.dart';
+import '../common/entities.dart';
 import '../common/extensions.dart';
+import '../counter_screen/counter_screen.dart';
 
 class History extends StatefulWidget {
   final Auth auth;
@@ -42,7 +45,7 @@ class HistoryState extends State<History> {
       } else {
         _stream = FirebaseFirestore.instance
             .collection('counters')
-            .where('deleted', isNotEqualTo: null)
+            .where('deleted', isNull: true)
             .where('user_id', isEqualTo: widget.auth.userId)
             .orderBy('lastUpdated', descending: true)
             .limit(20)
@@ -94,7 +97,7 @@ class HistoryState extends State<History> {
             SizedBox(height: 20),
             Divider(),
             SizedBox(height: 20),
-            Text('Conteggi passati'),
+            Text(AppLocalizations.of(context).historyTitle),
             SizedBox(height: 20),
             ...(snapshot.data.length > 0
                 ? snapshot.data
@@ -104,22 +107,22 @@ class HistoryState extends State<History> {
                     .toList()
                 : [
                     Text(
-                      'I tuoi conteggi passati appariranno qui.',
+                      AppLocalizations.of(context).noHistoryNotice,
                       style: TextStyle(fontStyle: FontStyle.italic),
                     )
                   ]),
           ]);
         } else {
+          print(snapshot.error);
           return Column(
             children: [
               SizedBox(height: 20),
               Divider(),
               SizedBox(height: 20),
-              Text(
-                  'Si è verificato un errore nel caricamento dei conteggi passati.'),
+              Text(AppLocalizations.of(context).historyLoadingError),
               FlatButton.icon(
                 icon: Icon(Icons.refresh),
-                label: Text('Riprova'),
+                label: Text(AppLocalizations.of(context).tryAgain),
                 onPressed: _updateStream,
               )
             ],
@@ -137,7 +140,7 @@ class HistoryState extends State<History> {
 
     final time = data.lastUpdated == null
         ? ''
-        : data.lastUpdated.toDate().toHumanString();
+        : data.lastUpdated.toDate().toHumanString(context: context);
 
     return StreamBuilder(
       stream: Stream.periodic(Duration(seconds: 1)),
@@ -163,15 +166,15 @@ class HistoryState extends State<History> {
                     children: [
                       Icon(Icons.delete),
                       SizedBox(width: 10),
-                      Text('Nascondi'),
+                      Text(AppLocalizations.of(context).delete),
                     ],
                   ),
-                  onPressed: () => _hideFromHistory(data.token),
+                  onPressed: () => _deleteFromHistory(data.token),
                 ),
                 FlatButton(
                   child: Row(
                     children: [
-                      Text('Riprendi'),
+                      Text(AppLocalizations.of(context).continueButton),
                       SizedBox(width: 10),
                       Icon(Icons.arrow_forward),
                     ],
@@ -186,11 +189,59 @@ class HistoryState extends State<History> {
     );
   }
 
-  void _hideFromHistory(CounterToken token) {
-    FirebaseFirestore.instance.collection('counters').doc(token.toString()).set(
-      {'deleted': Timestamp.now()},
-      SetOptions(merge: true),
+  void _deleteFromHistory(CounterToken token) async {
+    if (await _deleteConfirmDialog()) {
+      FirebaseFirestore.instance
+          .collection('counters')
+          .doc(token.toString())
+          .set(
+        {
+          'deleted': Timestamp.now(),
+        },
+        SetOptions(merge: true),
+      );
+    }
+  }
+
+  Future<bool> _deleteConfirmDialog() {
+    final completer = Completer<bool>();
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context).historyDeleteConfirmTitle),
+          content:
+              Text(AppLocalizations.of(context).historyDeleteConfirmMessage),
+          actions: [
+            FlatButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                completer.complete(true);
+              },
+              child: Text(
+                AppLocalizations.of(context).confirm,
+                style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
+            ),
+            FlatButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                completer.complete(false);
+              },
+              child: Text(
+                AppLocalizations.of(context).cancel,
+                style: TextStyle(color: Theme.of(context).primaryColor),
+                // TODO: rely on Theme
+              ),
+            ),
+          ],
+        );
+      },
     );
+
+    return completer.future;
   }
 }
 

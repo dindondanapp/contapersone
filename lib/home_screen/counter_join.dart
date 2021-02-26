@@ -1,9 +1,10 @@
-import 'package:contapersone/common/entities.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../common/entities.dart';
 import '../common/scan_uri_qr_code.dart';
 
 /// A simple form to join a shared counter by scanning a QR code
@@ -30,7 +31,7 @@ class CounterJoinForm extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Partecipa ad un contapersone condiviso esistente',
+          AppLocalizations.of(context).scanQrCaption,
           textAlign: TextAlign.center,
         ),
         Container(
@@ -39,11 +40,12 @@ class CounterJoinForm extends StatelessWidget {
         () {
           if (kIsWeb) {
             return Text(
-                'Chiedi al creatore del contapersone di inviarti il link, oppure scarica la versione mobile di Contapersone da App Store o Play Store per inquadrare il codice QR');
+              AppLocalizations.of(context).scanQrWebNotice,
+            );
           } else {
             return RaisedButton.icon(
               onPressed: enabled ? () => _scan(context) : null,
-              label: Text('Inquadra il codice QR'),
+              label: Text(AppLocalizations.of(context).scanQrButton),
               icon: Icon(Icons.camera_alt),
               color: Theme.of(context).primaryColor,
               textColor: Colors.white,

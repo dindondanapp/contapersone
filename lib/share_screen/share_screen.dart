@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share/share.dart';
@@ -45,7 +46,7 @@ class _ShareScreenState extends State<ShareScreen> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: AppBar(
-        title: Text('Condividi il conteggio'),
+        title: Text(AppLocalizations.of(context).shareScreenTitle),
         backgroundColor: Palette.primary,
         leading: new IconButton(
           icon: new Icon(Icons.close),
@@ -71,7 +72,7 @@ class _ShareScreenState extends State<ShareScreen> {
                         constraints: BoxConstraints(maxWidth: 250),
                         margin: EdgeInsets.all(10),
                         child: Text(
-                          'Inquadra il codice QR con tutti i dispositivi su cui vuoi eseguire il conteggio',
+                          AppLocalizations.of(context).shareQrCodeCaption,
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -91,7 +92,7 @@ class _ShareScreenState extends State<ShareScreen> {
                         constraints: BoxConstraints(maxWidth: 250),
                         margin: EdgeInsets.all(10),
                         child: Text(
-                          'Oppure condividi il link:',
+                          AppLocalizations.of(context).orShareScreenCaption,
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -108,7 +109,8 @@ class _ShareScreenState extends State<ShareScreen> {
                           onPressed: () {
                             _startSubcounter(counterId: widget.token);
                           },
-                          label: Text('Avvia su questo dispositivo'),
+                          label: Text(
+                              AppLocalizations.of(context).startOnThisDevice),
                           color: Theme.of(context).primaryColor,
                           textColor: Colors.white,
                           icon: Icon(Icons.arrow_forward),
@@ -146,8 +148,8 @@ class _ShareScreenState extends State<ShareScreen> {
     } catch (error) {
       showErrorDialog(
         context: context,
-        title: 'Impossibile ottenere il link di condivisione',
-        text: 'Verifica la connessione di rete e riprova.',
+        title: AppLocalizations.of(context).shareLinkCreationErrorTitle,
+        text: AppLocalizations.of(context).shareLinkCreationErrorMessage,
         onRetry: _buildDynamicLink,
       );
     }
@@ -212,8 +214,9 @@ class _ShareScreenState extends State<ShareScreen> {
         IconButton(
           icon: Icon(Icons.share),
           onPressed: _url != ''
-              ? () => Share.share('Avvia il contapersone condiviso: $_url',
-                  subject: 'DinDonDan Contapersone')
+              ? () => Share.share(
+                  '${AppLocalizations.of(context).shareDialogMessage} $_url',
+                  subject: AppLocalizations.of(context).shareDialogSubject)
               : null,
         ),
       ]);
@@ -225,7 +228,7 @@ class _ShareScreenState extends State<ShareScreen> {
       return () {
         Clipboard.setData(ClipboardData(text: _url));
         Fluttertoast.showToast(
-            msg: "L'indirizzo è stato copiato negli appunti!",
+            msg: AppLocalizations.of(context).linkCopied,
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.CENTER,
             backgroundColor: Colors.grey,

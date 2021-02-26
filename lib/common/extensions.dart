@@ -1,9 +1,12 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 
 // This file contains miscellaneous extensions
 
+// TODO: Localize
 extension ColorToMaterialColor on Color {
   /// Convert the color into a [MaterialColor], creating variations based on lightness
   MaterialColor toMaterialColor() {
@@ -49,101 +52,31 @@ extension Saturation on num {
   }
 }
 
-class Quantity {
-  final int _value;
-  final UnitData _unitData;
-  Quantity(this._value, this._unitData);
-
-  @override
-  String toString() {
-    if (_value == 1) {
-      return '${_unitData.article}${_unitData.singular}';
-    } else {
-      return '$_value ${_unitData.plural}';
-    }
-  }
-}
-
-class UnitData {
-  final String singular;
-  final String plural;
-  final String article;
-
-  const UnitData({
-    @required this.singular,
-    @required this.plural,
-    @required this.article,
-  });
-}
-
 extension DurationToHuman on Duration {
-  String toHuman(
-      {DurationPrecisionData maximumPrecision = DurationPrecision.minute}) {
-    final precisionSequence = [
-      DurationPrecision.second,
-      DurationPrecision.minute,
-      DurationPrecision.hour,
-      DurationPrecision.day
-    ];
+  String toHuman({@required BuildContext context}) {
+    final Map<Duration, String Function(int)> precisionSequence = {
+      Duration(minutes: 1): AppLocalizations.of(context).minute,
+      Duration(hours: 1): AppLocalizations.of(context).hour,
+      Duration(days: 1): AppLocalizations.of(context).day,
+      Duration(days: 7): AppLocalizations.of(context).week,
+    };
 
-    final availablePrecisions = precisionSequence
-        .where((element) => element.duration >= maximumPrecision.duration);
+    final availablePrecisions = precisionSequence.entries
+        .where((element) => element.key >= precisionSequence.entries.first.key);
 
     final precision = availablePrecisions.lastWhere(
-      (element) => this > element.duration,
+      (element) => this > element.key,
       orElse: () => availablePrecisions.first,
     );
 
-    final units =
-        (this.inMilliseconds / precision.duration.inMilliseconds).floor();
-    if (units < 1) {
-      return 'meno di ${Quantity(1, precision.unitData)} fa';
-    } else {
-      return '${Quantity(units, precision.unitData)} fa';
-    }
+    final units = (this.inMilliseconds / precision.key.inMilliseconds).floor();
+    return precision.value(units);
   }
 }
 
-class DurationPrecisionData {
-  final Duration duration;
-  final UnitData unitData;
-
-  const DurationPrecisionData({
-    @required this.duration,
-    @required this.unitData,
-  });
-}
-
-class DurationPrecision {
-  static const second = DurationPrecisionData(
-    duration: Duration(milliseconds: 1000),
-    unitData: UnitData(singular: 'secondo', plural: 'secondi', article: 'un '),
-  );
-  static const minute = DurationPrecisionData(
-    duration: Duration(minutes: 1),
-    unitData: UnitData(singular: 'minuto', plural: 'minuti', article: 'un '),
-  );
-  static const hour = DurationPrecisionData(
-    duration: Duration(hours: 1),
-    unitData: UnitData(singular: 'ora', plural: 'ore', article: 'un\''),
-  );
-  static const day = DurationPrecisionData(
-    duration: Duration(days: 1),
-    unitData: UnitData(singular: 'giorno', plural: 'giorni', article: 'un '),
-  );
-  static const week = DurationPrecisionData(
-    duration: Duration(days: 7),
-    unitData:
-        UnitData(singular: 'settimana', plural: 'settimane', article: 'una '),
-  );
-}
-
-enum Gender { male, female }
-
 extension DateToHuman on DateTime {
   String toHumanString(
-      {DurationPrecisionData maximumPrecision = DurationPrecision.minute,
-      Duration maximumDuration}) {
+      {@required BuildContext context, Duration maximumDuration}) {
     final now = DateTime.now();
     final elapsed = now.difference(this);
 
@@ -152,27 +85,10 @@ extension DateToHuman on DateTime {
     }
 
     if (elapsed <= maximumDuration) {
-      return elapsed.toHuman();
+      return elapsed.toHuman(context: context);
     } else {
-      return this.toLocaleString();
+      return DateFormat.yMMMMd(AppLocalizations.of(context).localeName)
+          .format(this);
     }
-  }
-
-  String toLocaleString() {
-    final months = [
-      'gennaio',
-      'febbraio',
-      'marzo',
-      'aprile',
-      'maggio',
-      'giugno',
-      'luglio',
-      'agosto',
-      'settembre',
-      'ottobre',
-      'novembre',
-      'dicembre'
-    ];
-    return '$day ${months[month - 1]} $year';
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// A simple form to create a new counter, possibly specifying capacity
 class CounterCreateForm extends StatelessWidget {
@@ -17,7 +18,7 @@ class CounterCreateForm extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Crea un nuovo contapersone condiviso',
+          AppLocalizations.of(context).createCounterCaption,
           textAlign: TextAlign.center,
         ),
         TextField(
@@ -26,7 +27,7 @@ class CounterCreateForm extends StatelessWidget {
           keyboardType: TextInputType.number,
           controller: capacityController,
           decoration: InputDecoration(
-            hintText: 'Capienza (facoltativa)',
+            hintText: AppLocalizations.of(context).capacityHint,
             icon: Icon(Icons.people),
           ),
           style: TextStyle(fontSize: 20),
@@ -36,7 +37,7 @@ class CounterCreateForm extends StatelessWidget {
         ),
         RaisedButton.icon(
           onPressed: enabled ? onSubmit : null,
-          label: Text('Crea nuovo contapersone'),
+          label: Text(AppLocalizations.of(context).createCounterButton),
           icon: Icon(Icons.add),
           color: Theme.of(context).primaryColor,
           textColor: Colors.white,

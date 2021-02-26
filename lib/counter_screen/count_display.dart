@@ -1,5 +1,6 @@
 import 'package:contapersone/counter_screen/counter_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// A widget that displays the overall status of a counter, including its
 /// subcounters
@@ -44,7 +45,9 @@ class CountDisplay extends StatelessWidget {
                 capacity: capacity,
                 disconnected: isDisconnected,
               ),
-              _buildNameInput(defaultValue: 'Conteggio'),
+              _buildNameInput(
+                  defaultValue:
+                      AppLocalizations.of(context).singleSubcounterLabel),
             ],
           );
         } else {
@@ -62,7 +65,7 @@ class CountDisplay extends StatelessWidget {
                 ),
               ),
               Text(
-                'Conteggio totale',
+                AppLocalizations.of(context).counterTotalLabel,
                 textAlign: TextAlign.center,
               ),
               Container(
@@ -82,10 +85,13 @@ class CountDisplay extends StatelessWidget {
                         _buildMainSubcounter(
                           context: context,
                           count: thisSubcounterData.count,
-                          label: thisSubcounterData.label ?? 'Questo ingresso',
+                          label: thisSubcounterData.label ??
+                              AppLocalizations.of(context)
+                                  .thisEntranceDefaultLabel,
                         ),
                         ...otherSubcountersData.map(
                           (e) => _buildOtherSubcounter(
+                            context: context,
                             count: e.count,
                             label: e.label ?? '',
                           ),
@@ -132,7 +138,8 @@ class CountDisplay extends StatelessWidget {
               ),
               Spacer(),
               _buildNameInput(
-                defaultValue: 'Questo ingresso',
+                defaultValue:
+                    AppLocalizations.of(context).thisEntranceDefaultLabel,
                 brightness: Brightness.dark,
               ),
             ],
@@ -142,7 +149,8 @@ class CountDisplay extends StatelessWidget {
     );
   }
 
-  Widget _buildOtherSubcounter({@required int count, String label}) {
+  Widget _buildOtherSubcounter(
+      {@required BuildContext context, @required int count, String label}) {
     final labelDefined = label != null && label.trim() != '';
     return Container(
       height: 100,
@@ -170,7 +178,9 @@ class CountDisplay extends StatelessWidget {
               ),
               Spacer(),
               Text(
-                labelDefined ? label.trim() : 'Altro ingresso',
+                labelDefined
+                    ? label.trim()
+                    : AppLocalizations.of(context).otherEntranceDefaultLabel,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
                 textAlign: TextAlign.center,
