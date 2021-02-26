@@ -67,6 +67,7 @@ class CountDisplay extends StatelessWidget {
               Text(
                 AppLocalizations.of(context).counterTotalLabel,
                 textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
               ),
               Container(
                 height: 20,
@@ -248,24 +249,32 @@ class CountDisplay extends StatelessWidget {
       @required String defaultValue}) {
     final labelUndefined =
         thisSubcounterData.label == null || thisSubcounterData.label == '';
-    return FlatButton.icon(
-      icon: Opacity(
-        opacity: 0.5,
-        child: Icon(
-          Icons.edit,
-          color: brightness == Brightness.dark ? Colors.white : null,
+    return LayoutBuilder(builder: (context, constraints) {
+      print(constraints.maxWidth);
+      return FlatButton.icon(
+        icon: Opacity(
+          opacity: 0.5,
+          child: Icon(
+            Icons.edit,
+            color: brightness == Brightness.dark ? Colors.white : null,
+          ),
         ),
-      ),
-      label: Text(
-        labelUndefined ? defaultValue : thisSubcounterData.label,
-        style: TextStyle(
-          color: brightness == Brightness.dark ? Colors.white : null,
-          fontStyle: labelUndefined ? FontStyle.italic : null,
+        label: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: constraints.maxWidth - 60),
+          child: Text(
+            labelUndefined ? defaultValue : thisSubcounterData.label,
+            style: TextStyle(
+              color: brightness == Brightness.dark ? Colors.white : null,
+              fontStyle: labelUndefined ? FontStyle.italic : null,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
-        textAlign: TextAlign.center,
-        maxLines: 1,
-      ),
-      onPressed: onEditLabel,
-    );
+        clipBehavior: Clip.antiAlias,
+        onPressed: onEditLabel,
+      );
+    });
   }
 }
