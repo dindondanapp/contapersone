@@ -251,7 +251,7 @@ class CountDisplay extends StatelessWidget {
         thisSubcounterData.label == null || thisSubcounterData.label == '';
     return LayoutBuilder(builder: (context, constraints) {
       print(constraints.maxWidth);
-      return FlatButton.icon(
+      return TextButton.icon(
         icon: Opacity(
           opacity: 0.5,
           child: Icon(

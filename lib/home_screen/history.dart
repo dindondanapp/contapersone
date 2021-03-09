@@ -120,7 +120,7 @@ class HistoryState extends State<History> {
               Divider(),
               SizedBox(height: 20),
               Text(AppLocalizations.of(context).historyLoadingError),
-              FlatButton.icon(
+              TextButton.icon(
                 icon: Icon(Icons.refresh),
                 label: Text(AppLocalizations.of(context).tryAgain),
                 onPressed: _updateStream,
@@ -208,7 +208,7 @@ class HistoryState extends State<History> {
                     buttonTextTheme: ButtonTextTheme.accent,
                     alignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      FlatButton(
+                      TextButton(
                         child: Row(
                           children: [
                             Icon(Icons.delete),
@@ -218,7 +218,7 @@ class HistoryState extends State<History> {
                         ),
                         onPressed: () => _deleteFromHistory(data.token),
                       ),
-                      FlatButton(
+                      TextButton(
                         child: Row(
                           children: [
                             Text(AppLocalizations.of(context).continueButton),
@@ -265,7 +265,7 @@ class HistoryState extends State<History> {
           content:
               Text(AppLocalizations.of(context).historyDeleteConfirmMessage),
           actions: [
-            FlatButton(
+            TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 completer.complete(true);
@@ -275,7 +275,7 @@ class HistoryState extends State<History> {
                 style: TextStyle(color: Theme.of(context).primaryColor),
               ),
             ),
-            FlatButton(
+            TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 completer.complete(false);

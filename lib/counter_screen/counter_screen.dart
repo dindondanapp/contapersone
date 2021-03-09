@@ -277,11 +277,11 @@ class _CounterScreenState extends State<CounterScreen> {
               ],
             ),
             actions: [
-              FlatButton(
+              TextButton(
                 child: Text(AppLocalizations.of(context).cancel),
                 onPressed: _dismissEditLabelDialog,
               ),
-              FlatButton(
+              TextButton(
                 child: Text(AppLocalizations.of(context).confirm),
                 onPressed: _submitEditLabelDialog,
               ),

@@ -27,7 +27,7 @@ Future<void> showErrorDialog({
 
   if (onRetry != null) {
     actions.add(
-      FlatButton(
+      TextButton(
         child: Text(AppLocalizations.of(context).tryAgain),
         onPressed: () {
           Navigator.of(context).pop();
@@ -40,7 +40,7 @@ Future<void> showErrorDialog({
 
   if (onExit != null) {
     actions.add(
-      FlatButton(
+      TextButton(
         child: Text(AppLocalizations.of(context).quit),
         onPressed: () {
           Navigator.of(context).pop();
@@ -53,7 +53,7 @@ Future<void> showErrorDialog({
 
   if (onContinue != null) {
     actions.add(
-      FlatButton(
+      TextButton(
         child: Text(AppLocalizations.of(context).continueButton),
         onPressed: () {
           Navigator.of(context).pop();

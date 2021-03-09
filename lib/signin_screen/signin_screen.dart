@@ -112,14 +112,14 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget _showSignupButton() {
-    return new FlatButton(
+    return new TextButton(
         child: new Text(AppLocalizations.of(context).signUpButton,
             textAlign: TextAlign.center, style: new TextStyle(fontSize: 16.0)),
         onPressed: () => launch(Secret.signUpURL));
   }
 
   Widget _showPasswordRecovery() {
-    return new FlatButton(
+    return new TextButton(
         child: new Text(AppLocalizations.of(context).forgotPasswordButton,
             style: new TextStyle(fontSize: 16.0)),
         onPressed: () => launch(Secret.recoverPasswordURL));
