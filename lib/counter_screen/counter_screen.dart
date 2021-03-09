@@ -1,14 +1,13 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:contapersone/common/auth.dart';
-import 'package:contapersone/counter_screen/count_display.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../common/auth.dart';
 import '../common/entities.dart';
 import '../common/palette.dart';
+import '../counter_screen/count_display.dart';
 import '../share_screen/share_screen.dart';
 
 /// A screen with a simple counter, synchronized with Firebase Cloud Firestore
@@ -30,13 +29,19 @@ class _CounterScreenState extends State<CounterScreen> {
   /// Lock used to prevent remote updates of the subcounter label while editing
   bool _subcounterLabelLock = false;
 
-  int _counterTotal = 0;
   int _capacity;
-  List<SubcounterData> _otherSubCounters = [];
+  List<SubcounterData> _otherSubcounters = [];
   List<dynamic> _addEvents = [];
   List<dynamic> _subtractEvents = [];
 
-  int get _subcounterCount => _addEvents.length - _subtractEvents.length;
+  int _oldCounterTotal = 0;
+
+  int get _thisSubcounterCount => _addEvents.length - _subtractEvents.length;
+  int get _otherSubcountersTotal => _otherSubcounters.fold<int>(
+        0,
+        (previousValue, element) => previousValue + element.count,
+      );
+  int get _counterTotal => _thisSubcounterCount + _otherSubcountersTotal;
 
   String get _subcounterLabel => _subcounterLabelController.text;
   set _subcounterLabel(String label) {
@@ -45,7 +50,7 @@ class _CounterScreenState extends State<CounterScreen> {
     }
   }
 
-  final listeners = List<StreamSubscription>();
+  final listeners = [];
 
   @override
   void initState() {
@@ -61,12 +66,11 @@ class _CounterScreenState extends State<CounterScreen> {
           .distinct()
           .listen((event) {
         setState(() {
-          _counterTotal = event['total'];
           _capacity = event['capacity'];
           _disconnected = false;
 
           if (event.data().containsKey('subtotals')) {
-            _otherSubCounters = (event.data()['subtotals']
+            _otherSubcounters = (event.data()['subtotals']
                     as Map<String, dynamic>)
                 .map(
                   (id, value) => MapEntry(
@@ -85,13 +89,15 @@ class _CounterScreenState extends State<CounterScreen> {
                   ..sort(
                       (a, b) => b.lastUpdated.seconds - a.lastUpdated.seconds);
 
-            final thisSubconterData = _otherSubCounters.firstWhere(
+            final thisSubconterData = _otherSubcounters.firstWhere(
                 (element) => element.id == _subcounterId,
                 orElse: () => null);
             if (thisSubconterData != null) {
               _subcounterLabel = thisSubconterData.label;
             }
           }
+
+          giveFeedbackIfNeeded();
         });
       }),
     );
@@ -111,6 +117,8 @@ class _CounterScreenState extends State<CounterScreen> {
             _subtractEvents =
                 event.data()['subtract_events'] as List<dynamic> ?? [];
             _subcounterLabel = event.data()['label'] as String ?? null;
+
+            giveFeedbackIfNeeded();
           });
         }
       }),
@@ -169,6 +177,27 @@ class _CounterScreenState extends State<CounterScreen> {
     );
   }
 
+  // Vibration or sound feedback
+  bool giveFeedbackIfNeeded() {
+    // Simple haptic feedback when the total count changes
+    final hapticFeedback = _counterTotal != _oldCounterTotal;
+
+    // Strong vibration when the total count increases above 90% of capacity
+    // TODO: Intergrate the 90% threshold with CountDisplay color
+    final vibrate =
+        _counterTotal >= _capacity * 0.9 && _counterTotal > _oldCounterTotal;
+
+    _oldCounterTotal = _counterTotal;
+
+    if (vibrate) {
+      HapticFeedback.vibrate();
+    } else if (hapticFeedback) {
+      HapticFeedback.heavyImpact();
+    }
+
+    return vibrate;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -194,10 +223,10 @@ class _CounterScreenState extends State<CounterScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             CountDisplay(
-              otherSubcountersData: _otherSubCounters,
+              otherSubcountersData: _otherSubcounters,
               thisSubcounterData: SubcounterData(
                 id: _subcounterId,
-                count: _subcounterCount,
+                count: _thisSubcounterCount,
                 label: _subcounterLabel,
                 lastUpdated: Timestamp.now(),
               ),
@@ -335,4 +364,15 @@ class SubcounterData {
       @required this.label,
       @required this.id,
       @required this.count});
+}
+
+/// A class that handles virbation and sound feedback
+class CounterFeedback {
+  final State<CounterScreen> counterScreenState;
+  int otherSubcountersTotal;
+  int thisSubcounterTotal;
+
+  CounterFeedback(this.counterScreenState);
+
+  bool giveFeedbackIfNeeded() {}
 }
