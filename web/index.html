@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-    <meta name="description" content="Uno strumento semplice ed efficace per contare gli accessi a eventi, esercizi commerciali, celebrazioni religiose e qualunque luogo aperto al pubblico, anche in presenza di ingressi multipli">
+    <meta name="description"
+        content="Uno strumento semplice ed efficace per contare gli accessi a eventi, esercizi commerciali, celebrazioni religiose e qualunque luogo aperto al pubblico, anche in presenza di ingressi multipli">
 
     <!-- iOS meta tags & icons -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,7 +24,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-analytics.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-firestore.js"></script>
 
     <script>
         // Firebase configuration
@@ -43,12 +44,12 @@
     </script>
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('flutter-first-frame', function() {
+            window.addEventListener('flutter-first-frame', function () {
                 navigator.serviceWorker.register('flutter_service_worker.js');
             });
         }
     </script>
-    <script src="main.dart.js" type="application/javascript"></script>
+    <script src="main.dart.js?v1" type="application/javascript"></script>
 </body>
 
 </html>
