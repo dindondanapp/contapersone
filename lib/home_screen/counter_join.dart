@@ -43,12 +43,10 @@ class CounterJoinForm extends StatelessWidget {
               AppLocalizations.of(context).scanQrWebNotice,
             );
           } else {
-            return RaisedButton.icon(
+            return ElevatedButton.icon(
               onPressed: enabled ? () => _scan(context) : null,
               label: Text(AppLocalizations.of(context).scanQrButton),
               icon: Icon(Icons.camera_alt),
-              color: Theme.of(context).primaryColor,
-              textColor: Colors.white,
             );
           }
         }(),

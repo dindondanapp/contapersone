@@ -31,8 +31,11 @@ class MyApp extends StatelessWidget {
         onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          primaryColor: Palette.primary.toMaterialColor(),
-          accentColor: Palette.primary.toMaterialColor(),
+          primarySwatch: Palette.primary.toMaterialColor(),
+          buttonColor: Palette.primary,
+          accentColor: Palette.primary,
+          appBarTheme:
+              AppBarTheme.of(context).copyWith(brightness: Brightness.dark),
         ),
         initialRoute: '/',
         routes: {

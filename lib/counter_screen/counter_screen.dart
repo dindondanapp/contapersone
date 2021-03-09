@@ -214,23 +214,25 @@ class _CounterScreenState extends State<CounterScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    child: RaisedButton(
+                    child: ElevatedButton(
                       child: Icon(Icons.remove),
                       onPressed: () => _updateCounter(-1),
-                      color: Colors.grey[300],
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.grey[300],
+                        onPrimary: Colors.grey[600],
+                      ),
                     ),
                     flex: 3,
                   ),
                   Container(width: 10),
                   Expanded(
-                    child: RaisedButton(
+                    child: ElevatedButton(
                       child: Icon(
                         Icons.add,
                         color: Colors.white,
                         size: 50,
                       ),
                       onPressed: () => _updateCounter(1),
-                      color: Palette.primary,
                     ),
                     flex: 7,
                   ),

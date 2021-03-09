@@ -35,12 +35,10 @@ class CounterCreateForm extends StatelessWidget {
         Container(
           height: 20,
         ),
-        RaisedButton.icon(
+        ElevatedButton.icon(
           onPressed: enabled ? onSubmit : null,
           label: Text(AppLocalizations.of(context).createCounterButton),
           icon: Icon(Icons.add),
-          color: Theme.of(context).primaryColor,
-          textColor: Colors.white,
         ),
       ],
     );

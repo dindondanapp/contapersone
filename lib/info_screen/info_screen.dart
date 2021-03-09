@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -33,16 +34,14 @@ class InfoScreen extends StatelessWidget {
                   AppLocalizations.of(context).infoScreenText,
                   textAlign: TextAlign.justify,
                 ),
-                ...(!Platform.isIOS
+                ...(kIsWeb || Platform.isAndroid
                     ? [
                         SizedBox(height: 40),
-                        RaisedButton(
+                        ElevatedButton(
                           child:
                               Text(AppLocalizations.of(context).donateButton),
                           onPressed: () =>
                               launch('https://dindondan.app/donate.php'),
-                          textTheme: ButtonTextTheme.primary,
-                          color: Theme.of(context).primaryColor,
                         )
                       ]
                     : []),
