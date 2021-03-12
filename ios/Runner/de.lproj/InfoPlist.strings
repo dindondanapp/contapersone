@@ -1,0 +1,9 @@
+/* 
+  InfoPlist.strings
+  Runner
+
+  Created by Alessandro Diano on 26/02/21.
+  
+*/
+
+CFBundleDisplayName = "Shared Counter";
