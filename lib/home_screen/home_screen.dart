@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _startSubcounter({@required CounterToken token}) {
+  void _startSubcounter({@required CounterToken token, CounterData initData}) {
     FirebaseAnalytics().logEvent(name: 'start_subcounter', parameters: null);
     Navigator.of(context).popUntil((route) => route.isFirst);
     print('Starting subcounter for id $token');
@@ -121,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context) => CounterScreen(
           token: token,
           auth: _auth,
+          initData: initData,
         ),
       ),
     );
@@ -170,7 +171,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   History(
                     auth: _auth,
-                    resumeCounter: (token) => _startSubcounter(token: token),
+                    resumeCounter: (token, initData) =>
+                        _startSubcounter(token: token, initData: initData),
                   ),
                 ]),
               ),

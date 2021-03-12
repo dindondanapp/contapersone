@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:contapersone/home_screen/history.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,8 +15,9 @@ import '../share_screen/share_screen.dart';
 class CounterScreen extends StatefulWidget {
   final CounterToken token;
   final Auth auth;
+  final CounterData initData;
 
-  CounterScreen({@required this.token, @required this.auth});
+  CounterScreen({@required this.token, @required this.auth, this.initData});
 
   @override
   _CounterScreenState createState() => _CounterScreenState();
@@ -24,7 +26,7 @@ class CounterScreen extends StatefulWidget {
 class _CounterScreenState extends State<CounterScreen> {
   var _disconnected = false;
   var _subcounterLabelController = TextEditingController();
-  String _subcounterId;
+  String _thisSubcounterId;
 
   /// Lock used to prevent remote updates of the subcounter label while editing
   bool _subcounterLabelLock = false;
@@ -34,7 +36,7 @@ class _CounterScreenState extends State<CounterScreen> {
   List<dynamic> _addEvents = [];
   List<dynamic> _subtractEvents = [];
 
-  int _oldCounterTotal = 0;
+  int _oldCounterTotal;
 
   int get _thisSubcounterCount => _addEvents.length - _subtractEvents.length;
   int get _otherSubcountersTotal => _otherSubcounters.fold<int>(
@@ -56,7 +58,27 @@ class _CounterScreenState extends State<CounterScreen> {
   void initState() {
     super.initState();
 
-    _subcounterId = widget.auth.getCurrentUser().uid;
+    _thisSubcounterId = widget.auth.getCurrentUser().uid;
+
+    if (widget.initData != null) {
+      final thisSubcounterData = widget.initData.subcounters
+          .firstWhere((element) => element.id == _thisSubcounterId);
+      final otherSubcountersData = widget.initData.subcounters
+          .where((element) => element.id != _thisSubcounterId)
+          .toList();
+
+      _addEvents = thisSubcounterData.count > 0
+          ? List.filled(thisSubcounterData.count.abs(), null)
+          : [];
+      _subtractEvents = thisSubcounterData.count < 0
+          ? List.filled(thisSubcounterData.count.abs(), null)
+          : [];
+      _otherSubcounters = otherSubcountersData;
+
+      print(_thisSubcounterCount);
+      print(_otherSubcountersTotal);
+      print(_counterTotal);
+    }
 
     listeners.add(
       FirebaseFirestore.instance
@@ -84,13 +106,13 @@ class _CounterScreenState extends State<CounterScreen> {
                   ),
                 )
                 .values
-                .where((element) => element.id != _subcounterId)
+                .where((element) => element.id != _thisSubcounterId)
                 .toList()
                   ..sort(
                       (a, b) => b.lastUpdated.seconds - a.lastUpdated.seconds);
 
             final thisSubconterData = _otherSubcounters.firstWhere(
-                (element) => element.id == _subcounterId,
+                (element) => element.id == _thisSubcounterId,
                 orElse: () => null);
             if (thisSubconterData != null) {
               _subcounterLabel = thisSubconterData.label;
@@ -107,7 +129,7 @@ class _CounterScreenState extends State<CounterScreen> {
           .collection('counters')
           .doc(widget.token.toString())
           .collection('subcounters')
-          .doc(_subcounterId)
+          .doc(_thisSubcounterId)
           .snapshots()
           .distinct()
           .listen((event) {
@@ -127,7 +149,7 @@ class _CounterScreenState extends State<CounterScreen> {
 
   // Send an increment event to firestore
   void _updateCounter(int increment) {
-    if (_subcounterId == null) {
+    if (_thisSubcounterId == null) {
       return;
     }
 
@@ -153,7 +175,7 @@ class _CounterScreenState extends State<CounterScreen> {
         .collection('counters')
         .doc(widget.token.toString())
         .collection('subcounters')
-        .doc(_subcounterId)
+        .doc(_thisSubcounterId)
         .set(update, SetOptions(merge: true))
         .timeout(Duration(seconds: 10))
         .then((value) => setState(() => _disconnected = false))
@@ -170,7 +192,7 @@ class _CounterScreenState extends State<CounterScreen> {
         .collection('counters')
         .doc(widget.token.toString())
         .collection('subcounters')
-        .doc(_subcounterId)
+        .doc(_thisSubcounterId)
         .set(
       {'label': label},
       SetOptions(merge: true),
@@ -180,12 +202,15 @@ class _CounterScreenState extends State<CounterScreen> {
   // Vibration or sound feedback
   bool giveFeedbackIfNeeded() {
     // Simple haptic feedback when the total count changes
-    final hapticFeedback = _counterTotal != _oldCounterTotal;
+    final hapticFeedback =
+        _oldCounterTotal != null && _counterTotal != _oldCounterTotal;
 
     // Strong vibration when the total count increases above 90% of capacity
     // TODO: Intergrate the 90% threshold with CountDisplay color
-    final vibrate =
-        _counterTotal >= _capacity * 0.9 && _counterTotal > _oldCounterTotal;
+    final vibrate = _oldCounterTotal != null &&
+        _capacity != null &&
+        _counterTotal >= _capacity * 0.9 &&
+        _counterTotal > _oldCounterTotal;
 
     _oldCounterTotal = _counterTotal;
 
@@ -225,7 +250,7 @@ class _CounterScreenState extends State<CounterScreen> {
             CountDisplay(
               otherSubcountersData: _otherSubcounters,
               thisSubcounterData: SubcounterData(
-                id: _subcounterId,
+                id: _thisSubcounterId,
                 count: _thisSubcounterCount,
                 label: _subcounterLabel,
                 lastUpdated: Timestamp.now(),
@@ -364,15 +389,4 @@ class SubcounterData {
       @required this.label,
       @required this.id,
       @required this.count});
-}
-
-/// A class that handles virbation and sound feedback
-class CounterFeedback {
-  final State<CounterScreen> counterScreenState;
-  int otherSubcountersTotal;
-  int thisSubcounterTotal;
-
-  CounterFeedback(this.counterScreenState);
-
-  bool giveFeedbackIfNeeded() {}
 }

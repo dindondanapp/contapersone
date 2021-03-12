@@ -11,7 +11,7 @@ import '../counter_screen/counter_screen.dart';
 
 class History extends StatefulWidget {
   final Auth auth;
-  final void Function(CounterToken token) resumeCounter;
+  final void Function(CounterToken token, CounterData initData) resumeCounter;
 
   const History({Key key, this.auth, @required this.resumeCounter})
       : super(key: key);
@@ -226,7 +226,7 @@ class HistoryState extends State<History> {
                             Icon(Icons.arrow_forward),
                           ],
                         ),
-                        onPressed: () => widget.resumeCounter(data.token),
+                        onPressed: () => widget.resumeCounter(data.token, data),
                       ),
                     ],
                   ),
