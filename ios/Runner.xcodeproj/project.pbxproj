@@ -52,6 +52,7 @@
 		D2B7609E25E9380A005028E3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D2B760A025E9383E005028E3 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D2B760A125E9384F005028E3 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D2C1AF5225FC196A00599AB6 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D2D4F5132577EA2E009E3F21 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		D2EDB2052576771500ABA235 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -184,6 +185,7 @@
 				Base,
 				it,
 				es,
+				de,
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
@@ -333,6 +335,7 @@
 				D2B7609E25E9380A005028E3 /* en */,
 				D2B760A025E9383E005028E3 /* it */,
 				D2B760A125E9384F005028E3 /* es */,
+				D2C1AF5225FC196A00599AB6 /* de */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
