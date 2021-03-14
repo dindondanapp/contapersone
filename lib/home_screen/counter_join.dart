@@ -68,7 +68,7 @@ class CounterJoinForm extends StatelessWidget {
         if (onError != null) {
           onError();
         } else {
-          throw Exception('Inval code scanned.');
+          throw Exception('Invalid code scanned.');
         }
       }
     } catch (error) {
@@ -76,7 +76,7 @@ class CounterJoinForm extends StatelessWidget {
       if (onError != null) {
         onError();
       } else {
-        throw Exception('Inval code scanned.');
+        throw Exception('Invalid code scanned.');
       }
       // TODO: Provide visual feedback
     }
