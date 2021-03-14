@@ -88,7 +88,9 @@ extension DateToHuman on DateTime {
       return elapsed.toHuman(context: context);
     } else {
       return DateFormat.yMMMMd(AppLocalizations.of(context).localeName)
-          .format(this);
+              .format(this) +
+          ' ' +
+          TimeOfDay.fromDateTime(this).format(context);
     }
   }
 

@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:contapersone/home_screen/history.dart';
+import 'package:contapersone/stats_screen/stats_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:vibration/vibration.dart';
 
 import '../common/auth.dart';
 import '../common/entities.dart';
@@ -26,6 +27,7 @@ class CounterScreen extends StatefulWidget {
 class _CounterScreenState extends State<CounterScreen> {
   var _disconnected = false;
   var _subcounterLabelController = TextEditingController();
+  var _vibrationEnabled = true;
   String _thisSubcounterId;
 
   /// Lock used to prevent remote updates of the subcounter label while editing
@@ -202,25 +204,27 @@ class _CounterScreenState extends State<CounterScreen> {
   // Vibration or sound feedback
   bool giveFeedbackIfNeeded() {
     // Simple haptic feedback when the total count changes
-    final hapticFeedback =
+    final lightVibration =
         _oldCounterTotal != null && _counterTotal != _oldCounterTotal;
 
     // Strong vibration when the total count increases above 90% of capacity
     // TODO: Intergrate the 90% threshold with CountDisplay color
-    final vibrate = _oldCounterTotal != null &&
+    final strongVibration = _oldCounterTotal != null &&
         _capacity != null &&
         _counterTotal >= _capacity * 0.9 &&
         _counterTotal > _oldCounterTotal;
 
     _oldCounterTotal = _counterTotal;
 
-    if (vibrate) {
-      HapticFeedback.vibrate();
-    } else if (hapticFeedback) {
-      HapticFeedback.heavyImpact();
+    if (_vibrationEnabled) {
+      if (strongVibration) {
+        Vibration.vibrate();
+      } else if (lightVibration) {
+        HapticFeedback.heavyImpact();
+      }
     }
 
-    return vibrate;
+    return strongVibration;
   }
 
   @override
@@ -230,9 +234,46 @@ class _CounterScreenState extends State<CounterScreen> {
         title: Text(AppLocalizations.of(context).appBarDefault),
         backgroundColor: Palette.primary,
         actions: [
-          IconButton(
-            icon: Icon(Icons.share),
-            onPressed: _openShareScreen,
+          PopupMenuButton<void Function()>(
+            icon: Icon(Icons.more_vert),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                child: ListTile(
+                  leading: Icon(Icons.share),
+                  title: Text(AppLocalizations.of(context).shareCounter),
+                ),
+                value: _openShareScreen,
+              ),
+              PopupMenuItem(
+                child: ListTile(
+                  leading: Icon(Icons.show_chart),
+                  title: Text(AppLocalizations.of(context).statsScreenTitle),
+                ),
+                value: _openStatsScreen,
+              ),
+              /*PopupMenuItem(
+                child: ListTile(
+                  leading: Icon(Icons.replay_rounded),
+                  title: Text('Azzera'),
+                ),
+              ),*/
+              PopupMenuDivider(),
+              PopupMenuItem(
+                child: _vibrationEnabled
+                    ? ListTile(
+                        leading: Icon(Icons.vibration),
+                        title:
+                            Text(AppLocalizations.of(context).disableVibration),
+                      )
+                    : ListTile(
+                        leading: Icon(Icons.vibration),
+                        title:
+                            Text(AppLocalizations.of(context).enableVibration),
+                      ),
+                value: _toggleVibration,
+              ),
+            ],
+            onSelected: (value) => value(),
           ),
         ],
         leading: new IconButton(
@@ -369,24 +410,29 @@ class _CounterScreenState extends State<CounterScreen> {
     );
   }
 
+  void _openStatsScreen() {
+    FirebaseAnalytics()
+        .logEvent(name: 'open_stats_from_counter', parameters: null);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => StatsScreen(
+          token: widget.token,
+          auth: widget.auth,
+        ),
+      ),
+    );
+  }
+
+  void _toggleVibration() {
+    setState(() {
+      // TODO: this should be made persistent through Shared Preferences
+      _vibrationEnabled = !_vibrationEnabled;
+    });
+  }
+
   @override
   void dispose() {
     super.dispose();
     listeners.forEach((element) => element.cancel());
   }
-}
-
-/// All the data about the current state of a subcounter
-class SubcounterData {
-  final String label;
-  final String id;
-  final int count;
-  final Timestamp lastUpdated;
-
-  /// Create an object with all the data about the current state of a subcounter
-  SubcounterData(
-      {@required this.lastUpdated,
-      @required this.label,
-      @required this.id,
-      @required this.count});
 }

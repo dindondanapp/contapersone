@@ -1,13 +1,14 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../common/auth.dart';
 import '../common/entities.dart';
 import '../common/extensions.dart';
-import '../counter_screen/counter_screen.dart';
+import '../stats_screen/stats_screen.dart';
 
 class History extends StatefulWidget {
   final Auth auth;
@@ -196,39 +197,37 @@ class HistoryState extends State<History> {
                       ],
                     ),
                   ),
-                  ...(data.subcounters != null && data.subcounters.length > 1
-                      ? data.subcounters.map(
-                          (e) => ListTile(
-                            title: Text(e.count.toString()),
-                            subtitle: e.label != null ? Text(e.label) : null,
+                  IconTheme(
+                    data: IconThemeData(color: Theme.of(context).primaryColor),
+                    child: ButtonBar(
+                      buttonTextTheme: ButtonTextTheme.accent,
+                      alignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.delete),
+                              onPressed: () => _deleteFromHistory(data.token),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.show_chart),
+                              onPressed: () => _openStatsScreen(data.token),
+                            ),
+                          ],
+                        ),
+                        TextButton(
+                          child: Row(
+                            children: [
+                              Text(AppLocalizations.of(context).continueButton),
+                              SizedBox(width: 10),
+                              Icon(Icons.arrow_forward),
+                            ],
                           ),
-                        )
-                      : []),
-                  ButtonBar(
-                    buttonTextTheme: ButtonTextTheme.accent,
-                    alignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete),
-                            SizedBox(width: 10),
-                            Text(AppLocalizations.of(context).delete),
-                          ],
+                          onPressed: () =>
+                              widget.resumeCounter(data.token, data),
                         ),
-                        onPressed: () => _deleteFromHistory(data.token),
-                      ),
-                      TextButton(
-                        child: Row(
-                          children: [
-                            Text(AppLocalizations.of(context).continueButton),
-                            SizedBox(width: 10),
-                            Icon(Icons.arrow_forward),
-                          ],
-                        ),
-                        onPressed: () => widget.resumeCounter(data.token, data),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -236,6 +235,19 @@ class HistoryState extends State<History> {
           ),
         );
       },
+    );
+  }
+
+  void _openStatsScreen(CounterToken token) {
+    FirebaseAnalytics()
+        .logEvent(name: 'open_stats_from_history', parameters: null);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => StatsScreen(
+          token: token,
+          auth: widget.auth,
+        ),
+      ),
     );
   }
 
@@ -280,11 +292,7 @@ class HistoryState extends State<History> {
                 Navigator.of(context).pop();
                 completer.complete(false);
               },
-              child: Text(
-                AppLocalizations.of(context).cancel,
-                style: TextStyle(color: Theme.of(context).primaryColor),
-                // TODO: rely on Theme
-              ),
+              child: Text(AppLocalizations.of(context).cancel),
             ),
           ],
         );
@@ -293,22 +301,4 @@ class HistoryState extends State<History> {
 
     return completer.future;
   }
-}
-
-class CounterData {
-  final CounterToken token;
-  final Timestamp lastUpdated;
-  final int peak;
-  final int total;
-  final int capacity;
-  final List<SubcounterData> subcounters;
-
-  CounterData(
-    this.token, {
-    this.lastUpdated,
-    this.peak,
-    this.total,
-    this.capacity,
-    this.subcounters,
-  });
 }
