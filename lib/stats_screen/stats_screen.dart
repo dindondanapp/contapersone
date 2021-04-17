@@ -1,11 +1,21 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contapersone/common/palette.dart';
+import 'package:contapersone/stats_screen/stats_chart.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:rxdart/subjects.dart';
+import 'package:share/share.dart';
+import 'package:universal_html/html.dart' as html;
 
 import '../common/auth.dart';
 import '../common/entities.dart';
-import '../common/extensions.dart';
+import 'package:collection/collection.dart';
 
 class StatsScreen extends StatefulWidget {
   final Auth auth;
@@ -24,27 +34,31 @@ class StatsScreen extends StatefulWidget {
 class StatsScreenState extends State<StatsScreen> {
   String _userId;
   Stream<CounterData> _counterDataStream = Stream.empty();
-  Stream<CounterPeak> _peakStream = Stream.empty();
+  BehaviorSubject<TimeSeriesCollection> _timeSeriesStream =
+      BehaviorSubject.seeded(TimeSeriesCollection.empty());
+  List<StreamSubscription> subscriptions = [];
 
   @override
   void initState() {
     super.initState();
 
-    widget.auth.addListener(() {
-      if (widget.auth.userId != _userId) {
-        _userId = widget.auth.userId;
-        _updateStreams();
-      }
-    });
+    widget.auth.addListener(_updateAuth);
 
     _updateStreams();
+  }
+
+  void _updateAuth() {
+    if (widget.auth.userId != _userId) {
+      _userId = widget.auth.userId;
+      _updateStreams();
+    }
   }
 
   _updateStreams() {
     setState(() {
       if (widget.auth.userId == null) {
         _counterDataStream = Stream.empty();
-        _peakStream = Stream.empty();
+        _timeSeriesStream.add(TimeSeriesCollection.empty());
       } else {
         _counterDataStream = FirebaseFirestore.instance
             .collection('counters')
@@ -86,40 +100,13 @@ class StatsScreenState extends State<StatsScreen> {
             .limit(20)
             .snapshots();
 
-        _peakStream = subcountersStream.map((event) {
-          final List<dynamic> addEvents = [];
-          final List<dynamic> subtractEvents = [];
-          event.docs.forEach((doc) {
-            addEvents.addAll(doc.data()['add_events'] as List<dynamic> ?? []);
-            subtractEvents
-                .addAll(doc.data()['subtract_events'] as List<dynamic> ?? []);
-          });
-
-          //TODO: check add and subtract events type
-          Map<Timestamp, int> variations = Map.fromEntries([
-            ...addEvents
-                .map((time) => MapEntry<Timestamp, int>(time as Timestamp, 1)),
-            ...subtractEvents
-                .map((time) => MapEntry<Timestamp, int>(time as Timestamp, -1)),
-          ]);
-          final sortedVariations = (variations.entries.toList()
-            ..sort((a, b) =>
-                a.key.toDate().difference(b.key.toDate()).inMilliseconds));
-
-          int peakValue = 0;
-          DateTime peakTime;
-          var trailing = 0;
-
-          for (final variation in sortedVariations) {
-            trailing += variation.value;
-            if (trailing > peakValue) {
-              peakValue = trailing;
-              peakTime = variation.key.toDate();
-            }
-          }
-
-          return CounterPeak(peakValue, peakTime);
-        });
+        subscriptions.add(
+          subcountersStream
+              .map((event) => TimeSeriesCollection.fromDocs(event.docs))
+              .listen(
+                (event) => _timeSeriesStream.add(event),
+              ),
+        );
       }
     });
   }
@@ -130,121 +117,159 @@ class StatsScreenState extends State<StatsScreen> {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).statsScreenTitle),
         backgroundColor: Palette.primary,
+        actions: [_buildShareOrDownloadAction()],
       ),
       body: _buildCounterStateWidget(),
     );
   }
 
   Widget _buildCounterStateWidget() {
-    return StreamBuilder(
-      stream: Stream.periodic(Duration(seconds: 1)),
-      initialData: 0,
-      builder: (context, snapshot) => StreamBuilder<CounterData>(
-        stream: _counterDataStream,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Container();
-          }
-          final data = snapshot.data;
+    return StreamBuilder<CounterData>(
+      stream: _counterDataStream,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Container();
+        }
 
-          final subtitle = data.subcounters.length == 1 &&
-                  data.subcounters.first.label != null &&
-                  data.subcounters.first.label != ''
-              ? '${data.subcounters.first.label}'
-              : '';
+        final capacity = snapshot.data.capacity;
 
-          return Column(
+        return SafeArea(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                padding: EdgeInsets.only(left: 20, right: 20, top: 20),
-                child: Column(
-                  children: [
-                    RichText(
-                      text: TextSpan(
-                        text: data.total.toString(),
-                        children: [
-                          TextSpan(
-                            text: data.capacity != null
-                                ? '/${data.capacity}'
-                                : '',
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor),
-                          ),
-                        ],
-                        style: TextStyle(fontSize: 25, color: Colors.black),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    subtitle != ''
-                        ? Container(
-                            child: Text(subtitle),
-                            padding: EdgeInsets.only(bottom: 10),
-                          )
-                        : Container(),
-                  ],
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  child: StreamBuilder<TimeSeriesCollection>(
+                    stream: _timeSeriesStream,
+                    initialData: TimeSeriesCollection.empty(),
+                    builder: (context, snapshot) {
+                      return StatsChart(
+                        timeSeries: snapshot.data,
+                        capacity: capacity,
+                      );
+                    },
+                  ),
                 ),
               ),
-              ..._buildStatTiles(data),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Iterable<Widget> _buildStatTiles(CounterData data) sync* {
-    final timeString = data.lastUpdated == null
-        ? ''
-        : data.lastUpdated
-            .toDate()
-            .asStrictlyPast()
-            .toHumanString(context: context);
-    yield ListTile(
-      title: Text(AppLocalizations.of(context).lastUpdate),
-      subtitle: Text(timeString),
-    );
-    yield ListTile(
-      title: Text(AppLocalizations.of(context).peakValue),
-      subtitle: StreamBuilder<CounterPeak>(
-          stream: _peakStream,
-          initialData: CounterPeak(0, DateTime.now()),
-          builder: (context, snapshot) {
-            final value = snapshot.data.value;
-            final timeString = snapshot.data.time != null
-                ? ' (${snapshot.data.time.asStrictlyPast().toHumanString(context: context, maximumDuration: Duration.zero)})'
-                : '';
-            return Text('$value$timeString');
-          }),
-    );
-    if (data.subcounters != null && data.subcounters.length > 1) {
-      yield Divider();
-      yield ListTile(
-        title: Text(
-          AppLocalizations.of(context).entrances,
-          style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor),
-        ),
+  Widget _buildShareOrDownloadAction() {
+    if (kIsWeb) {
+      return IconButton(
+        icon: Icon(Icons.file_download),
+        onPressed: _downloadFile,
       );
-      yield* data.subcounters.map(
-        (e) => ListTile(
-          title: Text(e.count.toString()),
-          subtitle: e.label != null && e.label.trim() != ''
-              ? Text(e.label)
-              : Text(
-                  AppLocalizations.of(context).untitled,
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-        ),
+    } else {
+      return IconButton(
+        icon: Icon(Icons.share),
+        onPressed: _shareFile,
       );
     }
   }
-}
 
-class CounterPeak {
-  final int value;
-  final DateTime time;
+  Future<void> _shareFile() async {
+    final fileName = 'stats.csv';
+    final dir = Directory.systemTemp.createTempSync();
+    final file = File("${dir.path}/$fileName")..createSync();
 
-  CounterPeak(this.value, this.time);
+    file.writeAsStringSync(await _generateCSV());
+
+    await Share.shareFiles([file.path]);
+
+    //dir.deleteSync(recursive: true);
+  }
+
+  Future<void> _downloadFile() async {
+    final fileName = 'stats.csv';
+    final encodedContent = base64Encode(utf8.encode(await _generateCSV()));
+    final mimeType = 'text/csv';
+    final anchor = html.AnchorElement(
+        href: "data:$mimeType;charset=utf8;base64,$encodedContent")
+      ..setAttribute("download", fileName);
+    anchor.click();
+  }
+
+  Future<String> _generateCSV() async {
+    final timeSeriesList = _timeSeriesStream.valueWrapper.value.subcounters;
+
+    // Get all the sorted time instants of all the points.
+    // Each instant will correspond to a table row.
+    final List<DateTime> times = timeSeriesList
+        .map<List<DateTime>>(
+          (timeSeries) =>
+              timeSeries.points.map<DateTime>((point) => point.time).toList(),
+        )
+        .expand((list) => list)
+        .toSet()
+        .toList();
+
+    times.sort((a, b) => a.difference(b).inMilliseconds);
+
+    // The heading row has one empty cell for the time column and then one
+    // or more cells, each with the label of a subcounter
+    final String headingRow = [
+      '',
+      ...timeSeriesList.map<String>(
+        (timeSeries) =>
+            (timeSeries.label != null && timeSeries.label.isNotEmpty)
+                ? timeSeries.label
+                : AppLocalizations.of(context).untitled,
+      ),
+    ].join(',');
+
+    // Generate a table row for each instant
+    final List<String> bodyRows = [];
+    final pointIndexes = List.filled(timeSeriesList.length, 0);
+    times.forEach(
+      (time) {
+        // Add a row to the table body with the values of all the subcounter
+        // at the the current point indexes (that represent the count at the
+        // cycle `time`)
+        bodyRows.add(
+          // The first column is the time in ISO-8601 format
+          time.toIso8601String() +
+              ',' +
+              // The subsequent columns are the counts of each subcounter
+              pointIndexes
+                  .mapIndexed<String>(
+                    (seriesIndex, pointIndex) => timeSeriesList[seriesIndex]
+                        .points[min(
+                          pointIndex,
+                          timeSeriesList[seriesIndex].points.length - 1,
+                        )]
+                        .count
+                        .toString(),
+                  )
+                  .join(','),
+        );
+
+        // Update point indexes according to the cycle `time`
+        timeSeriesList.forEachIndexed(
+          (seriesIndex, timeSeries) {
+            pointIndexes[seriesIndex] += timeSeries.points
+                .skip(pointIndexes[seriesIndex])
+                .takeWhile((point) => point.time.isBefore(time))
+                .length;
+          },
+        );
+      },
+    );
+
+    return [headingRow, ...bodyRows].join('\n');
+  }
+
+  @override
+  void dispose() {
+    subscriptions.forEach((element) => element.cancel());
+    _timeSeriesStream.close();
+    widget.auth.removeListener(_updateAuth);
+
+    super.dispose();
+  }
 }

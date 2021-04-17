@@ -15,7 +15,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.1.2+29
+version: 1.2.0+30
 
 # Disable sound null safety in Flutter beta channel
 environment:
@@ -42,6 +42,10 @@ dependencies:
   url_launcher: ^5.7.10
   window_location_href: ^0.0.2
   vibration: ^1.7.3
+  syncfusion_flutter_charts: ^19.1.55+1
+  file: ^6.1.0
+  rxdart: ^0.26.0
+  universal_html: ^2.0.8
 
 dependency_overrides:
   intl: ^0.17.0

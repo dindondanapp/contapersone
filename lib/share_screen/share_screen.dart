@@ -105,14 +105,12 @@ class _ShareScreenState extends State<ShareScreen> {
                       : Container(),
                   widget.startCounterButton == null ||
                           !widget.startCounterButton
-                      ? RaisedButton.icon(
+                      ? ElevatedButton.icon(
                           onPressed: () {
                             _startSubcounter(counterId: widget.token);
                           },
                           label: Text(
                               AppLocalizations.of(context).startOnThisDevice),
-                          color: Theme.of(context).primaryColor,
-                          textColor: Colors.white,
                           icon: Icon(Icons.arrow_forward),
                         )
                       : Container(),

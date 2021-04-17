@@ -5,8 +5,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 // This file contains miscellaneous extensions
-
-// TODO: Localize
 extension ColorToMaterialColor on Color {
   /// Convert the color into a [MaterialColor], creating variations based on lightness
   MaterialColor toMaterialColor() {

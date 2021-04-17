@@ -27,6 +27,7 @@ class CounterScreen extends StatefulWidget {
 class _CounterScreenState extends State<CounterScreen> {
   var _disconnected = false;
   var _subcounterLabelController = TextEditingController();
+  var _capacityController = TextEditingController();
   var _vibrationEnabled = true;
   String _thisSubcounterId;
 
@@ -63,23 +64,21 @@ class _CounterScreenState extends State<CounterScreen> {
     _thisSubcounterId = widget.auth.getCurrentUser().uid;
 
     if (widget.initData != null) {
-      final thisSubcounterData = widget.initData.subcounters
-          .firstWhere((element) => element.id == _thisSubcounterId);
+      final thisSubcounterData = widget.initData.subcounters.firstWhere(
+          (element) => element.id == _thisSubcounterId,
+          orElse: () => null);
       final otherSubcountersData = widget.initData.subcounters
           .where((element) => element.id != _thisSubcounterId)
           .toList();
 
-      _addEvents = thisSubcounterData.count > 0
+      _addEvents = thisSubcounterData != null && thisSubcounterData.count > 0
           ? List.filled(thisSubcounterData.count.abs(), null)
           : [];
-      _subtractEvents = thisSubcounterData.count < 0
-          ? List.filled(thisSubcounterData.count.abs(), null)
-          : [];
+      _subtractEvents =
+          thisSubcounterData != null && thisSubcounterData.count < 0
+              ? List.filled(thisSubcounterData.count.abs(), null)
+              : [];
       _otherSubcounters = otherSubcountersData;
-
-      print(_thisSubcounterCount);
-      print(_otherSubcountersTotal);
-      print(_counterTotal);
     }
 
     listeners.add(
@@ -91,6 +90,8 @@ class _CounterScreenState extends State<CounterScreen> {
           .listen((event) {
         setState(() {
           _capacity = event['capacity'];
+          _capacityController.text =
+              _capacity != null ? _capacity.toString() : '';
           _disconnected = false;
 
           if (event.data().containsKey('subtotals')) {
@@ -184,10 +185,8 @@ class _CounterScreenState extends State<CounterScreen> {
         .catchError((error) => setState(() => _disconnected = true));
   }
 
-  // Create a new subcounter and initialize the total stream
-  void _submitEntranceName(String label) async {
-    print('Entrance submitted');
-
+  // Set the subcounter label
+  void _submitSubcounterLabel(String label) async {
     FirebaseAnalytics().logEvent(name: 'submit_entrance_name');
 
     FirebaseFirestore.instance
@@ -197,6 +196,19 @@ class _CounterScreenState extends State<CounterScreen> {
         .doc(_thisSubcounterId)
         .set(
       {'label': label},
+      SetOptions(merge: true),
+    );
+  }
+
+  // Set the counter capacity
+  void _submitCapacity(int capacity) async {
+    FirebaseAnalytics().logEvent(name: 'submit_capacity');
+
+    FirebaseFirestore.instance
+        .collection('counters')
+        .doc(widget.token.toString())
+        .set(
+      {'capacity': capacity},
       SetOptions(merge: true),
     );
   }
@@ -251,12 +263,13 @@ class _CounterScreenState extends State<CounterScreen> {
                 ),
                 value: _openStatsScreen,
               ),
-              /*PopupMenuItem(
+              PopupMenuItem(
                 child: ListTile(
-                  leading: Icon(Icons.replay_rounded),
-                  title: Text('Azzera'),
+                  leading: Icon(Icons.people),
+                  title: Text(AppLocalizations.of(context).editCapacityTitle),
                 ),
-              ),*/
+                value: _openEditCapacityDialog,
+              ),
               PopupMenuDivider(),
               PopupMenuItem(
                 child: _vibrationEnabled
@@ -387,12 +400,71 @@ class _CounterScreenState extends State<CounterScreen> {
     );
   }
 
+  void _openEditCapacityDialog() {
+    // Lock label remote updates
+    _subcounterLabelLock = true;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return WillPopScope(
+          onWillPop: () async {
+            _subcounterLabelLock = false; // Release the lock before popping
+            return true;
+          },
+          child: AlertDialog(
+            title: Text(AppLocalizations.of(context).editCapacityTitle),
+            content: new Row(
+              children: <Widget>[
+                new Expanded(
+                  child: FocusScope(
+                    child: TextField(
+                      controller: _capacityController,
+                      keyboardType: TextInputType.numberWithOptions(
+                        decimal: false,
+                        signed: false,
+                      ),
+                      onSubmitted: (_) => _submitEditCapacityDialog(),
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context).capacityHint,
+                        prefixIcon: Icon(Icons.edit),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                child: Text(AppLocalizations.of(context).cancel),
+                onPressed: _dismissEditCapacityDialog,
+              ),
+              TextButton(
+                child: Text(AppLocalizations.of(context).confirm),
+                onPressed: _submitEditCapacityDialog,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _submitEditLabelDialog() {
-    _submitEntranceName(_subcounterLabelController.text);
+    _submitSubcounterLabel(_subcounterLabelController.text);
     Navigator.of(context).pop();
   }
 
   void _dismissEditLabelDialog() {
+    Navigator.of(context).pop();
+  }
+
+  void _submitEditCapacityDialog() {
+    _submitCapacity(int.tryParse(_capacityController.text));
+    Navigator.of(context).pop();
+  }
+
+  void _dismissEditCapacityDialog() {
     Navigator.of(context).pop();
   }
 

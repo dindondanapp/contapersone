@@ -91,11 +91,8 @@ class _SignInScreenState extends State<SignInScreen> {
         padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
         child: SizedBox(
           height: 40.0,
-          child: new RaisedButton(
-            elevation: 5.0,
+          child: new ElevatedButton(
             child: new Text(AppLocalizations.of(context).signInSubmit),
-            color: Theme.of(context).primaryColor,
-            textColor: Colors.white,
             onPressed: _validateAndSubmit,
           ),
         ));

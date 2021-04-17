@@ -23,7 +23,7 @@ Future<void> showErrorDialog({
   // Future Completer
   final completer = Completer<void>();
 
-  final actions = List<Widget>();
+  final actions = <Widget>[];
 
   if (onRetry != null) {
     actions.add(
