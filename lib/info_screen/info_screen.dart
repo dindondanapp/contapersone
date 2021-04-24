@@ -34,7 +34,7 @@ class InfoScreen extends StatelessWidget {
                   AppLocalizations.of(context).infoScreenText,
                   textAlign: TextAlign.justify,
                 ),
-                ...(kIsWeb || Platform.isAndroid
+                ...(kIsWeb
                     ? [
                         SizedBox(height: 40),
                         ElevatedButton(
