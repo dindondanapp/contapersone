@@ -37,6 +37,7 @@ class StatsScreenState extends State<StatsScreen> {
   BehaviorSubject<TimeSeriesCollection> _timeSeriesStream =
       BehaviorSubject.seeded(TimeSeriesCollection.empty());
   List<StreamSubscription> subscriptions = [];
+  final _shareButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -169,6 +170,7 @@ class StatsScreenState extends State<StatsScreen> {
       return IconButton(
         icon: Icon(Icons.share),
         onPressed: _shareFile,
+        key: _shareButtonKey,
       );
     }
   }
@@ -180,9 +182,12 @@ class StatsScreenState extends State<StatsScreen> {
 
     file.writeAsStringSync(await _generateCSV());
 
-    await Share.shareFiles([file.path]);
+    final RenderBox box = _shareButtonKey.currentContext.findRenderObject();
 
-    //dir.deleteSync(recursive: true);
+    await Share.shareFiles(
+      [file.path],
+      sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
+    );
   }
 
   Future<void> _downloadFile() async {
