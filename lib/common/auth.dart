@@ -101,7 +101,8 @@ class Auth extends ValueNotifier<AuthValue> {
         var token = await user.getIdToken();
         String body = 'idToken=$token';
 
-        Response response = await post(url, headers: headers, body: body);
+        Response response =
+            await post(Uri.parse(url), headers: headers, body: body);
 
         if (response.statusCode != 200) {
           throw 'REQUEST_ERROR_${response.statusCode}';

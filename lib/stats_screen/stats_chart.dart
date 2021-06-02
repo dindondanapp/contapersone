@@ -2,9 +2,10 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import '../common/extensions.dart';
 
 class StatsChart extends StatefulWidget {
@@ -294,16 +295,16 @@ class TimeSeriesCollection {
   factory TimeSeriesCollection.fromDocs(List<QueryDocumentSnapshot> docs) {
     return TimeSeriesCollection(
       docs.map<TimeSeries>((doc) {
-        final label = doc.data()['label'] as String;
-        final addEvents = (doc.data()['add_events'] as List<dynamic> ?? [])
+        final Map<String, dynamic> data = doc.data();
+        final label = data['label'] as String;
+        final addEvents = (data['add_events'] as List<dynamic> ?? [])
             .whereType<Timestamp>()
             .map((e) => e.toDate())
             .toList();
-        final subtractEvents =
-            (doc.data()['subtract_events'] as List<dynamic> ?? [])
-                .whereType<Timestamp>()
-                .map((e) => e.toDate())
-                .toList();
+        final subtractEvents = (data['subtract_events'] as List<dynamic> ?? [])
+            .whereType<Timestamp>()
+            .map((e) => e.toDate())
+            .toList();
         return TimeSeries.fromEvents(
           label: label,
           addEvents: addEvents,
