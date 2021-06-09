@@ -28,6 +28,14 @@ class CounterToken {
   String toString() {
     return _value;
   }
+
+  @override
+  int get hashCode => _value.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    return this.hashCode == other.hashCode;
+  }
 }
 
 /// Set of minimal data for representing the state of a counter
@@ -47,6 +55,14 @@ class CounterData {
     this.capacity,
     this.subcounters,
   });
+
+  @override
+  int get hashCode => this.token.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    return other is CounterData && other.token == this.token;
+  }
 }
 
 /// Set of minimal data for representing the state of a subcounter

@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:rxdart/subjects.dart';
 
 import '../common/auth.dart';
 import '../common/entities.dart';
@@ -22,7 +25,7 @@ class History extends StatefulWidget {
 }
 
 class HistoryState extends State<History> {
-  Stream<List<CounterData>> _stream = Stream.empty();
+  BehaviorSubject<List<CounterData>> _stream = BehaviorSubject();
   String _userId;
 
   @override
@@ -42,48 +45,71 @@ class HistoryState extends State<History> {
   _updateStream() {
     setState(() {
       if (widget.auth.userId == null) {
-        _stream = Stream.empty();
+        _stream.add([]);
       } else {
-        _stream = FirebaseFirestore.instance
+        const limit = 20;
+
+        final stream = FirebaseFirestore.instance
+            .collection('counters')
+            .where('users', arrayContains: widget.auth.userId)
+            .orderBy('lastUpdated', descending: true)
+            .limit(limit)
+            .snapshots()
+            .distinct();
+
+        final legacy = FirebaseFirestore.instance
             .collection('counters')
             .where('deleted', isNull: true)
             .where('user_id', isEqualTo: widget.auth.userId)
             .orderBy('lastUpdated', descending: true)
-            .limit(20)
+            .limit(limit)
             .snapshots()
-            .distinct()
-            .map<List<CounterData>>(
-          (event) {
-            return event.docs.map<CounterData>(
-              (doc) {
-                List<SubcounterData> subcounters = [];
-                try {
-                  if (doc.data()['subtotals'] != null) {
-                    subcounters = (doc.data()['subtotals'] as Map)
-                        .entries
-                        .map<SubcounterData>(
-                          (MapEntry e) => SubcounterData(
-                            lastUpdated: e.value['lastUpdated'],
-                            label: e.value['label'],
-                            id: e.key,
-                            count: e.value['count'],
-                          ),
-                        )
-                        .toList();
-                  }
-                } catch (e) {}
+            .distinct();
 
-                return CounterData(
-                  CounterToken.fromString(doc.id),
-                  lastUpdated: doc.data()['lastUpdated'],
-                  total: doc.data()['total'],
-                  capacity: doc.data()['capacity'],
-                  subcounters: subcounters,
-                );
-              },
-            ).toList();
+        Rx.combineLatest2<QuerySnapshot<Map<String, dynamic>>,
+            QuerySnapshot<Map<String, dynamic>>, List<CounterData>>(
+          stream,
+          legacy,
+          (a, b) {
+            // Obtain joint list of CounterData
+            final list = [...a.docs, ...b.docs]
+                .map<CounterData>(
+                  (doc) {
+                    List<SubcounterData> subcounters = [];
+                    try {
+                      if (doc.data()['subtotals'] != null) {
+                        subcounters = (doc.data()['subtotals'] as Map)
+                            .entries
+                            .map<SubcounterData>(
+                              (MapEntry e) => SubcounterData(
+                                lastUpdated: e.value['lastUpdated'],
+                                label: e.value['label'],
+                                id: e.key,
+                                count: e.value['count'],
+                              ),
+                            )
+                            .toList();
+                      }
+                    } catch (e) {}
+
+                    return CounterData(
+                      CounterToken.fromString(doc.id),
+                      lastUpdated: doc.data()['lastUpdated'],
+                      total: doc.data()['total'],
+                      capacity: doc.data()['capacity'],
+                      subcounters: subcounters,
+                    );
+                  },
+                )
+                .toSet()
+                .toList()
+                  ..sort((a, b) =>
+                      b.lastUpdated.millisecondsSinceEpoch -
+                      a.lastUpdated.millisecondsSinceEpoch);
+
+            return list.sublist(0, min(list.length, limit));
           },
-        );
+        ).listen(_stream.add);
       }
     });
   }
@@ -258,7 +284,8 @@ class HistoryState extends State<History> {
           .doc(token.toString())
           .set(
         {
-          'deleted': Timestamp.now(),
+          'deleted': Timestamp.now(), // For legacy
+          'users': FieldValue.arrayRemove([this._userId]),
         },
         SetOptions(merge: true),
       );
@@ -300,5 +327,11 @@ class HistoryState extends State<History> {
     );
 
     return completer.future;
+  }
+
+  @override
+  void dispose() {
+    _stream.close();
+    super.dispose();
   }
 }
