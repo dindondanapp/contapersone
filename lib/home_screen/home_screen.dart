@@ -265,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final newCounterData = {
         'total': 0,
         'church_uuid': '',
-        'user_id': _auth.getCurrentUser().uid,
+        'creator': _auth.getCurrentUser().uid,
         'lastUpdated': Timestamp.now(),
         'capacity': capacity,
         'deleted': null

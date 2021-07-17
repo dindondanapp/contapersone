@@ -33,6 +33,7 @@
     "donateButton": "Apóyenos con una donación",
     "singleSubcounterLabel": "Cuenta",
     "counterTotalLabel": "Cuenta total",
+    "reverseCounterTotalLabel": "Plazas libres",
     "chartTotalLabel": "Total",
     "notEnoughData": "No hay suficientes datos",
     "thisEntranceDefaultLabel": "Esta entrada",
@@ -86,5 +87,8 @@
     "hour": "{num, plural, =0 {menos de una hora atrás} =1 {una hora atrás} other {{num} horas atrás}}",
     "day": "{num, plural, =0 {menos de un día atrás} =1 {un día atrás} other {{num} dias atrás}}",
     "week": "{num, plural, =0 {menos de una semana atrás} =1 {una semana atrás} other {{num} semanas atrás}}",
-    "subcounters": "{num, plural, =0 {Ninguna entrada} =1 {Una entrada} other {{num} entradas}}"
+    "subcounters": "{num, plural, =0 {Ninguna entrada} =1 {Una entrada} other {{num} entradas}}",
+    "resetCounter": "Reinicia",
+    "resetConfirmTitle": "Reinicia la cuenta",
+    "resetConfirmMessage": "¿Realmente quieres reiniciar el recuento? Eliminará irreversiblemente todos los datos relacionados con este recuento para todos los usuarios, incluidas las estadísticas. Los usuarios con los que haya compartido el recuento podrán seguir teniendo acceso."
 }

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -45,6 +43,12 @@ class InfoScreen extends StatelessWidget {
                         )
                       ]
                     : []),
+                SizedBox(height: 40),
+                TextButton.icon(
+                  icon: Icon(Icons.mail),
+                  label: Text('Feedback'),
+                  onPressed: () => launch('mailto:feedback@dindondan.app'),
+                ),
               ],
             ),
           ),

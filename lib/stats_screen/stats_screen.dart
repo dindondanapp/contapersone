@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:collection/collection.dart';
 import 'package:contapersone/common/palette.dart';
 import 'package:contapersone/stats_screen/stats_chart.dart';
 import 'package:flutter/foundation.dart';
@@ -15,7 +16,6 @@ import 'package:universal_html/html.dart' as html;
 
 import '../common/auth.dart';
 import '../common/entities.dart';
-import 'package:collection/collection.dart';
 
 class StatsScreen extends StatefulWidget {
   final Auth auth;
@@ -89,6 +89,7 @@ class StatsScreenState extends State<StatsScreen> {
               lastUpdated: doc.data()['lastUpdated'],
               total: doc.data()['total'],
               capacity: doc.data()['capacity'],
+              creator: doc.data()['creator'],
               subcounters: subcounters,
             );
           },

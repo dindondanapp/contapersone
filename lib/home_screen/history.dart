@@ -26,15 +26,16 @@ class History extends StatefulWidget {
 
 class HistoryState extends State<History> {
   BehaviorSubject<List<CounterData>> _stream = BehaviorSubject();
-  String _userId;
+  String _currentUserId;
 
   @override
   void initState() {
     super.initState();
 
+    _currentUserId = widget.auth.userId;
     widget.auth.addListener(() {
-      if (widget.auth.userId != _userId) {
-        _userId = widget.auth.userId;
+      if (widget.auth.userId != _currentUserId) {
+        _currentUserId = widget.auth.userId;
         _updateStream();
       }
     });
@@ -97,6 +98,7 @@ class HistoryState extends State<History> {
                       lastUpdated: doc.data()['lastUpdated'],
                       total: doc.data()['total'],
                       capacity: doc.data()['capacity'],
+                      creator: doc.data()['creator'],
                       subcounters: subcounters,
                     );
                   },
@@ -171,96 +173,114 @@ class HistoryState extends State<History> {
       stream: Stream.periodic(Duration(seconds: 1)),
       initialData: 0,
       builder: (context, snapshot) {
-        final timeString = data.lastUpdated == null
-            ? ''
-            : data.lastUpdated
-                .toDate()
-                .asStrictlyPast()
-                .toHumanString(context: context);
-
+        final userIsCreator = data.creator == widget.auth.userId;
         return Card(
-          child: Container(
-            child: Theme(
-              data:
-                  Theme.of(context).copyWith(dividerColor: Colors.transparent),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(left: 20, right: 20, top: 20),
-                    child: Column(
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            text: data.total.toString(),
+          child: Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: Stack(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildCounterTotal(
+                      total: data.total,
+                      capacity: data.capacity,
+                      lastUpdated: data.lastUpdated,
+                      subtitle: subtitle,
+                    ),
+                    IconTheme(
+                      data:
+                          IconThemeData(color: Theme.of(context).primaryColor),
+                      child: ButtonBar(
+                        buttonTextTheme: ButtonTextTheme.accent,
+                        alignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
                             children: [
-                              TextSpan(
-                                text: data.capacity != null
-                                    ? '/${data.capacity}'
-                                    : '',
-                                style: TextStyle(
-                                    color: Theme.of(context).primaryColor),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () => _deleteFromHistory(data.token),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.show_chart),
+                                onPressed: () => _openStatsScreen(data.token),
                               ),
                             ],
-                            style: TextStyle(fontSize: 25, color: Colors.black),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        subtitle != ''
-                            ? Container(
-                                child: Text(subtitle),
-                                padding: EdgeInsets.only(bottom: 10),
-                              )
-                            : Container(),
-                        timeString != ''
-                            ? Text(
-                                timeString,
-                                style: TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              )
-                            : Container(),
-                      ],
-                    ),
-                  ),
-                  IconTheme(
-                    data: IconThemeData(color: Theme.of(context).primaryColor),
-                    child: ButtonBar(
-                      buttonTextTheme: ButtonTextTheme.accent,
-                      alignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.delete),
-                              onPressed: () => _deleteFromHistory(data.token),
+                          TextButton(
+                            child: Row(
+                              children: [
+                                Text(AppLocalizations.of(context)
+                                    .continueButton),
+                                SizedBox(width: 10),
+                                Icon(Icons.arrow_forward),
+                              ],
                             ),
-                            IconButton(
-                              icon: Icon(Icons.show_chart),
-                              onPressed: () => _openStatsScreen(data.token),
-                            ),
-                          ],
-                        ),
-                        TextButton(
-                          child: Row(
-                            children: [
-                              Text(AppLocalizations.of(context).continueButton),
-                              SizedBox(width: 10),
-                              Icon(Icons.arrow_forward),
-                            ],
+                            onPressed: () =>
+                                widget.resumeCounter(data.token, data),
                           ),
-                          onPressed: () =>
-                              widget.resumeCounter(data.token, data),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+                !userIsCreator
+                    ? Positioned(
+                        child: Icon(Icons.people, color: Colors.grey[300]),
+                        top: 20,
+                        right: 20,
+                      )
+                    : Container(),
+              ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildCounterTotal({
+    @required int total,
+    @required int capacity,
+    @required Timestamp lastUpdated,
+    String subtitle = '',
+  }) {
+    final timeString = lastUpdated == null
+        ? ''
+        : lastUpdated.toDate().asStrictlyPast().toHumanString(context: context);
+    return Container(
+      padding: EdgeInsets.only(left: 20, right: 20, top: 20),
+      child: Column(
+        children: [
+          RichText(
+            text: TextSpan(
+              text: total.toString(),
+              children: [
+                TextSpan(
+                  text: capacity != null ? '/$capacity' : '',
+                  style: TextStyle(color: Theme.of(context).primaryColor),
+                ),
+              ],
+              style: TextStyle(fontSize: 25, color: Colors.black),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          subtitle != ''
+              ? Container(
+                  child: Text(subtitle),
+                  padding: EdgeInsets.only(bottom: 10),
+                )
+              : Container(),
+          timeString != ''
+              ? Text(
+                  timeString,
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                  ),
+                )
+              : Container(),
+        ],
+      ),
     );
   }
 
@@ -279,16 +299,13 @@ class HistoryState extends State<History> {
 
   void _deleteFromHistory(CounterToken token) async {
     if (await _deleteConfirmDialog()) {
-      FirebaseFirestore.instance
+      await FirebaseFirestore.instance
           .collection('counters')
           .doc(token.toString())
-          .set(
-        {
-          'deleted': Timestamp.now(), // For legacy
-          'users': FieldValue.arrayRemove([this._userId]),
-        },
-        SetOptions(merge: true),
-      );
+          .update({
+        'deleted': Timestamp.now(), // For legacy
+        'users': FieldValue.arrayRemove([widget.auth.userId])
+      });
     }
   }
 

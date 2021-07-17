@@ -305,6 +305,7 @@ class TimeSeriesCollection {
             .whereType<Timestamp>()
             .map((e) => e.toDate())
             .toList();
+
         return TimeSeries.fromEvents(
           label: label,
           addEvents: addEvents,
@@ -380,7 +381,9 @@ class TimeSeries {
       accumulator += deltaEvent.value;
     }
 
-    yield StatChartPoint(time: time, count: accumulator);
+    if (accumulator > 0 && time != null) {
+      yield StatChartPoint(time: time, count: accumulator);
+    }
   }
 
   static Iterable<StatChartPoint> _addPoints(

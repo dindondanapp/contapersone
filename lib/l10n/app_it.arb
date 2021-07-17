@@ -15,7 +15,7 @@
     "@scanQrWebNotice": {},
     "historyTitle": "Conteggi passati",
     "@historyTitle": {},
-    "noHistoryNotice": "I tuoi conteggi passati appariaranno qui.",
+    "noHistoryNotice": "I tuoi conteggi passati appariranno qui.",
     "@noHistoryNotice": {},
     "historyLoadingError": "Si è verificato un errore nel caricamento dei conteggi passati.",
     "@historyLoadingError": {},
@@ -67,6 +67,8 @@
     "@singleSubcounterLabel": {},
     "counterTotalLabel": "Conteggio totale",
     "@counterTotalLabel": {},
+    "reverseCounterTotalLabel": "Posti liberi",
+    "@reverseCounterTotalLabel": {},
     "chartTotalLabel": "Totale",
     "@chartTotalLabel": {},
     "notEnoughData": "Dati non sufficienti",
@@ -163,6 +165,13 @@
     "@disableVibration": {},
     "shareCounter": "Condividi conteggio",
     "@shareCounter": {},
+    "resetCounter": "Azzera",
+    "@resetCounter": {},
+    "resetConfirmTitle": "Azzera il conteggio",
+    "@resetConfirmTitle": {},
+    "resetConfirmMessage": "Vuoi davvero azzerare il conteggio? Eliminerai in modo irreversibile tutti i dati relativi a questo conteggio per tutti gli utenti, incluse le statistiche. Gli utenti con cui hai condiviso il conteggio potranno continuare accedere.",
+    "@resetConfirmMessage": {},
+
     "second": "{num, plural, =0 {meno di un secondo fa} =1 {un secondo fa} other {{num} secondi fa}}",
     "@second": {
         "placeholders": {

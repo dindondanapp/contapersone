@@ -33,6 +33,7 @@
     "donateButton": "Unterstützen Sie uns mit einer Spende",
     "singleSubcounterLabel": "Zählung",
     "counterTotalLabel": "Komplette Zählung",
+    "reverseCounterTotalLabel": "Freie Platzwahl",
     "chartTotalLabel": "Gesamt",
     "notEnoughData": "nicht genug Daten",
     "thisEntranceDefaultLabel": "Dieser Eingang",
@@ -56,7 +57,7 @@
     "shareDialogMessage": "Starten Sie den Zähler für gemeinsam genutzte Personen:",
     "shareDialogSubject": "DinDonDan Shared Counter",
     "linkCopied": "Die Adresse wurde in die Zwischenablage kopiert!",
-    "signInScreenTitle": "Melden Sie sich als Kirhce an",
+    "signInScreenTitle": "Melden Sie sich als Kirche an",
     "signInEmailHint": "E-mail",
     "signInEmailValidator": "Geben sie ihre E-Mailadresse ein",
     "signInPasswordHint": "Passwort",
@@ -83,8 +84,11 @@
     "shareCounter": "Teilen sich die Zählung",
     "second": "{num, plural, =0 {vor weniger als einer Sekunde} =1 {vor einer Sekunde} other {vor {num} Sekunden}}",
     "minute": "{num, plural, =0 {vor weniger als einer Minute} =1 {vor einer Minute} other {vor {num} Minuten}}",
-    "hour": "{num, plural, =0 {vor weniger als einer Stunde} =1 {vor einer Stunde} other {vor {num} Stuneden}}",
+    "hour": "{num, plural, =0 {vor weniger als einer Stunde} =1 {vor einer Stunde} other {vor {num} Stunden}}",
     "day": "{num, plural, =0 {vor weniger als einem Tag} =1 {vor einem Tag} other {vor {num} Tagen}}",
     "week": "{num, plural, =0 {vor weniger als einer Woche} =1 {vor einer Woche} other {vor {num} Wochen}}",
-    "subcounters": "{num, plural, =0 {kein Eingang} =1 {ein Eingang} other {{num} Eingänge}}"
+    "subcounters": "{num, plural, =0 {kein Eingang} =1 {ein Eingang} other {{num} Eingänge}}",
+    "resetCounter": "Zurücksetzen",
+    "resetConfirmTitle": "Personenzähler zurücksetzen",
+    "resetConfirmMessage": "Möchten Sie den Zähler wirklich zurücksetzen? Sie werden alle Daten zu dieser Zählung für alle Benutzer, einschließlich Statistiken, unwiderruflich löschen. Benutzer, mit denen Sie die Zählung geteilt haben, können sich weiterhin anmelden."
 }

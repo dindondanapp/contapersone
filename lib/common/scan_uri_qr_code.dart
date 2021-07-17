@@ -91,6 +91,7 @@ class _ScanScreenState extends State<_ScanScreen> {
     controller.scannedDataStream.listen((scanData) {
       if (widget.scanCallback != null) {
         widget.scanCallback(scanData);
+        controller.dispose();
       }
       if (widget.closeOnScan) {
         Navigator.of(context).pop();

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contapersone/stats_screen/stats_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -29,6 +31,9 @@ class _CounterScreenState extends State<CounterScreen> {
   var _subcounterLabelController = TextEditingController();
   var _capacityController = TextEditingController();
   var _vibrationEnabled = true;
+  var _isUserCreator = false;
+  var _reverseCountDisplay = false;
+
   String _thisSubcounterId;
 
   /// Lock used to prevent remote updates of the subcounter label while editing
@@ -89,10 +94,12 @@ class _CounterScreenState extends State<CounterScreen> {
           .distinct()
           .listen((event) {
         setState(() {
-          _capacity = event['capacity'];
+          _capacity = event.get('capacity');
           _capacityController.text =
               _capacity != null ? _capacity.toString() : '';
           _disconnected = false;
+          _isUserCreator = event.data().containsKey('creator') &&
+              event.data()['creator'] == widget.auth.userId;
 
           if (event.data().containsKey('subtotals')) {
             _otherSubcounters = (event.data()['subtotals']
@@ -270,6 +277,18 @@ class _CounterScreenState extends State<CounterScreen> {
                 ),
                 value: _openEditCapacityDialog,
               ),
+              ...(_isUserCreator
+                  ? [
+                      PopupMenuItem(
+                        child: ListTile(
+                          leading: Icon(Icons.refresh),
+                          title:
+                              Text(AppLocalizations.of(context).resetCounter),
+                        ),
+                        value: _resetCounter,
+                      )
+                    ]
+                  : []),
               PopupMenuDivider(),
               PopupMenuItem(
                 child: _vibrationEnabled
@@ -301,18 +320,26 @@ class _CounterScreenState extends State<CounterScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            CountDisplay(
-              otherSubcountersData: _otherSubcounters,
-              thisSubcounterData: SubcounterData(
-                id: _thisSubcounterId,
-                count: _thisSubcounterCount,
-                label: _subcounterLabel,
-                lastUpdated: Timestamp.now(),
+            GestureDetector(
+              child: CountDisplay(
+                otherSubcountersData: _otherSubcounters,
+                thisSubcounterData: SubcounterData(
+                  id: _thisSubcounterId,
+                  count: _thisSubcounterCount,
+                  label: _subcounterLabel,
+                  lastUpdated: Timestamp.now(),
+                ),
+                isDisconnected: _disconnected,
+                total: _counterTotal,
+                capacity: _capacity,
+                onEditLabel: _openEditLabelDialog,
+                reverse: _reverseCountDisplay,
               ),
-              isDisconnected: _disconnected,
-              total: _counterTotal,
-              capacity: _capacity,
-              onEditLabel: _openEditLabelDialog,
+              onTap: () => {
+                setState(() {
+                  _reverseCountDisplay = !_reverseCountDisplay;
+                })
+              },
             ),
             Container(
               height: 20,
@@ -500,6 +527,72 @@ class _CounterScreenState extends State<CounterScreen> {
       // TODO: this should be made persistent through Shared Preferences
       _vibrationEnabled = !_vibrationEnabled;
     });
+  }
+
+  /// Resets the counter by removing all events from all subcounters
+  void _resetCounter() async {
+    if (await _resetConfirmDialog()) {
+      FirebaseAnalytics().logEvent(name: 'reset_counter', parameters: null);
+
+      final subcounterIds = <String>[
+        _thisSubcounterId,
+        ..._otherSubcounters.map((e) => e.id)
+      ];
+
+      final WriteBatch batch = FirebaseFirestore.instance.batch();
+
+      subcounterIds.forEach((id) {
+        batch.update(
+          FirebaseFirestore.instance
+              .collection('counters')
+              .doc(widget.token.toString())
+              .collection('subcounters')
+              .doc(id),
+          {
+            'add_events': [],
+            'subtract_events': [],
+          },
+        );
+      });
+
+      await batch.commit();
+    }
+  }
+
+  Future<bool> _resetConfirmDialog() {
+    final completer = Completer<bool>();
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context).resetConfirmTitle),
+          content: Text(AppLocalizations.of(context).resetConfirmMessage),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                completer.complete(true);
+              },
+              child: Text(
+                AppLocalizations.of(context).confirm,
+                style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                completer.complete(false);
+              },
+              child: Text(AppLocalizations.of(context).cancel),
+            ),
+          ],
+        );
+      },
+    );
+
+    return completer.future;
   }
 
   @override

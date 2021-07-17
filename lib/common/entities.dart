@@ -42,18 +42,18 @@ class CounterToken {
 class CounterData {
   final CounterToken token;
   final Timestamp lastUpdated;
-  final int peak;
   final int total;
   final int capacity;
+  final String creator;
   final List<SubcounterData> subcounters;
 
   CounterData(
     this.token, {
-    this.lastUpdated,
-    this.peak,
-    this.total,
-    this.capacity,
-    this.subcounters,
+    @required this.lastUpdated,
+    @required this.total,
+    @required this.capacity,
+    @required this.creator,
+    @required this.subcounters,
   });
 
   @override

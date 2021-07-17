@@ -12,18 +12,18 @@ class Auth extends ValueNotifier<AuthValue> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   // Getters and setters
-  get status => value.status;
+  AuthStatus get status => value.status;
   set status(AuthStatus newValue) =>
       value = value.rebuildWith(status: newValue);
 
-  get userId => value.userId;
+  String get userId => value.userId;
   set userId(String newValue) => value = value.rebuildWith(userId: newValue);
 
-  get churchName => value.churchName;
+  String get churchName => value.churchName;
   set churchName(String newValue) =>
       value = value.rebuildWith(churchName: newValue);
 
-  get error => value.error;
+  AuthError get error => value.error;
   set error(AuthError newValue) => value = value.rebuildWith(error: newValue);
 
   /// Create an authentication controller and retrieve the authentication status.

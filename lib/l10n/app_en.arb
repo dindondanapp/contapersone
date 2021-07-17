@@ -20,7 +20,7 @@
     "parishSignIn": "Reserved area for churches",
     "parishSignOut": "Sign out",
     "createCounterErrorTitle": "Could not create a shared counter",
-    "createCounterErrorMessage": "Please check your interent connection and try again.",
+    "createCounterErrorMessage": "Please check your Internet connection and try again.",
     "accountErrorTitle": "Connection error",
     "accountErrorMessage": "Your account information could not be retrieved.\n\nIf the problem persists, tap \"sign out\" and try again.",
     "networkErrorTitle": "Connection error",
@@ -33,6 +33,7 @@
     "donateButton": "Support us with a donation",
     "singleSubcounterLabel": "Count",
     "counterTotalLabel": "Total count",
+    "reverseCounterTotalLabel": "Vacancies",
     "chartTotalLabel": "Total",
     "notEnoughData": "Not Enough Data",
     "thisEntranceDefaultLabel": "This entrance",
@@ -67,7 +68,7 @@
     "signInReservedWarning": "Warning! Sign in is reserved for churches.",
     "signInFormCaption": "To collect count statistics for your church sign in with your DinDonDan account:",
     "signInUnknownErrorMessage": "An unknown error has occurred. Please try again later and if the problem persists write to feedback@dindondan.app.",
-    "signInInvalidEmailError": "Ivalid e-mail address. Please check and try again.",
+    "signInInvalidEmailError": "Invalid e-mail address. Please check and try again.",
     "signInWrongPasswordError": "Incorrect password.",
     "signInUserNotFoundError": "This address does not match any account.",
     "signInUserDisabledError": "This account has been disabled. For more information write to feedback@dindondan.app.",
@@ -86,5 +87,8 @@
     "hour": "{num, plural, =0 {less than one hour ago} =1 {one hour ago} other {{num} hours ago}}",
     "day": "{num, plural, =0 {less than one day ago} =1 {one day ago} other {{num} days ago}}",
     "week": "{num, plural, =0 {less than one week ago} =1 {one week ago} other {{num} weeks ago}}",
-    "subcounters": "{num, plural, =0 {no entrance} =1 {one entrance} other {{num} entrances}}"
+    "subcounters": "{num, plural, =0 {no entrance} =1 {one entrance} other {{num} entrances}}",
+    "resetCounter": "Reset",
+    "resetConfirmTitle": "Reset counter",
+    "resetConfirmMessage": "Do you really want to reset the counter? All data about this counter, including statistics, will be permanently deleted for all users. The users you shared this counter with will still have access."
 }

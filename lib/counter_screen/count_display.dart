@@ -11,6 +11,7 @@ class CountDisplay extends StatelessWidget {
   final bool isDisconnected;
   final int total;
   final int capacity;
+  final bool reverse;
   final void Function() onEditLabel;
 
   /// Creates a widget that displays the status of a counter, given its `total`
@@ -21,18 +22,20 @@ class CountDisplay extends StatelessWidget {
   /// Additionally, a `capacity` can provided to be displayed along with the
   /// total count and an `onEditCallback`can be used to allow the user to change
   /// tha label of the subcounter by pressing on it.
-  const CountDisplay(
-      {Key key,
-      @required this.otherSubcountersData,
-      @required this.thisSubcounterData,
-      @required this.isDisconnected,
-      @required this.total,
-      this.onEditLabel,
-      this.capacity})
-      : super(key: key);
+  const CountDisplay({
+    Key key,
+    @required this.otherSubcountersData,
+    @required this.thisSubcounterData,
+    @required this.isDisconnected,
+    @required this.total,
+    this.onEditLabel,
+    this.capacity,
+    this.reverse = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final safeReverse = reverse && capacity != null;
     return Container(
       child: () {
         if (otherSubcountersData.length == 0) {
@@ -45,6 +48,7 @@ class CountDisplay extends StatelessWidget {
                 count: thisSubcounterData.count,
                 capacity: capacity,
                 disconnected: isDisconnected,
+                reverse: reverse,
               ),
               _buildNameInput(
                   defaultValue:
@@ -63,10 +67,13 @@ class CountDisplay extends StatelessWidget {
                   count: total,
                   capacity: capacity,
                   disconnected: isDisconnected,
+                  reverse: safeReverse,
                 ),
               ),
               Text(
-                AppLocalizations.of(context).counterTotalLabel,
+                safeReverse
+                    ? AppLocalizations.of(context).reverseCounterTotalLabel
+                    : AppLocalizations.of(context).counterTotalLabel,
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -202,6 +209,7 @@ class CountDisplay extends StatelessWidget {
     @required int count,
     int capacity,
     bool disconnected = false,
+    bool reverse = false,
   }) {
     Color color = disconnected ? Colors.grey : Colors.black;
     if (capacity != null) {
@@ -217,7 +225,8 @@ class CountDisplay extends StatelessWidget {
       children: [
         RichText(
           text: TextSpan(
-            text: count.toString(),
+            text: (capacity != null && reverse ? capacity - count : count)
+                .toString(),
             children: [
               TextSpan(
                 text: capacity != null ? '/$capacity' : '',
