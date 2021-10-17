@@ -13,6 +13,7 @@ class CountDisplay extends StatelessWidget {
   final int capacity;
   final bool reverse;
   final void Function() onEditLabel;
+  final void Function() onTotalTap;
 
   /// Creates a widget that displays the status of a counter, given its `total`
   /// count, the [SubcounterData] `thisSubcounterData` of the subcounter for
@@ -22,16 +23,17 @@ class CountDisplay extends StatelessWidget {
   /// Additionally, a `capacity` can provided to be displayed along with the
   /// total count and an `onEditCallback`can be used to allow the user to change
   /// tha label of the subcounter by pressing on it.
-  const CountDisplay({
-    Key key,
-    @required this.otherSubcountersData,
-    @required this.thisSubcounterData,
-    @required this.isDisconnected,
-    @required this.total,
-    this.onEditLabel,
-    this.capacity,
-    this.reverse = false,
-  }) : super(key: key);
+  const CountDisplay(
+      {Key key,
+      @required this.otherSubcountersData,
+      @required this.thisSubcounterData,
+      @required this.isDisconnected,
+      @required this.total,
+      this.onEditLabel,
+      this.capacity,
+      this.reverse = false,
+      this.onTotalTap})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -39,46 +41,57 @@ class CountDisplay extends StatelessWidget {
     return Container(
       child: () {
         if (otherSubcountersData.length == 0) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildStyledCount(
-                context: context,
-                count: thisSubcounterData.count,
-                capacity: capacity,
-                disconnected: isDisconnected,
-                reverse: reverse,
-              ),
-              _buildNameInput(
-                  defaultValue:
-                      AppLocalizations.of(context).singleSubcounterLabel),
-            ],
+          return GestureDetector(
+            onTap: this.onTotalTap,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildStyledCount(
+                  context: context,
+                  count: thisSubcounterData.count,
+                  capacity: capacity,
+                  disconnected: isDisconnected,
+                  reverse: reverse,
+                ),
+                _buildNameInput(
+                    defaultValue:
+                        AppLocalizations.of(context).singleSubcounterLabel),
+              ],
+            ),
           );
         } else {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                height: 60,
-                child: _buildStyledCount(
-                  context: context,
-                  count: total,
-                  capacity: capacity,
-                  disconnected: isDisconnected,
-                  reverse: safeReverse,
+              GestureDetector(
+                onTap: this.onTotalTap,
+                child: Column(
+                  children: [
+                    Container(
+                      height: 60,
+                      child: _buildStyledCount(
+                        context: context,
+                        count: total,
+                        capacity: capacity,
+                        disconnected: isDisconnected,
+                        reverse: safeReverse,
+                      ),
+                    ),
+                    Text(
+                      safeReverse
+                          ? AppLocalizations.of(context)
+                              .reverseCounterTotalLabel
+                          : AppLocalizations.of(context).counterTotalLabel,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Container(
+                      height: 20,
+                    ),
+                  ],
                 ),
-              ),
-              Text(
-                safeReverse
-                    ? AppLocalizations.of(context).reverseCounterTotalLabel
-                    : AppLocalizations.of(context).counterTotalLabel,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Container(
-                height: 20,
               ),
               () {
                 return Center(

@@ -334,12 +334,12 @@ class _CounterScreenState extends State<CounterScreen> {
                 capacity: _capacity,
                 onEditLabel: _openEditLabelDialog,
                 reverse: _reverseCountDisplay,
+                onTotalTap: () => {
+                  setState(() {
+                    _reverseCountDisplay = !_reverseCountDisplay;
+                  })
+                },
               ),
-              onTap: () => {
-                setState(() {
-                  _reverseCountDisplay = !_reverseCountDisplay;
-                })
-              },
             ),
             Container(
               height: 20,
