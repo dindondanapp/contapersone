@@ -1,55 +1,74 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-    <meta charset="UTF-8">
-    <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-    <meta name="description"
-        content="Uno strumento semplice ed efficace per contare gli accessi a eventi, esercizi commerciali, celebrazioni religiose e qualunque luogo aperto al pubblico, anche in presenza di ingressi multipli">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+    <meta
+      name="description"
+      lang="it"
+      content="Uno strumento semplice ed efficace per contare gli accessi a eventi, esercizi commerciali, celebrazioni religiose e qualunque luogo aperto al pubblico, anche in presenza di ingressi multipli"
+    />
+    <meta
+      name="description"
+      lang="en"
+      content="A simple and effective tool to monitor people flows in events, local businesses, religious services and any other public place, also in case of multiple entrances"
+    />
+    <meta
+      name="description"
+      lang="de"
+      content="A simple and effective tool to monitor people flows in events, local businesses, religious services and any other public place, also in case of multiple entrances"
+    />
+    <meta
+      name="description"
+      lang="es"
+      content="A simple and effective tool to monitor people flows in events, local businesses, religious services and any other public place, also in case of multiple entrances"
+    />
 
     <!-- iOS meta tags & icons -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Contapersone">
-    <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="Contapersone" />
+    <link rel="apple-touch-icon" href="icons/Icon-192.png" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon.png" />
 
-    <title>Contapersone</title>
-    <link rel="manifest" href="manifest.json">
-</head>
+    <title lang="it">Contapersone</title>
+    <title lang="en">Shared Counter</title>
+    <title lang="de">Shared Counter</title>
+    <title lang="es">Shared Counter</title>
+    <link rel="manifest" href="manifest.json" />
+  </head>
 
-<body>
+  <body>
     <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-analytics.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-firestore.js"></script>
 
     <script>
-        // Firebase configuration
-        var firebaseConfig = {
-            apiKey: "AIzaSyDD_GbIq5EY-Inyf94LxqmNwL_qxKzObZc",
-            authDomain: "dindondan-9b3af.firebaseapp.com",
-            databaseURL: "https://dindondan-9b3af.firebaseio.com",
-            projectId: "dindondan-9b3af",
-            storageBucket: "dindondan-9b3af.appspot.com",
-            messagingSenderId: "276981948675",
-            appId: "1:276981948675:web:f567fff9df313c3a56c936",
-            measurementId: "G-9V638XJGK1"
-        };
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        firebase.analytics();
+      // Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyDD_GbIq5EY-Inyf94LxqmNwL_qxKzObZc",
+        authDomain: "dindondan-9b3af.firebaseapp.com",
+        databaseURL: "https://dindondan-9b3af.firebaseio.com",
+        projectId: "dindondan-9b3af",
+        storageBucket: "dindondan-9b3af.appspot.com",
+        messagingSenderId: "276981948675",
+        appId: "1:276981948675:web:f567fff9df313c3a56c936",
+        measurementId: "G-9V638XJGK1",
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
     </script>
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('flutter-first-frame', function () {
-                navigator.serviceWorker.register('flutter_service_worker.js');
-            });
-        }
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("flutter-first-frame", function () {
+          navigator.serviceWorker.register("flutter_service_worker.js");
+        });
+      }
     </script>
-    <script src="main.dart.js?v1" type="application/javascript"></script>
-</body>
-
+    <script src="main.dart.js?v2" type="application/javascript"></script>
+  </body>
 </html>
