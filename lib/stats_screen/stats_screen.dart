@@ -181,7 +181,9 @@ class StatsScreenState extends State<StatsScreen> {
     final dir = Directory.systemTemp.createTempSync();
     final file = File("${dir.path}/$fileName")..createSync();
 
-    file.writeAsStringSync(await _generateCSV());
+    final string = await _generateCSV();
+
+    file.writeAsStringSync(string);
 
     final RenderBox box = _shareButtonKey.currentContext.findRenderObject();
 
@@ -244,13 +246,19 @@ class StatsScreenState extends State<StatsScreen> {
               // The subsequent columns are the counts of each subcounter
               pointIndexes
                   .mapIndexed<String>(
-                    (seriesIndex, pointIndex) => timeSeriesList[seriesIndex]
-                        .points[min(
-                          pointIndex,
-                          timeSeriesList[seriesIndex].points.length - 1,
-                        )]
-                        .count
-                        .toString(),
+                    (seriesIndex, pointIndex) =>
+                        (timeSeriesList[seriesIndex].points.length == 0
+                                ? 0
+                                : timeSeriesList[seriesIndex]
+                                    .points[min(
+                                      pointIndex,
+                                      timeSeriesList[seriesIndex]
+                                              .points
+                                              .length -
+                                          1,
+                                    )]
+                                    .count)
+                            .toString(),
                   )
                   .join(','),
         );
