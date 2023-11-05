@@ -12,19 +12,19 @@ class Auth extends ValueNotifier<AuthValue> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   // Getters and setters
-  AuthStatus get status => value.status;
-  set status(AuthStatus newValue) =>
+  AuthStatus? get status => value.status;
+  set status(AuthStatus? newValue) =>
       value = value.rebuildWith(status: newValue);
 
-  String get userId => value.userId;
-  set userId(String newValue) => value = value.rebuildWith(userId: newValue);
+  String? get userId => value.userId;
+  set userId(String? newValue) => value = value.rebuildWith(userId: newValue);
 
-  String get churchName => value.churchName;
-  set churchName(String newValue) =>
+  String? get churchName => value.churchName;
+  set churchName(String? newValue) =>
       value = value.rebuildWith(churchName: newValue);
 
-  AuthError get error => value.error;
-  set error(AuthError newValue) => value = value.rebuildWith(error: newValue);
+  AuthError? get error => value.error;
+  set error(AuthError? newValue) => value = value.rebuildWith(error: newValue);
 
   /// Create an authentication controller and retrieve the authentication status.
   /// If the user is not signed-in, sign in anonymously.
@@ -33,16 +33,15 @@ class Auth extends ValueNotifier<AuthValue> {
   }
 
   FutureOr<void> refreshState() {
-    final user = _firebaseAuth.currentUser;
-    if (user == null) {
+    if (_firebaseAuth.currentUser == null) {
       return signInAnonymously();
     } else {
-      if (_firebaseAuth.currentUser.isAnonymous) {
+      if (_firebaseAuth.currentUser!.isAnonymous) {
         this.status = AuthStatus.loggedInAnonymously;
       } else {
         this.status = AuthStatus.loggedIn;
       }
-      this.userId = user.uid;
+      this.userId = _firebaseAuth.currentUser!.uid;
     }
 
     refreshUserData();
@@ -53,7 +52,7 @@ class Auth extends ValueNotifier<AuthValue> {
     try {
       await _firebaseAuth.signInAnonymously().timeout(Duration(seconds: 10));
       this.status = AuthStatus.loggedInAnonymously;
-      this.userId = getCurrentUser().uid;
+      this.userId = getCurrentUser()?.uid;
     } catch (error) {
       this.status = AuthStatus.notLoggedIn;
       this.error = AuthError.anonymous;
@@ -72,11 +71,11 @@ class Auth extends ValueNotifier<AuthValue> {
     refreshState();
 
     this.status = AuthStatus.loggedIn;
-    this.userId = getCurrentUser().uid;
+    this.userId = getCurrentUser()?.uid;
   }
 
   /// Get current user
-  User getCurrentUser() {
+  User? getCurrentUser() {
     return _firebaseAuth.currentUser;
   }
 
@@ -98,7 +97,7 @@ class Auth extends ValueNotifier<AuthValue> {
           "Content-type": "application/x-www-form-urlencoded"
         };
         var user = getCurrentUser();
-        var token = await user.getIdToken();
+        var token = await user?.getIdToken();
         String body = 'idToken=$token';
 
         Response response =
@@ -136,15 +135,18 @@ class Auth extends ValueNotifier<AuthValue> {
 
 /// An object that describes the authentication status
 class AuthValue {
-  final String userId;
-  final String churchName;
-  final AuthStatus status;
-  final AuthError error;
+  final String? userId;
+  final String? churchName;
+  final AuthStatus? status;
+  final AuthError? error;
 
-  AuthValue({this.churchName, this.userId, @required this.status, this.error});
+  AuthValue({this.churchName, this.userId, required this.status, this.error});
 
   AuthValue rebuildWith(
-      {String churchName, String userId, AuthStatus status, AuthError error}) {
+      {String? churchName,
+      String? userId,
+      AuthStatus? status,
+      AuthError? error}) {
     return AuthValue(
       churchName: churchName ?? this.churchName,
       status: status ?? this.status,

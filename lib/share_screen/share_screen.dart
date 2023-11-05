@@ -24,8 +24,8 @@ class ShareScreen extends StatefulWidget {
   /// Create a new [ShareScreen] given the [CounterToken] that has to be shared.
   /// If [startCounterButton] is true a button is displayed to start the counter
   ShareScreen(
-      {@required this.token,
-      @required this.auth,
+      {required this.token,
+      required this.auth,
       this.startCounterButton = false});
 
   @override
@@ -46,7 +46,7 @@ class _ShareScreenState extends State<ShareScreen> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).shareScreenTitle),
+        title: Text(AppLocalizations.of(context)!.shareScreenTitle),
         backgroundColor: Palette.primary,
         leading: new IconButton(
           icon: new Icon(Icons.close),
@@ -72,7 +72,7 @@ class _ShareScreenState extends State<ShareScreen> {
                         constraints: BoxConstraints(maxWidth: 250),
                         margin: EdgeInsets.all(10),
                         child: Text(
-                          AppLocalizations.of(context).shareQrCodeCaption,
+                          AppLocalizations.of(context)!.shareQrCodeCaption,
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -80,7 +80,7 @@ class _ShareScreenState extends State<ShareScreen> {
                         constraints: BoxConstraints(maxWidth: 200),
                         margin: EdgeInsets.all(10),
                         child: _url != ''
-                            ? QrImage(data: _url, version: QrVersions.auto)
+                            ? QrImageView(data: _url, version: QrVersions.auto)
                             : Container(
                                 width: 200,
                                 height: 200,
@@ -92,7 +92,7 @@ class _ShareScreenState extends State<ShareScreen> {
                         constraints: BoxConstraints(maxWidth: 250),
                         margin: EdgeInsets.all(10),
                         child: Text(
-                          AppLocalizations.of(context).orShareScreenCaption,
+                          AppLocalizations.of(context)!.orShareScreenCaption,
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -110,7 +110,7 @@ class _ShareScreenState extends State<ShareScreen> {
                             _startSubcounter(counterId: widget.token);
                           },
                           label: Text(
-                              AppLocalizations.of(context).startOnThisDevice),
+                              AppLocalizations.of(context)!.startOnThisDevice),
                           icon: Icon(Icons.arrow_forward),
                         )
                       : Container(),
@@ -123,7 +123,7 @@ class _ShareScreenState extends State<ShareScreen> {
     );
   }
 
-  void _startSubcounter({@required CounterToken counterId}) {
+  void _startSubcounter({required CounterToken counterId}) {
     Navigator.of(context).popUntil(ModalRoute.withName('/'));
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -146,8 +146,8 @@ class _ShareScreenState extends State<ShareScreen> {
     } catch (error) {
       showErrorDialog(
         context: context,
-        title: AppLocalizations.of(context).shareLinkCreationErrorTitle,
-        text: AppLocalizations.of(context).shareLinkCreationErrorMessage,
+        title: AppLocalizations.of(context)!.shareLinkCreationErrorTitle,
+        text: AppLocalizations.of(context)!.shareLinkCreationErrorMessage,
         onRetry: _buildDynamicLink,
       );
     }
@@ -166,17 +166,16 @@ class _ShareScreenState extends State<ShareScreen> {
           packageName: 'app.dindondan.contapersone',
           minimumVersion: 0,
           fallbackUrl: Uri.parse(uriString)),
-      iosParameters: IosParameters(
+      iosParameters: IOSParameters(
           bundleId: 'app.dindondan.contapersone',
           appStoreId: '1513235116',
           minimumVersion: '0.0.0',
           fallbackUrl: Uri.parse(uriString)),
-      dynamicLinkParametersOptions: DynamicLinkParametersOptions(
-          shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
     );
 
-    ShortDynamicLink shortLink =
-        await parameters.buildShortLink().timeout(Duration(seconds: 10));
+    ShortDynamicLink shortLink = await FirebaseDynamicLinks.instance
+        .buildShortLink(parameters)
+        .timeout(Duration(seconds: 10));
 
     return shortLink.shortUrl.toString();
   }
@@ -213,20 +212,20 @@ class _ShareScreenState extends State<ShareScreen> {
           icon: Icon(Icons.share),
           onPressed: _url != ''
               ? () => Share.share(
-                  '${AppLocalizations.of(context).shareDialogMessage} $_url',
-                  subject: AppLocalizations.of(context).shareDialogSubject)
+                  '${AppLocalizations.of(context)!.shareDialogMessage} $_url',
+                  subject: AppLocalizations.of(context)!.shareDialogSubject)
               : null,
         ),
       ]);
     }
   }
 
-  Function get _copyURL {
+  Function()? get _copyURL {
     if (_url != '') {
       return () {
         Clipboard.setData(ClipboardData(text: _url));
         Fluttertoast.showToast(
-            msg: AppLocalizations.of(context).linkCopied,
+            msg: AppLocalizations.of(context)!.linkCopied,
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.CENTER,
             backgroundColor: Colors.grey,

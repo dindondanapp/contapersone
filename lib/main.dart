@@ -28,14 +28,17 @@ class MyApp extends StatelessWidget {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
-        onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+        onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Palette.primary.toMaterialColor(),
-          buttonColor: Palette.primary,
-          accentColor: Palette.primary,
-          appBarTheme:
-              AppBarTheme.of(context).copyWith(brightness: Brightness.dark),
+          buttonTheme: ButtonThemeData(
+            buttonColor: Palette.primary,
+          ),
+          //buttonColor: Palette.primary,
+          //accentColor: Palette.primary,
+          //appBarTheme: AppBarTheme.of(context).copyWith(li: Brightness.dark),
+          // TODO : Remove
         ),
         initialRoute: '/',
         routes: {

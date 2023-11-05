@@ -29,10 +29,10 @@ Future<Uri> scanUriQRCode(BuildContext context) {
 }
 
 class _ScanScreen extends StatefulWidget {
-  final void Function(String result) scanCallback;
+  final void Function(String result)? scanCallback;
   final bool closeOnScan;
 
-  const _ScanScreen({Key key, this.scanCallback, this.closeOnScan = true})
+  const _ScanScreen({Key? key, this.scanCallback, this.closeOnScan = true})
       : super(key: key);
 
   @override
@@ -42,7 +42,7 @@ class _ScanScreen extends StatefulWidget {
 class _ScanScreenState extends State<_ScanScreen> {
   bool flashOn = false;
 
-  QRViewController controller;
+  QRViewController? controller;
   final GlobalKey qrKey = GlobalKey();
 
   _ScanScreenState();
@@ -51,24 +51,24 @@ class _ScanScreenState extends State<_ScanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).scanQrButton),
+        title: Text(AppLocalizations.of(context)!.scanQrButton),
         actions: [
           IconButton(
             icon: Icon(flashOn ? Icons.flash_off : Icons.flash_on),
             onPressed: () {
-              controller.toggleFlash();
+              controller?.toggleFlash();
               setState(() => flashOn = !flashOn);
             },
             tooltip: flashOn
-                ? AppLocalizations.of(context).turnOnFlash
-                : AppLocalizations.of(context).turnOffFlash,
+                ? AppLocalizations.of(context)!.turnOnFlash
+                : AppLocalizations.of(context)!.turnOffFlash,
           ),
           IconButton(
             icon: Icon(Icons.flip_camera_android),
             onPressed: () {
-              controller.flipCamera();
+              controller?.flipCamera();
             },
-            tooltip: AppLocalizations.of(context).switchCamera,
+            tooltip: AppLocalizations.of(context)!.switchCamera,
           ),
         ],
       ),
@@ -89,8 +89,8 @@ class _ScanScreenState extends State<_ScanScreen> {
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
-      if (widget.scanCallback != null) {
-        widget.scanCallback(scanData);
+      if (scanData.code != null && widget.scanCallback != null) {
+        widget.scanCallback!(scanData.code!);
         controller.dispose();
       }
       if (widget.closeOnScan) {
@@ -101,7 +101,7 @@ class _ScanScreenState extends State<_ScanScreen> {
 
   @override
   void dispose() {
-    controller.dispose();
+    controller?.dispose();
     super.dispose();
   }
 }

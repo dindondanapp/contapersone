@@ -19,48 +19,49 @@ version: 1.2.1+33
 
 # Disable sound null safety in Flutter beta channel
 environment:
-  sdk: ">=2.6.0 <3.0.0"
+    sdk: ">=2.12.0 <=3.13.4"
 
 dependencies:
-  flutter:
-    sdk: flutter
-  flutter_localizations:
-    sdk: flutter
-  cloud_firestore: ^2.2.0
-  cupertino_icons: ^1.0.0
-  firebase_analytics: ^8.1.0
-  firebase_auth: ^1.2.0
-  firebase_core: ^1.2.0
-  firebase_dynamic_links: ^2.0.4
-  fluttertoast: ^7.1.5
-  http: ^0.13.3
-  intl: ^0.17.0
-  package_info: 0.4.3+2
-  qr_code_scanner: ^0.0.13
-  qr_flutter: ^3.2.0
-  share: ^0.6.5+4
-  url_launcher: ^6.0.5
-  window_location_href: ^0.0.2
-  vibration: ^1.7.3
-  syncfusion_flutter_charts: ^19.1.55+1
-  file: ^6.1.0
-  rxdart: ^0.26.0
-  universal_html: ^2.0.8
+    flutter:
+        sdk: flutter
+    flutter_localizations:
+        sdk: flutter
+    # Remember to update the tag for the prebuilt podf in Podfile
+    cloud_firestore: ^4.12.2
+    cupertino_icons: ^1.0.6
+    firebase_analytics: ^10.6.3
+    firebase_auth: ^4.12.1
+    firebase_core: ^2.21.0
+    firebase_dynamic_links: ^5.4.3
+    fluttertoast: ^8.2.2
+    http: ^0.13.6
+    intl: ^0.18.1
+    package_info: ^2.0.2
+    qr_code_scanner: ^1.0.1
+    qr_flutter: ^4.1.0
+    share: ^2.0.4
+    url_launcher: ^6.1.11
+    window_location_href: ^1.0.1+2
+    vibration: ^1.8.3
+    syncfusion_flutter_charts: ^21.2.4
+    file: ^6.1.4
+    rxdart: ^0.27.7
+    universal_html: ^2.2.4
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_launcher_icons: null
+    flutter_test:
+        sdk: flutter
+    flutter_launcher_icons: ^0.13.1
 
 flutter_icons:
-  android: "launcher_icon"
-  ios: true
-  image_path: "assets/icon.png"
-  adaptive_icon_background: "#FF6E95CB"
+    android: "launcher_icon"
+    ios: true
+    image_path: "assets/icon.png"
+    adaptive_icon_background: "#FF6E95CB"
 
 flutter:
-  uses-material-design: true
-  generate: true
+    uses-material-design: true
+    generate: true
 
-  assets:
-    - assets/
+    assets:
+        - assets/

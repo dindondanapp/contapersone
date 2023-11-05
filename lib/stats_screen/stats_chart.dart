@@ -10,14 +10,13 @@ import '../common/extensions.dart';
 
 class StatsChart extends StatefulWidget {
   final TimeSeriesCollection timeSeries;
-  final int capacity;
+  final int? capacity;
 
   StatsChart({
-    Key key,
-    @required this.timeSeries,
+    Key? key,
+    required this.timeSeries,
     this.capacity,
-  })  : assert(timeSeries != null),
-        super(key: key);
+  }) : super(key: key);
 
   @override
   _StatsChartState createState() {
@@ -39,13 +38,13 @@ class _StatsChartState extends State<StatsChart> {
     Colors.blueGrey,
   ];
 
-  double autoZoomPosition;
-  double autoZoomFactor;
-  double zoomPosition;
-  double zoomFactor;
-  double upperLimit;
-  double lowerLimit;
-  TimeSeries totalTimeSeries;
+  double? autoZoomPosition;
+  double? autoZoomFactor;
+  double? zoomPosition;
+  double? zoomFactor;
+  double? upperLimit;
+  double? lowerLimit;
+  TimeSeries totalTimeSeries = TimeSeries([]);
 
   _StatsChartState();
 
@@ -120,7 +119,7 @@ class _StatsChartState extends State<StatsChart> {
 
   Widget _buildFilledChart() {
     final timeString = totalTimeSeries.points.length > 0
-        ? AppLocalizations.of(context).lastUpdate +
+        ? AppLocalizations.of(context)!.lastUpdate +
             ': ' +
             totalTimeSeries.points.last.time
                 .asStrictlyPast()
@@ -227,7 +226,7 @@ class _StatsChartState extends State<StatsChart> {
         ),
         Center(
           child: Text(
-            AppLocalizations.of(context).notEnoughData,
+            AppLocalizations.of(context)!.notEnoughData,
             style: TextStyle(
               color: Colors.grey,
               fontWeight: FontWeight.bold,
@@ -246,8 +245,8 @@ class _StatsChartState extends State<StatsChart> {
       yValueMapper: (point, _) => point.count,
       color: Theme.of(context).primaryColor,
       width: 4,
-      legendItemText: AppLocalizations.of(context).chartTotalLabel,
-      name: AppLocalizations.of(context).chartTotalLabel,
+      legendItemText: AppLocalizations.of(context)!.chartTotalLabel,
+      name: AppLocalizations.of(context)!.chartTotalLabel,
       legendIconType: LegendIconType.circle,
       animationDuration: 0,
     );
@@ -268,10 +267,10 @@ class _StatsChartState extends State<StatsChart> {
           width: 2,
           legendItemText: timeseries.label != null && timeseries.label != ''
               ? timeseries.label
-              : AppLocalizations.of(context).untitled,
+              : AppLocalizations.of(context)!.untitled,
           name: timeseries.label != null && timeseries.label != ''
               ? timeseries.label
-              : AppLocalizations.of(context).untitled,
+              : AppLocalizations.of(context)!.untitled,
           legendIconType: LegendIconType.circle,
           animationDuration: 0,
         );
@@ -284,7 +283,7 @@ class StatChartPoint {
   final DateTime time;
   final int count;
 
-  StatChartPoint({@required this.time, @required this.count});
+  StatChartPoint({required this.time, required this.count});
 }
 
 class TimeSeriesCollection {
@@ -295,13 +294,13 @@ class TimeSeriesCollection {
   factory TimeSeriesCollection.fromDocs(List<QueryDocumentSnapshot> docs) {
     return TimeSeriesCollection(
       docs.map<TimeSeries>((doc) {
-        final Map<String, dynamic> data = doc.data();
-        final label = data['label'] as String;
-        final addEvents = (data['add_events'] as List<dynamic> ?? [])
+        final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        final label = data['label'] as String?;
+        final addEvents = (data['add_events'] as List<dynamic>? ?? [])
             .whereType<Timestamp>()
             .map((e) => e.toDate())
             .toList();
-        final subtractEvents = (data['subtract_events'] as List<dynamic> ?? [])
+        final subtractEvents = (data['subtract_events'] as List<dynamic>? ?? [])
             .whereType<Timestamp>()
             .map((e) => e.toDate())
             .toList();
@@ -320,14 +319,14 @@ class TimeSeriesCollection {
 
 class TimeSeries {
   final List<StatChartPoint> points;
-  final String label;
+  final String? label;
 
   TimeSeries(this.points, {this.label});
 
   factory TimeSeries.fromEvents({
-    String label,
-    List<DateTime> addEvents,
-    List<DateTime> subtractEvents,
+    String? label,
+    required List<DateTime> addEvents,
+    required List<DateTime> subtractEvents,
   }) {
     return TimeSeries(
       _computePoints(addEvents, subtractEvents).toList(),
@@ -335,7 +334,7 @@ class TimeSeries {
     );
   }
 
-  factory TimeSeries.combine(List<TimeSeries> addenda, {String label}) {
+  factory TimeSeries.combine(List<TimeSeries> addenda, {String? label}) {
     return TimeSeries(
       addenda.fold<Iterable<StatChartPoint>>(
         [],
@@ -346,7 +345,7 @@ class TimeSeries {
     );
   }
 
-  TimeSeries extrapolateTo({DateTime start, DateTime end}) {
+  TimeSeries extrapolateTo({DateTime? start, DateTime? end}) {
     if (this.points.length > 2) {
       return TimeSeries(
           List.from([
@@ -372,7 +371,7 @@ class TimeSeries {
     ]..sort((a, b) => a.key.difference(b.key).inMilliseconds);
 
     int accumulator = 0;
-    DateTime time;
+    DateTime? time;
     for (final deltaEvent in deltaEvents) {
       if (time != null && deltaEvent.key != time) {
         yield StatChartPoint(time: time, count: accumulator);
@@ -387,7 +386,7 @@ class TimeSeries {
   }
 
   static Iterable<StatChartPoint> _addPoints(
-      List<StatChartPoint> a, List<StatChartPoint> b) sync* {
+      Iterable<StatChartPoint> a, List<StatChartPoint> b) sync* {
     int skipCount = 0;
     int lastBPointCount = 0;
     int lastAPointCount = 0;

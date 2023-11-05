@@ -3,14 +3,14 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// A simple form to create a new counter, possibly specifying capacity
 class CounterCreateForm extends StatelessWidget {
-  final TextEditingController capacityController;
-  final Function onSubmit;
-  final bool enabled;
+  final TextEditingController? capacityController;
+  final Function() onSubmit;
+  final bool? enabled;
 
   /// Creates a new counter creation form
   /// The argument `enabled` can be set to `false` to grey out the actions.
   CounterCreateForm(
-      {this.capacityController, @required this.onSubmit, this.enabled});
+      {this.capacityController, required this.onSubmit, this.enabled});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class CounterCreateForm extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          AppLocalizations.of(context).createCounterCaption,
+          AppLocalizations.of(context)!.createCounterCaption,
           textAlign: TextAlign.center,
         ),
         TextField(
@@ -27,7 +27,7 @@ class CounterCreateForm extends StatelessWidget {
           keyboardType: TextInputType.number,
           controller: capacityController,
           decoration: InputDecoration(
-            hintText: AppLocalizations.of(context).capacityHint,
+            hintText: AppLocalizations.of(context)!.capacityHint,
             icon: Icon(Icons.people),
           ),
           style: TextStyle(fontSize: 20),
@@ -36,8 +36,8 @@ class CounterCreateForm extends StatelessWidget {
           height: 20,
         ),
         ElevatedButton.icon(
-          onPressed: enabled ? onSubmit : null,
-          label: Text(AppLocalizations.of(context).createCounterButton),
+          onPressed: (enabled != null && enabled!) ? onSubmit : null,
+          label: Text(AppLocalizations.of(context)!.createCounterButton),
           icon: Icon(Icons.add),
         ),
       ],

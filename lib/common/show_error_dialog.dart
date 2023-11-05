@@ -13,12 +13,12 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 ///
 /// Any action will also dismiss the dialog.
 Future<void> showErrorDialog({
-  @required BuildContext context,
-  @required String title,
-  String text,
-  void onRetry(),
-  void onExit(),
-  void onContinue(),
+  required BuildContext context,
+  required String title,
+  String? text,
+  void onRetry()?,
+  void onExit()?,
+  void onContinue()?,
 }) {
   // Future Completer
   final completer = Completer<void>();
@@ -28,7 +28,7 @@ Future<void> showErrorDialog({
   if (onRetry != null) {
     actions.add(
       TextButton(
-        child: Text(AppLocalizations.of(context).tryAgain),
+        child: Text(AppLocalizations.of(context)!.tryAgain),
         onPressed: () {
           Navigator.of(context).pop();
           onRetry();
@@ -41,7 +41,7 @@ Future<void> showErrorDialog({
   if (onExit != null) {
     actions.add(
       TextButton(
-        child: Text(AppLocalizations.of(context).quit),
+        child: Text(AppLocalizations.of(context)!.quit),
         onPressed: () {
           Navigator.of(context).pop();
           onExit();
@@ -54,7 +54,7 @@ Future<void> showErrorDialog({
   if (onContinue != null) {
     actions.add(
       TextButton(
-        child: Text(AppLocalizations.of(context).continueButton),
+        child: Text(AppLocalizations.of(context)!.continueButton),
         onPressed: () {
           Navigator.of(context).pop();
           onContinue();

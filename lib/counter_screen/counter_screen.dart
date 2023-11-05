@@ -18,9 +18,9 @@ import '../share_screen/share_screen.dart';
 class CounterScreen extends StatefulWidget {
   final CounterToken token;
   final Auth auth;
-  final CounterData initData;
+  final CounterData? initData;
 
-  CounterScreen({@required this.token, @required this.auth, this.initData});
+  CounterScreen({required this.token, required this.auth, this.initData});
 
   @override
   _CounterScreenState createState() => _CounterScreenState();
@@ -34,17 +34,17 @@ class _CounterScreenState extends State<CounterScreen> {
   var _isUserCreator = false;
   var _reverseCountDisplay = false;
 
-  String _thisSubcounterId;
+  String? _thisSubcounterId;
 
   /// Lock used to prevent remote updates of the subcounter label while editing
   bool _subcounterLabelLock = false;
 
-  int _capacity;
+  int? _capacity;
   List<SubcounterData> _otherSubcounters = [];
   List<dynamic> _addEvents = [];
   List<dynamic> _subtractEvents = [];
 
-  int _oldCounterTotal;
+  int? _oldCounterTotal;
 
   int get _thisSubcounterCount => _addEvents.length - _subtractEvents.length;
   int get _otherSubcountersTotal => _otherSubcounters.fold<int>(
@@ -53,10 +53,10 @@ class _CounterScreenState extends State<CounterScreen> {
       );
   int get _counterTotal => _thisSubcounterCount + _otherSubcountersTotal;
 
-  String get _subcounterLabel => _subcounterLabelController.text;
-  set _subcounterLabel(String label) {
+  String? get _subcounterLabel => _subcounterLabelController.text;
+  set _subcounterLabel(String? label) {
     if (!_subcounterLabelLock) {
-      _subcounterLabelController.text = label;
+      _subcounterLabelController.text = label ?? "";
     }
   }
 
@@ -66,13 +66,15 @@ class _CounterScreenState extends State<CounterScreen> {
   void initState() {
     super.initState();
 
-    _thisSubcounterId = widget.auth.getCurrentUser().uid;
+    _thisSubcounterId = widget.auth.getCurrentUser()?.uid;
 
     if (widget.initData != null) {
-      final thisSubcounterData = widget.initData.subcounters.firstWhere(
-          (element) => element.id == _thisSubcounterId,
-          orElse: () => null);
-      final otherSubcountersData = widget.initData.subcounters
+      final thisSubcounterData =
+          widget.initData!.subcounters.cast<SubcounterData?>().firstWhere(
+                (element) => element?.id == _thisSubcounterId,
+                orElse: () => null,
+              );
+      final otherSubcountersData = widget.initData!.subcounters
           .where((element) => element.id != _thisSubcounterId)
           .toList();
 
@@ -98,11 +100,11 @@ class _CounterScreenState extends State<CounterScreen> {
           _capacityController.text =
               _capacity != null ? _capacity.toString() : '';
           _disconnected = false;
-          _isUserCreator = event.data().containsKey('creator') &&
-              event.data()['creator'] == widget.auth.userId;
+          _isUserCreator = event.data()!.containsKey('creator') &&
+              event.data()!['creator'] == widget.auth.userId;
 
-          if (event.data().containsKey('subtotals')) {
-            _otherSubcounters = (event.data()['subtotals']
+          if (event.data()!.containsKey('subtotals')) {
+            _otherSubcounters = (event.data()!['subtotals']
                     as Map<String, dynamic>)
                 .map(
                   (id, value) => MapEntry(
@@ -118,14 +120,14 @@ class _CounterScreenState extends State<CounterScreen> {
                 .values
                 .where((element) => element.id != _thisSubcounterId)
                 .toList()
-                  ..sort(
-                      (a, b) => b.lastUpdated.seconds - a.lastUpdated.seconds);
+              ..sort((a, b) => b.lastUpdated.seconds - a.lastUpdated.seconds);
 
-            final thisSubconterData = _otherSubcounters.firstWhere(
-                (element) => element.id == _thisSubcounterId,
-                orElse: () => null);
+            final thisSubconterData = _otherSubcounters
+                .cast<SubcounterData?>()
+                .firstWhere((element) => element?.id == _thisSubcounterId,
+                    orElse: () => null);
             if (thisSubconterData != null) {
-              _subcounterLabel = thisSubconterData.label;
+              _subcounterLabel = thisSubconterData!.label;
             }
           }
 
@@ -145,10 +147,10 @@ class _CounterScreenState extends State<CounterScreen> {
           .listen((event) {
         if (event.exists) {
           setState(() {
-            _addEvents = event.data()['add_events'] as List<dynamic> ?? [];
+            _addEvents = event.data()!['add_events'] as List<dynamic>? ?? [];
             _subtractEvents =
-                event.data()['subtract_events'] as List<dynamic> ?? [];
-            _subcounterLabel = event.data()['label'] as String ?? null;
+                event.data()!['subtract_events'] as List<dynamic>? ?? [];
+            _subcounterLabel = event.data()!['label'] as String? ?? null;
 
             giveFeedbackIfNeeded();
           });
@@ -194,7 +196,7 @@ class _CounterScreenState extends State<CounterScreen> {
 
   // Set the subcounter label
   void _submitSubcounterLabel(String label) async {
-    FirebaseAnalytics().logEvent(name: 'submit_entrance_name');
+    FirebaseAnalytics.instance.logEvent(name: 'submit_entrance_name');
 
     FirebaseFirestore.instance
         .collection('counters')
@@ -208,8 +210,8 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   // Set the counter capacity
-  void _submitCapacity(int capacity) async {
-    FirebaseAnalytics().logEvent(name: 'submit_capacity');
+  void _submitCapacity(int? capacity) async {
+    FirebaseAnalytics.instance.logEvent(name: 'submit_capacity');
 
     FirebaseFirestore.instance
         .collection('counters')
@@ -230,8 +232,8 @@ class _CounterScreenState extends State<CounterScreen> {
     // TODO: Intergrate the 90% threshold with CountDisplay color
     final strongVibration = _oldCounterTotal != null &&
         _capacity != null &&
-        _counterTotal >= _capacity * 0.9 &&
-        _counterTotal > _oldCounterTotal;
+        _counterTotal >= _capacity! * 0.9 &&
+        _counterTotal > _oldCounterTotal!;
 
     _oldCounterTotal = _counterTotal;
 
@@ -250,7 +252,7 @@ class _CounterScreenState extends State<CounterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).appBarDefault),
+        title: Text(AppLocalizations.of(context)!.appBarDefault),
         backgroundColor: Palette.primary,
         actions: [
           PopupMenuButton<void Function()>(
@@ -259,21 +261,21 @@ class _CounterScreenState extends State<CounterScreen> {
               PopupMenuItem(
                 child: ListTile(
                   leading: Icon(Icons.share),
-                  title: Text(AppLocalizations.of(context).shareCounter),
+                  title: Text(AppLocalizations.of(context)!.shareCounter),
                 ),
                 value: _openShareScreen,
               ),
               PopupMenuItem(
                 child: ListTile(
                   leading: Icon(Icons.show_chart),
-                  title: Text(AppLocalizations.of(context).statsScreenTitle),
+                  title: Text(AppLocalizations.of(context)!.statsScreenTitle),
                 ),
                 value: _openStatsScreen,
               ),
               PopupMenuItem(
                 child: ListTile(
                   leading: Icon(Icons.people),
-                  title: Text(AppLocalizations.of(context).editCapacityTitle),
+                  title: Text(AppLocalizations.of(context)!.editCapacityTitle),
                 ),
                 value: _openEditCapacityDialog,
               ),
@@ -283,7 +285,7 @@ class _CounterScreenState extends State<CounterScreen> {
                         child: ListTile(
                           leading: Icon(Icons.refresh),
                           title:
-                              Text(AppLocalizations.of(context).resetCounter),
+                              Text(AppLocalizations.of(context)!.resetCounter),
                         ),
                         value: _resetCounter,
                       )
@@ -294,13 +296,13 @@ class _CounterScreenState extends State<CounterScreen> {
                 child: _vibrationEnabled
                     ? ListTile(
                         leading: Icon(Icons.vibration),
-                        title:
-                            Text(AppLocalizations.of(context).disableVibration),
+                        title: Text(
+                            AppLocalizations.of(context)!.disableVibration),
                       )
                     : ListTile(
                         leading: Icon(Icons.vibration),
                         title:
-                            Text(AppLocalizations.of(context).enableVibration),
+                            Text(AppLocalizations.of(context)!.enableVibration),
                       ),
                 value: _toggleVibration,
               ),
@@ -324,7 +326,7 @@ class _CounterScreenState extends State<CounterScreen> {
               child: CountDisplay(
                 otherSubcountersData: _otherSubcounters,
                 thisSubcounterData: SubcounterData(
-                  id: _thisSubcounterId,
+                  id: _thisSubcounterId!,
                   count: _thisSubcounterCount,
                   label: _subcounterLabel,
                   lastUpdated: Timestamp.now(),
@@ -393,7 +395,7 @@ class _CounterScreenState extends State<CounterScreen> {
             return true;
           },
           child: AlertDialog(
-            title: Text(AppLocalizations.of(context).editEntranceLabelTitle),
+            title: Text(AppLocalizations.of(context)!.editEntranceLabelTitle),
             content: new Row(
               children: <Widget>[
                 new Expanded(
@@ -403,7 +405,7 @@ class _CounterScreenState extends State<CounterScreen> {
                       onSubmitted: (_) => _submitEditLabelDialog(),
                       decoration: InputDecoration(
                         hintText:
-                            AppLocalizations.of(context).editEntranceLabelHint,
+                            AppLocalizations.of(context)!.editEntranceLabelHint,
                         prefixIcon: Icon(Icons.edit),
                       ),
                     ),
@@ -413,11 +415,11 @@ class _CounterScreenState extends State<CounterScreen> {
             ),
             actions: [
               TextButton(
-                child: Text(AppLocalizations.of(context).cancel),
+                child: Text(AppLocalizations.of(context)!.cancel),
                 onPressed: _dismissEditLabelDialog,
               ),
               TextButton(
-                child: Text(AppLocalizations.of(context).confirm),
+                child: Text(AppLocalizations.of(context)!.confirm),
                 onPressed: _submitEditLabelDialog,
               ),
             ],
@@ -440,7 +442,7 @@ class _CounterScreenState extends State<CounterScreen> {
             return true;
           },
           child: AlertDialog(
-            title: Text(AppLocalizations.of(context).editCapacityTitle),
+            title: Text(AppLocalizations.of(context)!.editCapacityTitle),
             content: new Row(
               children: <Widget>[
                 new Expanded(
@@ -453,7 +455,7 @@ class _CounterScreenState extends State<CounterScreen> {
                       ),
                       onSubmitted: (_) => _submitEditCapacityDialog(),
                       decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context).capacityHint,
+                        hintText: AppLocalizations.of(context)!.capacityHint,
                         prefixIcon: Icon(Icons.edit),
                       ),
                     ),
@@ -463,11 +465,11 @@ class _CounterScreenState extends State<CounterScreen> {
             ),
             actions: [
               TextButton(
-                child: Text(AppLocalizations.of(context).cancel),
+                child: Text(AppLocalizations.of(context)!.cancel),
                 onPressed: _dismissEditCapacityDialog,
               ),
               TextButton(
-                child: Text(AppLocalizations.of(context).confirm),
+                child: Text(AppLocalizations.of(context)!.confirm),
                 onPressed: _submitEditCapacityDialog,
               ),
             ],
@@ -496,7 +498,7 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   void _openShareScreen() {
-    FirebaseAnalytics()
+    FirebaseAnalytics.instance
         .logEvent(name: 'open_share_from_counter', parameters: null);
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -510,7 +512,7 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   void _openStatsScreen() {
-    FirebaseAnalytics()
+    FirebaseAnalytics.instance
         .logEvent(name: 'open_stats_from_counter', parameters: null);
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -532,10 +534,11 @@ class _CounterScreenState extends State<CounterScreen> {
   /// Resets the counter by removing all events from all subcounters
   void _resetCounter() async {
     if (await _resetConfirmDialog()) {
-      FirebaseAnalytics().logEvent(name: 'reset_counter', parameters: null);
+      FirebaseAnalytics.instance
+          .logEvent(name: 'reset_counter', parameters: null);
 
       final subcounterIds = <String>[
-        _thisSubcounterId,
+        _thisSubcounterId!,
         ..._otherSubcounters.map((e) => e.id)
       ];
 
@@ -567,8 +570,8 @@ class _CounterScreenState extends State<CounterScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(AppLocalizations.of(context).resetConfirmTitle),
-          content: Text(AppLocalizations.of(context).resetConfirmMessage),
+          title: Text(AppLocalizations.of(context)!.resetConfirmTitle),
+          content: Text(AppLocalizations.of(context)!.resetConfirmMessage),
           actions: [
             TextButton(
               onPressed: () {
@@ -576,7 +579,7 @@ class _CounterScreenState extends State<CounterScreen> {
                 completer.complete(true);
               },
               child: Text(
-                AppLocalizations.of(context).confirm,
+                AppLocalizations.of(context)!.confirm,
                 style: TextStyle(color: Theme.of(context).primaryColor),
               ),
             ),
@@ -585,7 +588,7 @@ class _CounterScreenState extends State<CounterScreen> {
                 Navigator.of(context).pop();
                 completer.complete(false);
               },
-              child: Text(AppLocalizations.of(context).cancel),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
           ],
         );

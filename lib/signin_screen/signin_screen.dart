@@ -11,7 +11,7 @@ import '../common/secret.dart';
 /// A screen for authenticating with Firebase Authentication
 class SignInScreen extends StatefulWidget {
   final Auth auth;
-  SignInScreen({this.auth});
+  SignInScreen({required this.auth});
 
   @override
   State<StatefulWidget> createState() => _SignInScreenState();
@@ -33,7 +33,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).signInScreenTitle),
+        title: Text(AppLocalizations.of(context)!.signInScreenTitle),
       ),
       body: Stack(
         children: <Widget>[
@@ -52,15 +52,15 @@ class _SignInScreenState extends State<SignInScreen> {
         keyboardType: TextInputType.emailAddress,
         autofocus: false,
         decoration: new InputDecoration(
-            hintText: AppLocalizations.of(context).signInEmailHint,
+            hintText: AppLocalizations.of(context)!.signInEmailHint,
             icon: new Icon(
               Icons.mail,
               color: Colors.grey,
             )),
-        validator: (value) => value.isEmpty
-            ? AppLocalizations.of(context).signInEmailValidator
+        validator: (value) => (value?.isEmpty ?? false)
+            ? AppLocalizations.of(context)!.signInEmailValidator
             : null,
-        onSaved: (value) => _email = value.trim(),
+        onSaved: (value) => _email = (value ?? "").trim(),
       ),
     );
   }
@@ -73,15 +73,15 @@ class _SignInScreenState extends State<SignInScreen> {
         obscureText: true,
         autofocus: false,
         decoration: new InputDecoration(
-            hintText: AppLocalizations.of(context).signInPasswordHint,
+            hintText: AppLocalizations.of(context)!.signInPasswordHint,
             icon: new Icon(
               Icons.lock,
               color: Colors.grey,
             )),
-        validator: (value) => value.isEmpty
-            ? AppLocalizations.of(context).signInPasswordValidator
+        validator: (value) => (value?.isEmpty ?? false)
+            ? AppLocalizations.of(context)!.signInPasswordValidator
             : null,
-        onSaved: (value) => _password = value,
+        onSaved: (value) => _password = value ?? "",
       ),
     );
   }
@@ -92,7 +92,7 @@ class _SignInScreenState extends State<SignInScreen> {
         child: SizedBox(
           height: 40.0,
           child: new ElevatedButton(
-            child: new Text(AppLocalizations.of(context).signInSubmit),
+            child: new Text(AppLocalizations.of(context)!.signInSubmit),
             onPressed: _validateAndSubmit,
           ),
         ));
@@ -110,14 +110,14 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Widget _showSignupButton() {
     return new TextButton(
-        child: new Text(AppLocalizations.of(context).signUpButton,
+        child: new Text(AppLocalizations.of(context)!.signUpButton,
             textAlign: TextAlign.center, style: new TextStyle(fontSize: 16.0)),
         onPressed: () => launch(Secret.signUpURL));
   }
 
   Widget _showPasswordRecovery() {
     return new TextButton(
-        child: new Text(AppLocalizations.of(context).forgotPasswordButton,
+        child: new Text(AppLocalizations.of(context)!.forgotPasswordButton,
             style: new TextStyle(fontSize: 16.0)),
         onPressed: () => launch(Secret.recoverPasswordURL));
   }
@@ -151,7 +151,7 @@ class _SignInScreenState extends State<SignInScreen> {
               child: Column(
                 children: [
                   Text(
-                    AppLocalizations.of(context).signInReservedWarning,
+                    AppLocalizations.of(context)!.signInReservedWarning,
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).primaryColor),
@@ -159,7 +159,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   Text(''),
                   Text(
-                    AppLocalizations.of(context).signInFormCaption,
+                    AppLocalizations.of(context)!.signInFormCaption,
                     textAlign: TextAlign.center,
                   ),
                   _showEmailInput(),
@@ -189,12 +189,13 @@ class _SignInScreenState extends State<SignInScreen> {
       _isLoading = true;
     });
     if (_validateAndSave()) {
-      FirebaseAnalytics().logEvent(name: 'signin_attempt', parameters: null);
+      FirebaseAnalytics.instance
+          .logEvent(name: 'signin_attempt', parameters: null);
       setState(() {
         _isLoading = false;
       });
       try {
-        FirebaseAnalytics()
+        FirebaseAnalytics.instance
             .logEvent(name: 'signin_successful', parameters: null);
         // Firebase sign-in
         await widget.auth.signIn(_email, _password);
@@ -202,35 +203,37 @@ class _SignInScreenState extends State<SignInScreen> {
         Navigator.of(context).pop();
       } on FirebaseAuthException catch (error) {
         print('Error: ${error.code}');
-        String message = AppLocalizations.of(context).signInUnknownErrorMessage;
+        String message =
+            AppLocalizations.of(context)!.signInUnknownErrorMessage;
 
         switch (error.code) {
           case "invalid-email":
-            message = AppLocalizations.of(context).signInInvalidEmailError;
+            message = AppLocalizations.of(context)!.signInInvalidEmailError;
             break;
           case "wrong-password":
-            message = AppLocalizations.of(context).signInWrongPasswordError;
+            message = AppLocalizations.of(context)!.signInWrongPasswordError;
             break;
           case "user-not-found":
-            message = AppLocalizations.of(context).signInUserNotFoundError;
+            message = AppLocalizations.of(context)!.signInUserNotFoundError;
             break;
           case "user-disabled":
-            message = AppLocalizations.of(context).signInUserDisabledError;
+            message = AppLocalizations.of(context)!.signInUserDisabledError;
             break;
           case "too-many-requests":
-            message = AppLocalizations.of(context).signInTooManyAttemptsError;
+            message = AppLocalizations.of(context)!.signInTooManyAttemptsError;
             break;
           case "network-request-failed":
-            message = AppLocalizations.of(context).signInNetworkError;
+            message = AppLocalizations.of(context)!.signInNetworkError;
         }
-        FirebaseAnalytics()
+        FirebaseAnalytics.instance
             .logEvent(name: 'signin_error', parameters: {'code': message});
         setState(() {
           _isLoading = false;
           _errorMessage = message;
         });
       } catch (error) {
-        FirebaseAnalytics().logEvent(name: 'signin_error', parameters: null);
+        FirebaseAnalytics.instance
+            .logEvent(name: 'signin_error', parameters: null);
         print(error);
         print('Unexpected sign-in error.');
       }
@@ -243,7 +246,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   bool _validateAndSave() {
     final form = _formKey.currentState;
-    if (form.validate()) {
+    if (form != null && form.validate()) {
       form.save();
       return true;
     }
