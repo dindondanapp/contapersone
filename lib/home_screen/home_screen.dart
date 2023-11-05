@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contapersone/common/show_error_dialog.dart';
 import 'package:contapersone/home_screen/counter_join.dart';
-import 'package:contapersone/signin_screen/signin_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -12,7 +11,6 @@ import 'package:window_location_href/window_location_href.dart';
 
 import '../common/auth.dart';
 import '../common/entities.dart';
-import '../common/secret.dart';
 import '../counter_screen/counter_screen.dart';
 import '../info_screen/info_screen.dart';
 import '../share_screen/share_screen.dart';
@@ -44,13 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _auth.addListener(() {
       if (!_modalOpen) {
-        if (_auth.error == AuthError.apiGeneric) {
-          _modalOpen = true;
-          _showAccountError().then((value) => _modalOpen = false);
-        } else if (_auth.error == AuthError.apiIncompleteSignup) {
-          _modalOpen = true;
-          _showIncompleteSignupError().then((value) => _modalOpen = false);
-        } else if (_auth.error == AuthError.anonymous) {
+        if (_auth.error == AuthError.anonymous) {
           _showNetworkError().then((value) => _modalOpen = false);
         }
       }
@@ -178,41 +170,6 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: Icon(Icons.info_outline),
         onPressed: _openInfoScreen,
       ),
-      actions: auth.status == AuthStatus.loggedIn
-          ? <Widget>[
-              PopupMenuButton(
-                icon: Icon(Icons.more_vert),
-                itemBuilder: (BuildContext context) => [
-                  PopupMenuItem(
-                    child: Text(AppLocalizations.of(context)!.parishSignOut),
-                    value: 'signout',
-                  ),
-                ],
-                onSelected: (value) => _signOut(),
-              )
-            ]
-          : <Widget>[
-              PopupMenuButton(
-                icon: Icon(Icons.more_vert),
-                itemBuilder: (BuildContext context) => [
-                  PopupMenuItem(
-                    child: Text(AppLocalizations.of(context)!.parishSignIn),
-                    value: 'signin',
-                  ),
-                ],
-                onSelected: (value) => _openSignInScreen(),
-              ),
-            ],
-    );
-  }
-
-  void _openSignInScreen() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => SignInScreen(
-          auth: _auth,
-        ),
-      ),
     );
   }
 
@@ -223,11 +180,6 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context) => InfoScreen(),
       ),
     );
-  }
-
-  void _signOut() {
-    FirebaseAnalytics.instance.logEvent(name: 'signout', parameters: null);
-    _auth.signOut();
   }
 
   void _createCounter() async {
@@ -287,19 +239,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _showAccountError() {
-    FirebaseAnalytics.instance
-        .logEvent(name: 'account_error', parameters: null);
-
-    return showErrorDialog(
-      context: context,
-      title: AppLocalizations.of(context)!.accountErrorTitle,
-      text: AppLocalizations.of(context)!.accountErrorMessage,
-      onRetry: _auth.refreshUserData,
-      onExit: _auth.signOut,
-    );
-  }
-
   Future<void> _showNetworkError() {
     FirebaseAnalytics.instance
         .logEvent(name: 'connection_error', parameters: null);
@@ -309,19 +248,6 @@ class _HomeScreenState extends State<HomeScreen> {
       title: AppLocalizations.of(context)!.networkErrorTitle,
       text: AppLocalizations.of(context)!.networkErrorMessage,
       onRetry: _auth.refreshState,
-    );
-  }
-
-  Future<void> _showIncompleteSignupError() {
-    FirebaseAnalytics.instance
-        .logEvent(name: 'incomplete_signup_error', parameters: null);
-
-    return showErrorDialog(
-      context: context,
-      title: AppLocalizations.of(context)!.incompleteSignUpErrorTitle,
-      text: "",
-      onContinue: () => launch(Secret.incompleteSignUpURL),
-      onExit: () => _auth.signOut(),
     );
   }
 

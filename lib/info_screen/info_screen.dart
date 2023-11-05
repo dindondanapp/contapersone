@@ -38,8 +38,8 @@ class InfoScreen extends StatelessWidget {
                         ElevatedButton(
                           child:
                               Text(AppLocalizations.of(context)!.donateButton),
-                          onPressed: () =>
-                              launch('https://dindondan.app/donate.php'),
+                          onPressed: () => launchUrl(
+                              Uri.parse('https://dindondan.app/donate.php')),
                         )
                       ]
                     : []),
@@ -47,7 +47,8 @@ class InfoScreen extends StatelessWidget {
                 TextButton.icon(
                   icon: Icon(Icons.mail),
                   label: Text('Feedback'),
-                  onPressed: () => launch('mailto:feedback@dindondan.app'),
+                  onPressed: () =>
+                      launchUrl(Uri.parse('mailto:feedback@dindondan.app')),
                 ),
               ],
             ),

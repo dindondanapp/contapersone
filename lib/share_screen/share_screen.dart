@@ -12,7 +12,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share/share.dart';
 
 import '../common/palette.dart';
-import '../common/secret.dart';
 import '../counter_screen/counter_screen.dart';
 
 /// A screen that displays a QR code and sharable link for a given counter
@@ -135,7 +134,8 @@ class _ShareScreenState extends State<ShareScreen> {
   void _buildDynamicLink() async {
     try {
       print("Generating link…");
-      final uriString = '${Secret.baseShareURL}?token=${widget.token}';
+      final uriString =
+          'https://dindondan.app/contapersone/web?token=${widget.token}';
       String link = kIsWeb
           ? _manualDynamicLink(uriString)
           : await _shortDynamicLink(uriString);

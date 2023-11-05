@@ -1,11 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart';
-
-import 'secret.dart';
 
 /// Authentication controller based on Firebase Authentication
 class Auth extends ValueNotifier<AuthValue> {
@@ -43,8 +39,6 @@ class Auth extends ValueNotifier<AuthValue> {
       }
       this.userId = _firebaseAuth.currentUser!.uid;
     }
-
-    refreshUserData();
   }
 
   /// Sign in anonymously with Firebase Authentication
@@ -86,51 +80,6 @@ class Auth extends ValueNotifier<AuthValue> {
     this.status = AuthStatus.notLoggedIn;
     this.userId = null;
   }
-
-  /// Load user data from custom API
-  FutureOr<void> refreshUserData() async {
-    try {
-      if (status == AuthStatus.loggedIn) {
-        //Fetch data
-        String url = '${Secret.baseAPIURL}?key=${Secret.secretAPIKey}';
-        Map<String, String> headers = {
-          "Content-type": "application/x-www-form-urlencoded"
-        };
-        var user = getCurrentUser();
-        var token = await user?.getIdToken();
-        String body = 'idToken=$token';
-
-        Response response =
-            await post(Uri.parse(url), headers: headers, body: body);
-
-        if (response.statusCode != 200) {
-          throw 'REQUEST_ERROR_${response.statusCode}';
-        }
-
-        // Parse
-        Map<String, dynamic> result = jsonDecode(response.body);
-        if (result["error"] != null ||
-            result["church_name"] == null ||
-            result["capacity"] == null) {
-          throw result["error"];
-        }
-
-        this.churchName = result["church_name"];
-      } else {
-        this.churchName = null;
-      }
-
-      this.error = null;
-    } catch (error) {
-      if (error == 'INCOMPLETE_SIGNUP') {
-        this.error = AuthError.apiIncompleteSignup;
-      }
-
-      this.error = AuthError.apiGeneric;
-      this.churchName = null;
-      print(error);
-    }
-  }
 }
 
 /// An object that describes the authentication status
@@ -163,4 +112,4 @@ enum AuthStatus {
   loggedInAnonymously,
 }
 
-enum AuthError { apiIncompleteSignup, apiGeneric, anonymous }
+enum AuthError { anonymous }

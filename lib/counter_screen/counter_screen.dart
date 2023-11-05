@@ -112,7 +112,7 @@ class _CounterScreenState extends State<CounterScreen> {
                     SubcounterData(
                       id: id,
                       count: value['count'] as int,
-                      label: value['label'] as String,
+                      label: value['label'] as String?,
                       lastUpdated: value['lastUpdated'] as Timestamp,
                     ),
                   ),
