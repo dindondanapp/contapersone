@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contapersone/common/show_error_dialog.dart';
 import 'package:contapersone/home_screen/counter_join.dart';
-import 'package:contapersone/signin_screen/signin_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -12,7 +11,6 @@ import 'package:window_location_href/window_location_href.dart';
 
 import '../common/auth.dart';
 import '../common/entities.dart';
-import '../common/secret.dart';
 import '../counter_screen/counter_screen.dart';
 import '../info_screen/info_screen.dart';
 import '../share_screen/share_screen.dart';
@@ -30,8 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
   HomeStatus _status = HomeStatus.ready;
   final _capacityController = TextEditingController();
   String get _title => _auth.status == AuthStatus.loggedIn
-      ? _auth.churchName ?? AppLocalizations.of(context).appBarLoginInProgress
-      : AppLocalizations.of(context).appBarDefault;
+      ? _auth.churchName ?? AppLocalizations.of(context)!.appBarLoginInProgress
+      : AppLocalizations.of(context)!.appBarDefault;
   bool _modalOpen = false;
   bool get _buttonsEnabled =>
       _status == HomeStatus.ready &&
@@ -44,13 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _auth.addListener(() {
       if (!_modalOpen) {
-        if (_auth.error == AuthError.apiGeneric) {
-          _modalOpen = true;
-          _showAccountError().then((value) => _modalOpen = false);
-        } else if (_auth.error == AuthError.apiIncompleteSignup) {
-          _modalOpen = true;
-          _showIncompleteSignupError().then((value) => _modalOpen = false);
-        } else if (_auth.error == AuthError.anonymous) {
+        if (_auth.error == AuthError.anonymous) {
           _showNetworkError().then((value) => _modalOpen = false);
         }
       }
@@ -58,62 +50,50 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (kIsWeb) {
       // Retrieve the shared counter token from the query string, if present
-      final webUri = Uri.tryParse(getHref());
+      final webUri = Uri.tryParse(href ?? "");
       if (webUri != null && webUri.queryParameters['token'] != null) {
         print("Found web uri with token.");
         _followDeepLink(webUri);
       }
     } else {
       // Handle firebase dynamic links
-      _initDynamicLinks().then((Uri uri) {
+      _initDynamicLinks().then((Uri? uri) {
         if (uri != null) {
           _followDeepLink(uri);
         }
       });
 
-      FirebaseDynamicLinks.instance.onLink(
-        onSuccess: (PendingDynamicLinkData dynamicLink) async {
-          final Uri deepLink = dynamicLink?.link;
-
-          if (deepLink != null) {
-            _followDeepLink(deepLink);
-          }
-
-          return null;
-        },
-        onError: (OnLinkErrorException e) async {
-          print('onLinkError');
-          print(e.message);
-
-          return null;
-        },
-      );
+      FirebaseDynamicLinks.instance.onLink
+          .listen((PendingDynamicLinkData dynamicLink) async {
+        final Uri deepLink = dynamicLink.link;
+        _followDeepLink(deepLink);
+      });
     }
   }
 
-  Future<Uri> _initDynamicLinks() async {
+  Future<Uri?> _initDynamicLinks() async {
     print("Checking for deep links.");
-    final PendingDynamicLinkData data =
+    final PendingDynamicLinkData? data =
         await FirebaseDynamicLinks.instance.getInitialLink();
-    final Uri deepLink = data?.link;
 
-    if (deepLink == null) {
+    if (data?.link == null) {
       return null;
     } else {
-      return deepLink;
+      return data!.link;
     }
   }
 
   void _followDeepLink(Uri uri) {
     if (uri.queryParameters.containsKey('token')) {
       _startSubcounter(
-        token: CounterToken.fromString(uri.queryParameters['token']),
+        token: CounterToken.fromString(uri.queryParameters['token']!),
       );
     }
   }
 
-  void _startSubcounter({@required CounterToken token, CounterData initData}) {
-    FirebaseAnalytics().logEvent(name: 'start_subcounter', parameters: null);
+  void _startSubcounter({required CounterToken token, CounterData? initData}) {
+    FirebaseAnalytics.instance
+        .logEvent(name: 'start_subcounter', parameters: null);
     Navigator.of(context).popUntil((route) => route.isFirst);
     print('Starting subcounter for id $token');
     Navigator.of(context).push(
@@ -153,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Container(height: 20),
                   Text(
-                    AppLocalizations.of(context).orDivider,
+                    AppLocalizations.of(context)!.orDivider,
                     textAlign: TextAlign.center,
                   ),
                   Container(height: 20),
@@ -183,53 +163,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildAppBar(AuthValue auth) {
+  AppBar _buildAppBar(AuthValue auth) {
     return AppBar(
       title: Text(_title),
       leading: IconButton(
         icon: Icon(Icons.info_outline),
         onPressed: _openInfoScreen,
       ),
-      actions: auth.status == AuthStatus.loggedIn
-          ? <Widget>[
-              PopupMenuButton(
-                icon: Icon(Icons.more_vert),
-                itemBuilder: (BuildContext context) => [
-                  PopupMenuItem(
-                    child: Text(AppLocalizations.of(context).parishSignOut),
-                    value: 'signout',
-                  ),
-                ],
-                onSelected: (value) => _signOut(),
-              )
-            ]
-          : <Widget>[
-              PopupMenuButton(
-                icon: Icon(Icons.more_vert),
-                itemBuilder: (BuildContext context) => [
-                  PopupMenuItem(
-                    child: Text(AppLocalizations.of(context).parishSignIn),
-                    value: 'signin',
-                  ),
-                ],
-                onSelected: (value) => _openSignInScreen(),
-              ),
-            ],
-    );
-  }
-
-  void _openSignInScreen() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => SignInScreen(
-          auth: _auth,
-        ),
-      ),
     );
   }
 
   void _openInfoScreen() {
-    FirebaseAnalytics().logEvent(name: 'open_info', parameters: null);
+    FirebaseAnalytics.instance.logEvent(name: 'open_info', parameters: null);
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => InfoScreen(),
@@ -237,23 +182,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _signOut() {
-    FirebaseAnalytics().logEvent(name: 'signout', parameters: null);
-    _auth.signOut();
-  }
-
   void _createCounter() async {
-    FirebaseAnalytics().logEvent(name: 'create_counter', parameters: null);
+    FirebaseAnalytics.instance
+        .logEvent(name: 'create_counter', parameters: null);
 
     setState(() {
       _status = HomeStatus.creating_counter;
       print('Now creating counter.');
     });
 
-    int capacity;
+    int? capacity;
 
     try {
-      capacity = int.parse(_capacityController.text);
+      capacity = int.tryParse(_capacityController.text);
     } catch (e) {
       print('Invalid capacity provided');
       //TODO: Provide visual feedback
@@ -265,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final newCounterData = {
         'total': 0,
         'church_uuid': '',
-        'creator': _auth.getCurrentUser().uid,
+        'creator': _auth.getCurrentUser()!.uid,
         'lastUpdated': Timestamp.now(),
         'capacity': capacity,
         'deleted': null
@@ -287,54 +228,30 @@ class _HomeScreenState extends State<HomeScreen> {
         _status = HomeStatus.ready;
       });
     } catch (error) {
-      FirebaseAnalytics()
+      FirebaseAnalytics.instance
           .logEvent(name: 'counter_creation_error', parameters: null);
       showErrorDialog(
         context: context,
-        title: AppLocalizations.of(context).createCounterErrorTitle,
-        text: AppLocalizations.of(context).createCounterErrorMessage,
+        title: AppLocalizations.of(context)!.createCounterErrorTitle,
+        text: AppLocalizations.of(context)!.createCounterErrorMessage,
         onRetry: _createCounter,
       );
     }
   }
 
-  Future<void> _showAccountError() {
-    FirebaseAnalytics().logEvent(name: 'account_error', parameters: null);
-
-    return showErrorDialog(
-      context: context,
-      title: AppLocalizations.of(context).accountErrorTitle,
-      text: AppLocalizations.of(context).accountErrorMessage,
-      onRetry: _auth.refreshUserData,
-      onExit: _auth.signOut,
-    );
-  }
-
   Future<void> _showNetworkError() {
-    FirebaseAnalytics().logEvent(name: 'connection_error', parameters: null);
+    FirebaseAnalytics.instance
+        .logEvent(name: 'connection_error', parameters: null);
 
     return showErrorDialog(
       context: context,
-      title: AppLocalizations.of(context).networkErrorTitle,
-      text: AppLocalizations.of(context).networkErrorMessage,
+      title: AppLocalizations.of(context)!.networkErrorTitle,
+      text: AppLocalizations.of(context)!.networkErrorMessage,
       onRetry: _auth.refreshState,
     );
   }
 
-  Future<void> _showIncompleteSignupError() {
-    FirebaseAnalytics()
-        .logEvent(name: 'incomplete_signup_error', parameters: null);
-
-    return showErrorDialog(
-      context: context,
-      title: AppLocalizations.of(context).incompleteSignUpErrorTitle,
-      text: "",
-      onContinue: () => launch(Secret.incompleteSignUpURL),
-      onExit: () => _auth.signOut(),
-    );
-  }
-
-  BottomAppBar _buildBottomNavigationBar() {
+  BottomAppBar? _buildBottomNavigationBar() {
     if (kIsWeb) {
       return BottomAppBar(
         child: Center(

@@ -22,9 +22,9 @@ class StatsScreen extends StatefulWidget {
   final CounterToken token;
 
   const StatsScreen({
-    Key key,
-    this.auth,
-    this.token,
+    Key? key,
+    required this.auth,
+    required this.token,
   }) : super(key: key);
 
   @override
@@ -32,7 +32,7 @@ class StatsScreen extends StatefulWidget {
 }
 
 class StatsScreenState extends State<StatsScreen> {
-  String _userId;
+  String? _userId;
   Stream<CounterData> _counterDataStream = Stream.empty();
   BehaviorSubject<TimeSeriesCollection> _timeSeriesStream =
       BehaviorSubject.seeded(TimeSeriesCollection.empty());
@@ -69,8 +69,8 @@ class StatsScreenState extends State<StatsScreen> {
           (doc) {
             List<SubcounterData> subcounters = [];
             try {
-              if (doc.data()['subtotals'] != null) {
-                subcounters = (doc.data()['subtotals'] as Map)
+              if (doc.data()!['subtotals'] != null) {
+                subcounters = (doc.data()!['subtotals'] as Map)
                     .entries
                     .map<SubcounterData>(
                       (MapEntry e) => SubcounterData(
@@ -86,10 +86,10 @@ class StatsScreenState extends State<StatsScreen> {
 
             return CounterData(
               CounterToken.fromString(doc.id),
-              lastUpdated: doc.data()['lastUpdated'],
-              total: doc.data()['total'],
-              capacity: doc.data()['capacity'],
-              creator: doc.data()['creator'],
+              lastUpdated: doc.data()!['lastUpdated'],
+              total: doc.data()!['total'],
+              capacity: doc.data()!['capacity'],
+              creator: doc.data()!['creator'],
               subcounters: subcounters,
             );
           },
@@ -117,7 +117,7 @@ class StatsScreenState extends State<StatsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).statsScreenTitle),
+        title: Text(AppLocalizations.of(context)!.statsScreenTitle),
         backgroundColor: Palette.primary,
         actions: [_buildShareOrDownloadAction()],
       ),
@@ -133,7 +133,7 @@ class StatsScreenState extends State<StatsScreen> {
           return Container();
         }
 
-        final capacity = snapshot.data.capacity;
+        final capacity = snapshot.data!.capacity;
 
         return SafeArea(
           child: Column(
@@ -147,7 +147,7 @@ class StatsScreenState extends State<StatsScreen> {
                     initialData: TimeSeriesCollection.empty(),
                     builder: (context, snapshot) {
                       return StatsChart(
-                        timeSeries: snapshot.data,
+                        timeSeries: snapshot.data!,
                         capacity: capacity,
                       );
                     },
@@ -185,7 +185,8 @@ class StatsScreenState extends State<StatsScreen> {
 
     file.writeAsStringSync(string);
 
-    final RenderBox box = _shareButtonKey.currentContext.findRenderObject();
+    final RenderBox box =
+        _shareButtonKey.currentContext?.findRenderObject() as RenderBox;
 
     await Share.shareFiles(
       [file.path],
@@ -204,7 +205,7 @@ class StatsScreenState extends State<StatsScreen> {
   }
 
   Future<String> _generateCSV() async {
-    final timeSeriesList = _timeSeriesStream.valueWrapper.value.subcounters;
+    final timeSeriesList = _timeSeriesStream.value.subcounters;
 
     // Get all the sorted time instants of all the points.
     // Each instant will correspond to a table row.
@@ -225,9 +226,9 @@ class StatsScreenState extends State<StatsScreen> {
       '',
       ...timeSeriesList.map<String>(
         (timeSeries) =>
-            (timeSeries.label != null && timeSeries.label.isNotEmpty)
-                ? timeSeries.label
-                : AppLocalizations.of(context).untitled,
+            (timeSeries.label != null && timeSeries.label!.isNotEmpty)
+                ? (timeSeries.label ?? "")
+                : AppLocalizations.of(context)!.untitled,
       ),
     ].join(',');
 

@@ -14,10 +14,10 @@ import '../common/extensions.dart';
 import '../stats_screen/stats_screen.dart';
 
 class History extends StatefulWidget {
-  final Auth auth;
+  final Auth? auth;
   final void Function(CounterToken token, CounterData initData) resumeCounter;
 
-  const History({Key key, this.auth, @required this.resumeCounter})
+  const History({Key? key, this.auth, required this.resumeCounter})
       : super(key: key);
 
   @override
@@ -26,16 +26,16 @@ class History extends StatefulWidget {
 
 class HistoryState extends State<History> {
   BehaviorSubject<List<CounterData>> _stream = BehaviorSubject();
-  String _currentUserId;
+  String? _currentUserId;
 
   @override
   void initState() {
     super.initState();
 
-    _currentUserId = widget.auth.userId;
-    widget.auth.addListener(() {
-      if (widget.auth.userId != _currentUserId) {
-        _currentUserId = widget.auth.userId;
+    _currentUserId = widget.auth?.userId;
+    widget.auth?.addListener(() {
+      if (widget.auth?.userId != _currentUserId) {
+        _currentUserId = widget.auth?.userId;
         _updateStream();
       }
     });
@@ -45,14 +45,14 @@ class HistoryState extends State<History> {
 
   _updateStream() {
     setState(() {
-      if (widget.auth.userId == null) {
+      if (widget.auth?.userId == null) {
         _stream.add([]);
       } else {
         const limit = 20;
 
         final stream = FirebaseFirestore.instance
             .collection('counters')
-            .where('users', arrayContains: widget.auth.userId)
+            .where('users', arrayContains: widget.auth?.userId)
             .orderBy('lastUpdated', descending: true)
             .limit(limit)
             .snapshots()
@@ -61,7 +61,7 @@ class HistoryState extends State<History> {
         final legacy = FirebaseFirestore.instance
             .collection('counters')
             .where('deleted', isNull: true)
-            .where('user_id', isEqualTo: widget.auth.userId)
+            .where('user_id', isEqualTo: widget.auth?.userId)
             .orderBy('lastUpdated', descending: true)
             .limit(limit)
             .snapshots()
@@ -105,9 +105,9 @@ class HistoryState extends State<History> {
                 )
                 .toSet()
                 .toList()
-                  ..sort((a, b) =>
-                      b.lastUpdated.millisecondsSinceEpoch -
-                      a.lastUpdated.millisecondsSinceEpoch);
+              ..sort((a, b) =>
+                  b.lastUpdated.millisecondsSinceEpoch -
+                  a.lastUpdated.millisecondsSinceEpoch);
 
             return list.sublist(0, min(list.length, limit));
           },
@@ -126,17 +126,17 @@ class HistoryState extends State<History> {
             SizedBox(height: 20),
             Divider(),
             SizedBox(height: 20),
-            Text(AppLocalizations.of(context).historyTitle),
+            Text(AppLocalizations.of(context)!.historyTitle),
             SizedBox(height: 20),
-            ...(snapshot.data.length > 0
-                ? snapshot.data
+            ...(snapshot.data!.length > 0
+                ? snapshot.data!
                     .map(
                       (e) => _buildCounterTile(e),
                     )
                     .toList()
                 : [
                     Text(
-                      AppLocalizations.of(context).noHistoryNotice,
+                      AppLocalizations.of(context)!.noHistoryNotice,
                       style: TextStyle(fontStyle: FontStyle.italic),
                     )
                   ]),
@@ -148,10 +148,10 @@ class HistoryState extends State<History> {
               SizedBox(height: 20),
               Divider(),
               SizedBox(height: 20),
-              Text(AppLocalizations.of(context).historyLoadingError),
+              Text(AppLocalizations.of(context)!.historyLoadingError),
               TextButton.icon(
                 icon: Icon(Icons.refresh),
-                label: Text(AppLocalizations.of(context).tryAgain),
+                label: Text(AppLocalizations.of(context)!.tryAgain),
                 onPressed: _updateStream,
               )
             ],
@@ -173,7 +173,7 @@ class HistoryState extends State<History> {
       stream: Stream.periodic(Duration(seconds: 1)),
       initialData: 0,
       builder: (context, snapshot) {
-        final userIsCreator = data.creator == widget.auth.userId;
+        final userIsCreator = data.creator == widget.auth?.userId;
         return Card(
           child: Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -210,7 +210,7 @@ class HistoryState extends State<History> {
                           TextButton(
                             child: Row(
                               children: [
-                                Text(AppLocalizations.of(context)
+                                Text(AppLocalizations.of(context)!
                                     .continueButton),
                                 SizedBox(width: 10),
                                 Icon(Icons.arrow_forward),
@@ -240,9 +240,9 @@ class HistoryState extends State<History> {
   }
 
   Widget _buildCounterTotal({
-    @required int total,
-    @required int capacity,
-    @required Timestamp lastUpdated,
+    required int total,
+    required int capacity,
+    required Timestamp lastUpdated,
     String subtitle = '',
   }) {
     final timeString = lastUpdated == null
@@ -285,13 +285,13 @@ class HistoryState extends State<History> {
   }
 
   void _openStatsScreen(CounterToken token) {
-    FirebaseAnalytics()
+    FirebaseAnalytics.instance
         .logEvent(name: 'open_stats_from_history', parameters: null);
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => StatsScreen(
           token: token,
-          auth: widget.auth,
+          auth: widget.auth!,
         ),
       ),
     );
@@ -304,7 +304,7 @@ class HistoryState extends State<History> {
           .doc(token.toString())
           .update({
         'deleted': Timestamp.now(), // For legacy
-        'users': FieldValue.arrayRemove([widget.auth.userId])
+        'users': FieldValue.arrayRemove([widget.auth?.userId])
       });
     }
   }
@@ -317,9 +317,9 @@ class HistoryState extends State<History> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(AppLocalizations.of(context).historyDeleteConfirmTitle),
+          title: Text(AppLocalizations.of(context)!.historyDeleteConfirmTitle),
           content:
-              Text(AppLocalizations.of(context).historyDeleteConfirmMessage),
+              Text(AppLocalizations.of(context)!.historyDeleteConfirmMessage),
           actions: [
             TextButton(
               onPressed: () {
@@ -327,7 +327,7 @@ class HistoryState extends State<History> {
                 completer.complete(true);
               },
               child: Text(
-                AppLocalizations.of(context).confirm,
+                AppLocalizations.of(context)!.confirm,
                 style: TextStyle(color: Theme.of(context).primaryColor),
               ),
             ),
@@ -336,7 +336,7 @@ class HistoryState extends State<History> {
                 Navigator.of(context).pop();
                 completer.complete(false);
               },
-              child: Text(AppLocalizations.of(context).cancel),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
           ],
         );

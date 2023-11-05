@@ -10,7 +10,7 @@ class CountDisplay extends StatelessWidget {
   final SubcounterData thisSubcounterData;
   final bool isDisconnected;
   final int total;
-  final int capacity;
+  final int? capacity;
   final bool reverse;
   final void Function() onEditLabel;
   final void Function() onTotalTap;
@@ -24,15 +24,15 @@ class CountDisplay extends StatelessWidget {
   /// total count and an `onEditCallback`can be used to allow the user to change
   /// tha label of the subcounter by pressing on it.
   const CountDisplay(
-      {Key key,
-      @required this.otherSubcountersData,
-      @required this.thisSubcounterData,
-      @required this.isDisconnected,
-      @required this.total,
-      this.onEditLabel,
+      {Key? key,
+      required this.otherSubcountersData,
+      required this.thisSubcounterData,
+      required this.isDisconnected,
+      required this.total,
+      required this.onEditLabel,
       this.capacity,
       this.reverse = false,
-      this.onTotalTap})
+      required this.onTotalTap})
       : super(key: key);
 
   @override
@@ -56,7 +56,7 @@ class CountDisplay extends StatelessWidget {
                 ),
                 _buildNameInput(
                     defaultValue:
-                        AppLocalizations.of(context).singleSubcounterLabel),
+                        AppLocalizations.of(context)!.singleSubcounterLabel),
               ],
             ),
           );
@@ -81,9 +81,9 @@ class CountDisplay extends StatelessWidget {
                     ),
                     Text(
                       safeReverse
-                          ? AppLocalizations.of(context)
+                          ? AppLocalizations.of(context)!
                               .reverseCounterTotalLabel
-                          : AppLocalizations.of(context).counterTotalLabel,
+                          : AppLocalizations.of(context)!.counterTotalLabel,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -108,7 +108,7 @@ class CountDisplay extends StatelessWidget {
                           context: context,
                           count: thisSubcounterData.count,
                           label: thisSubcounterData.label ??
-                              AppLocalizations.of(context)
+                              AppLocalizations.of(context)!
                                   .thisEntranceDefaultLabel,
                         ),
                         ...otherSubcountersData.map(
@@ -131,7 +131,7 @@ class CountDisplay extends StatelessWidget {
   }
 
   Widget _buildMainSubcounter(
-      {@required BuildContext context, @required int count, String label}) {
+      {required BuildContext context, required int count, String? label}) {
     return Container(
       height: 120,
       width: 200,
@@ -161,7 +161,7 @@ class CountDisplay extends StatelessWidget {
               Spacer(),
               _buildNameInput(
                 defaultValue:
-                    AppLocalizations.of(context).thisEntranceDefaultLabel,
+                    AppLocalizations.of(context)!.thisEntranceDefaultLabel,
                 brightness: Brightness.dark,
               ),
             ],
@@ -172,7 +172,7 @@ class CountDisplay extends StatelessWidget {
   }
 
   Widget _buildOtherSubcounter(
-      {@required BuildContext context, @required int count, String label}) {
+      {required BuildContext context, required int count, String? label}) {
     final labelDefined = label != null && label.trim() != '';
     return Container(
       height: 100,
@@ -201,8 +201,8 @@ class CountDisplay extends StatelessWidget {
               Spacer(),
               Text(
                 labelDefined
-                    ? label.trim()
-                    : AppLocalizations.of(context).otherEntranceDefaultLabel,
+                    ? label!.trim()
+                    : AppLocalizations.of(context)!.otherEntranceDefaultLabel,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
                 textAlign: TextAlign.center,
@@ -218,9 +218,9 @@ class CountDisplay extends StatelessWidget {
   }
 
   Widget _buildStyledCount({
-    @required BuildContext context,
-    @required int count,
-    int capacity,
+    required BuildContext context,
+    required int count,
+    int? capacity,
     bool disconnected = false,
     bool reverse = false,
   }) {
@@ -269,7 +269,7 @@ class CountDisplay extends StatelessWidget {
 
   Widget _buildNameInput(
       {Brightness brightness = Brightness.light,
-      @required String defaultValue}) {
+      required String defaultValue}) {
     final labelUndefined =
         thisSubcounterData.label == null || thisSubcounterData.label == '';
     return LayoutBuilder(builder: (context, constraints) {
@@ -284,7 +284,7 @@ class CountDisplay extends StatelessWidget {
         label: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: constraints.maxWidth - 60),
           child: Text(
-            labelUndefined ? defaultValue : thisSubcounterData.label,
+            labelUndefined ? defaultValue : thisSubcounterData.label!,
             style: TextStyle(
               color: brightness == Brightness.dark ? Colors.white : null,
               fontStyle: labelUndefined ? FontStyle.italic : null,

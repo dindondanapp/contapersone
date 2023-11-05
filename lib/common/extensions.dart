@@ -45,18 +45,18 @@ extension ColorToMaterialColor on Color {
 
 extension Saturation on num {
   /// Saturate the number between given [lower] and [upper] bounds, if provided.
-  num sat({num lower, num upper}) {
+  num sat({num? lower, num? upper}) {
     return min(upper ?? double.infinity, max(lower ?? -double.infinity, this));
   }
 }
 
 extension DurationToHuman on Duration {
-  String toHuman({@required BuildContext context}) {
+  String toHuman({required BuildContext context}) {
     final Map<Duration, String Function(int)> precisionSequence = {
-      Duration(minutes: 1): AppLocalizations.of(context).minute,
-      Duration(hours: 1): AppLocalizations.of(context).hour,
-      Duration(days: 1): AppLocalizations.of(context).day,
-      Duration(days: 7): AppLocalizations.of(context).week,
+      Duration(minutes: 1): AppLocalizations.of(context)!.minute,
+      Duration(hours: 1): AppLocalizations.of(context)!.hour,
+      Duration(days: 1): AppLocalizations.of(context)!.day,
+      Duration(days: 7): AppLocalizations.of(context)!.week,
     };
 
     final availablePrecisions = precisionSequence.entries
@@ -74,7 +74,7 @@ extension DurationToHuman on Duration {
 
 extension DateToHuman on DateTime {
   String toHumanString(
-      {@required BuildContext context, Duration maximumDuration}) {
+      {required BuildContext context, Duration? maximumDuration}) {
     final now = DateTime.now();
     final elapsed = now.difference(this);
 
@@ -85,7 +85,7 @@ extension DateToHuman on DateTime {
     if (elapsed.inMilliseconds > 0 && elapsed <= maximumDuration) {
       return elapsed.toHuman(context: context);
     } else {
-      return DateFormat.yMMMMd(AppLocalizations.of(context).localeName)
+      return DateFormat.yMMMMd(AppLocalizations.of(context)!.localeName)
               .format(this) +
           ' ' +
           TimeOfDay.fromDateTime(this).format(context);

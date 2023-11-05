@@ -49,11 +49,11 @@ class CounterData {
 
   CounterData(
     this.token, {
-    @required this.lastUpdated,
-    @required this.total,
-    @required this.capacity,
-    @required this.creator,
-    @required this.subcounters,
+    required this.lastUpdated,
+    required this.total,
+    required this.capacity,
+    required this.creator,
+    required this.subcounters,
   });
 
   @override
@@ -67,15 +67,15 @@ class CounterData {
 
 /// Set of minimal data for representing the state of a subcounter
 class SubcounterData {
-  final String label;
+  final String? label;
   final String id;
   final int count;
   final Timestamp lastUpdated;
 
   /// Create an object with all the data about the current state of a subcounter
   SubcounterData(
-      {@required this.lastUpdated,
-      @required this.label,
-      @required this.id,
-      @required this.count});
+      {required this.lastUpdated,
+      required this.label,
+      required this.id,
+      required this.count});
 }

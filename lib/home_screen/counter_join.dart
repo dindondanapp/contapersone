@@ -1,4 +1,5 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ import '../common/scan_uri_qr_code.dart';
 class CounterJoinForm extends StatelessWidget {
   final bool enabled;
   final void Function(CounterToken token) onSuccess;
-  final void Function() onError;
+  final void Function()? onError;
 
   /// Creates a simple form to join a shared counter by scanning a QR code.
   ///
@@ -22,7 +23,7 @@ class CounterJoinForm extends StatelessWidget {
   ///
   /// The argument `enabled` can be set to `false` to grey out the actions.
   const CounterJoinForm(
-      {Key key, this.enabled = true, @required this.onSuccess, this.onError})
+      {Key? key, this.enabled = true, required this.onSuccess, this.onError})
       : super(key: key);
 
   @override
@@ -31,7 +32,7 @@ class CounterJoinForm extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          AppLocalizations.of(context).scanQrCaption,
+          AppLocalizations.of(context)!.scanQrCaption,
           textAlign: TextAlign.center,
         ),
         Container(
@@ -40,12 +41,12 @@ class CounterJoinForm extends StatelessWidget {
         () {
           if (kIsWeb) {
             return Text(
-              AppLocalizations.of(context).scanQrWebNotice,
+              AppLocalizations.of(context)!.scanQrWebNotice,
             );
           } else {
             return ElevatedButton.icon(
               onPressed: enabled ? () => _scan(context) : null,
-              label: Text(AppLocalizations.of(context).scanQrButton),
+              label: Text(AppLocalizations.of(context)!.scanQrButton),
               icon: Icon(Icons.camera_alt),
             );
           }
@@ -57,24 +58,24 @@ class CounterJoinForm extends StatelessWidget {
   Future<void> _scan(BuildContext context) async {
     try {
       Uri uri = await scanUriQRCode(context);
-      FirebaseAnalytics().logEvent(name: 'scan', parameters: null);
+      FirebaseAnalytics.instance.logEvent(name: 'scan', parameters: null);
 
-      PendingDynamicLinkData data =
+      PendingDynamicLinkData? data =
           await FirebaseDynamicLinks.instance.getDynamicLink(uri);
 
-      if (data.link.queryParameters.containsKey('token')) {
-        onSuccess(CounterToken.fromString(data.link.queryParameters['token']));
+      if (data != null && data.link.queryParameters.containsKey('token')) {
+        onSuccess(CounterToken.fromString(data.link.queryParameters['token']!));
       } else {
         if (onError != null) {
-          onError();
+          onError!();
         } else {
           throw Exception('Invalid code scanned.');
         }
       }
     } catch (error) {
-      FirebaseAnalytics().logEvent(name: 'scan_fail', parameters: null);
+      FirebaseAnalytics.instance.logEvent(name: 'scan_fail', parameters: null);
       if (onError != null) {
-        onError();
+        onError!();
       } else {
         throw Exception('Invalid code scanned.');
       }

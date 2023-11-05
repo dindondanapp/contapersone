@@ -9,7 +9,7 @@ class InfoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).infoScreenTitle),
+        title: Text(AppLocalizations.of(context)!.infoScreenTitle),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20),
@@ -29,7 +29,7 @@ class InfoScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 40),
                 Text(
-                  AppLocalizations.of(context).infoScreenText,
+                  AppLocalizations.of(context)!.infoScreenText,
                   textAlign: TextAlign.justify,
                 ),
                 ...(kIsWeb
@@ -37,9 +37,9 @@ class InfoScreen extends StatelessWidget {
                         SizedBox(height: 40),
                         ElevatedButton(
                           child:
-                              Text(AppLocalizations.of(context).donateButton),
-                          onPressed: () =>
-                              launch('https://dindondan.app/donate.php'),
+                              Text(AppLocalizations.of(context)!.donateButton),
+                          onPressed: () => launchUrl(
+                              Uri.parse('https://dindondan.app/donate.php')),
                         )
                       ]
                     : []),
@@ -47,7 +47,8 @@ class InfoScreen extends StatelessWidget {
                 TextButton.icon(
                   icon: Icon(Icons.mail),
                   label: Text('Feedback'),
-                  onPressed: () => launch('mailto:feedback@dindondan.app'),
+                  onPressed: () =>
+                      launchUrl(Uri.parse('mailto:feedback@dindondan.app')),
                 ),
               ],
             ),
