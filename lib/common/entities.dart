@@ -41,9 +41,9 @@ class CounterToken {
 /// Set of minimal data for representing the state of a counter
 class CounterData {
   final CounterToken token;
-  final Timestamp lastUpdated;
+  final Timestamp? lastUpdated;
   final int total;
-  final int capacity;
+  final int? capacity;
   final String creator;
   final List<SubcounterData> subcounters;
 

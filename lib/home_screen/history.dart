@@ -106,8 +106,8 @@ class HistoryState extends State<History> {
                 .toSet()
                 .toList()
               ..sort((a, b) =>
-                  b.lastUpdated.millisecondsSinceEpoch -
-                  a.lastUpdated.millisecondsSinceEpoch);
+                  (b.lastUpdated?.millisecondsSinceEpoch ?? 0) -
+                  (a.lastUpdated?.millisecondsSinceEpoch ?? 0));
 
             return list.sublist(0, min(list.length, limit));
           },
@@ -241,8 +241,8 @@ class HistoryState extends State<History> {
 
   Widget _buildCounterTotal({
     required int total,
-    required int capacity,
-    required Timestamp lastUpdated,
+    required int? capacity,
+    required Timestamp? lastUpdated,
     String subtitle = '',
   }) {
     final timeString = lastUpdated == null
