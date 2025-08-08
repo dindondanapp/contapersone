@@ -128,8 +128,7 @@ class _StatsChartState extends State<StatsChart> {
 
     return SfCartesianChart(
       enableAxisAnimation: false,
-      series: _buildChartSeries().toList()
-          as List<CartesianSeries<dynamic, dynamic>>,
+      series: _buildChartSeries().toList(),
       primaryXAxis: DateTimeAxis(
         intervalType: DateTimeIntervalType.minutes,
         dateFormat: DateFormat.Hm(),
@@ -239,7 +238,7 @@ class _StatsChartState extends State<StatsChart> {
     );
   }
 
-  Iterable<ChartSeries> _buildChartSeries() sync* {
+  Iterable<CartesianSeries<dynamic, dynamic>> _buildChartSeries() sync* {
     yield StepLineSeries<StatChartPoint, DateTime>(
       dataSource: totalTimeSeries.points,
       xValueMapper: (point, _) => point.time,

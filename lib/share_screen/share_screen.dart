@@ -177,11 +177,9 @@ class _ShareScreenState extends State<ShareScreen> {
         IconButton(
           icon: Icon(Icons.share),
           onPressed: _url != ''
-              ? () => Share.shareXFiles([
-                    XFile(
-                      '${AppLocalizations.of(context)!.shareDialogMessage} $_url',
-                    )
-                  ], subject: AppLocalizations.of(context)!.shareDialogSubject)
+              ? () => Share.shareUri(
+                    Uri.parse(_url),
+                  )
               : null,
         ),
       ]);

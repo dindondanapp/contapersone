@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:contapersone/l10n/app_localizations.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 /// Asynchronously open a scanning interface from the provided [context] to
 /// aquire a [Uri] from a QR code. When the user scans a QR code the interface
@@ -12,16 +12,17 @@ Future<Uri> scanUriQRCode(BuildContext context) {
 
   Navigator.of(context).push(
     MaterialPageRoute(
-      builder: (context) => _ScanScreen(
-        scanCallback: (result) {
-          try {
-            final uri = Uri.parse(result);
-            completer.complete(uri);
-          } catch (error) {
-            completer.completeError(error);
-          }
-        },
-      ),
+      builder:
+          (context) => _ScanScreen(
+            scanCallback: (result) {
+              try {
+                final uri = Uri.parse(result);
+                completer.complete(uri);
+              } catch (error) {
+                completer.completeError(error);
+              }
+            },
+          ),
     ),
   );
 
@@ -33,19 +34,14 @@ class _ScanScreen extends StatefulWidget {
   final bool closeOnScan;
 
   const _ScanScreen({Key? key, this.scanCallback, this.closeOnScan = true})
-      : super(key: key);
+    : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ScanScreenState();
 }
 
 class _ScanScreenState extends State<_ScanScreen> {
-  bool flashOn = false;
-
-  QRViewController? controller;
-  final GlobalKey qrKey = GlobalKey();
-
-  _ScanScreenState();
+  MobileScannerController controller = MobileScannerController();
 
   @override
   Widget build(BuildContext context) {
@@ -54,54 +50,38 @@ class _ScanScreenState extends State<_ScanScreen> {
         title: Text(AppLocalizations.of(context)!.scanQrButton),
         actions: [
           IconButton(
-            icon: Icon(flashOn ? Icons.flash_off : Icons.flash_on),
-            onPressed: () {
-              controller?.toggleFlash();
-              setState(() => flashOn = !flashOn);
-            },
-            tooltip: flashOn
-                ? AppLocalizations.of(context)!.turnOnFlash
-                : AppLocalizations.of(context)!.turnOffFlash,
+            icon: const Icon(Icons.flash_on),
+            onPressed: () => controller.toggleTorch(),
+            tooltip: AppLocalizations.of(context)!.turnOnFlash,
           ),
           IconButton(
-            icon: Icon(Icons.flip_camera_android),
-            onPressed: () {
-              controller?.flipCamera();
-            },
+            icon: const Icon(Icons.flip_camera_android),
+            onPressed: () => controller.switchCamera(),
             tooltip: AppLocalizations.of(context)!.switchCamera,
           ),
         ],
       ),
-      body: QRView(
-        key: qrKey,
-        onQRViewCreated: _onQRViewCreated,
-        overlay: QrScannerOverlayShape(
-          borderColor: Theme.of(context).colorScheme.primary,
-          borderRadius: 10,
-          borderLength: 40,
-          borderWidth: 5,
-          cutOutSize: 280,
-        ),
+      body: MobileScanner(
+        controller: controller,
+        onDetect: (capture) {
+          final List<Barcode> barcodes = capture.barcodes;
+          for (final barcode in barcodes) {
+            if (barcode.rawValue != null && widget.scanCallback != null) {
+              widget.scanCallback!(barcode.rawValue!);
+              if (widget.closeOnScan) {
+                Navigator.of(context).pop();
+              }
+              return;
+            }
+          }
+        },
       ),
     );
   }
 
-  void _onQRViewCreated(QRViewController controller) {
-    this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
-      if (scanData.code != null && widget.scanCallback != null) {
-        widget.scanCallback!(scanData.code!);
-        controller.dispose();
-      }
-      if (widget.closeOnScan) {
-        Navigator.of(context).pop();
-      }
-    });
-  }
-
   @override
   void dispose() {
-    controller?.dispose();
+    controller.dispose();
     super.dispose();
   }
 }
