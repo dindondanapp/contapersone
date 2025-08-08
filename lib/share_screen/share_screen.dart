@@ -97,12 +97,8 @@ class _ShareScreenState extends State<ShareScreen> {
                       _buildShareButtons()
                     ],
                   ),
-                  widget.startCounterButton == null ||
-                          !widget.startCounterButton
-                      ? Divider()
-                      : Container(),
-                  widget.startCounterButton == null ||
-                          !widget.startCounterButton
+                  !widget.startCounterButton ? Divider() : Container(),
+                  !widget.startCounterButton
                       ? ElevatedButton.icon(
                           onPressed: () {
                             _startSubcounter(counterId: widget.token);
@@ -133,13 +129,11 @@ class _ShareScreenState extends State<ShareScreen> {
   void _buildDynamicLink() async {
     try {
       print("Generating link…");
-      final uriString =
-          'https://dindondan.app/contapersone/web?token=${widget.token}';
-      String link = kIsWeb
-          ? _manualDynamicLink(uriString)
-          : await _shortDynamicLink(uriString);
+      // Generate direct link that works with Universal Links and App Links
+      final link =
+          'https://dindondan.app/contapersone/web/?token=${widget.token}';
       setState(() {
-        _url = link.toString();
+        _url = link;
         print("Link generated: $_url");
       });
     } catch (error) {
@@ -150,34 +144,6 @@ class _ShareScreenState extends State<ShareScreen> {
         onRetry: _buildDynamicLink,
       );
     }
-  }
-
-  String _manualDynamicLink(String uriString) {
-    final encodedUri = Uri.encodeComponent(uriString);
-    return 'https://dindondan.page.link/?link=$encodedUri&apn=app.dindondan.contapersone&afl=$encodedUri&ibi=app.dindondan.contapersone&ifl=$encodedUri&isi=1513235116';
-  }
-
-  Future<String> _shortDynamicLink(String uriString) async {
-    return '';
-    // final DynamicLinkParameters parameters = DynamicLinkParameters(
-    //   uriPrefix: 'https://dindondan.page.link',
-    //   link: Uri.parse(uriString),
-    //   androidParameters: AndroidParameters(
-    //       packageName: 'app.dindondan.contapersone',
-    //       minimumVersion: 0,
-    //       fallbackUrl: Uri.parse(uriString)),
-    //   iosParameters: IOSParameters(
-    //       bundleId: 'app.dindondan.contapersone',
-    //       appStoreId: '1513235116',
-    //       minimumVersion: '0.0.0',
-    //       fallbackUrl: Uri.parse(uriString)),
-    // );
-
-    // ShortDynamicLink shortLink = await FirebaseDynamicLinks.instance
-    //     .buildShortLink(parameters)
-    //     .timeout(Duration(seconds: 10));
-
-    // return shortLink.shortUrl.toString();
   }
 
   Widget _buildShareButtons() {

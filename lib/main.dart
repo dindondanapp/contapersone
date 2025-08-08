@@ -30,14 +30,14 @@ class MyApp extends StatelessWidget {
         onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          useMaterial3: true,
+          useMaterial3: false,
           colorScheme: ColorScheme.fromSeed(
             seedColor: Palette.primary,
             brightness: Brightness.light,
           ).copyWith(primary: Palette.primary),
         ),
         darkTheme: ThemeData(
-          useMaterial3: true,
+          useMaterial3: false,
           colorScheme: ColorScheme.fromSeed(
             seedColor: Palette.primary,
             brightness: Brightness.dark,

@@ -1,5 +1,4 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:contapersone/l10n/app_localizations.dart';
@@ -59,18 +58,16 @@ class CounterJoinForm extends StatelessWidget {
       Uri uri = await scanUriQRCode(context);
       FirebaseAnalytics.instance.logEvent(name: 'scan', parameters: null);
 
-      /*PendingDynamicLinkData? data =
-          await FirebaseDynamicLinks.instance.getDynamicLink(uri);
-
-      if (data != null && data.link.queryParameters.containsKey('token')) {
-        onSuccess(CounterToken.fromString(data.link.queryParameters['token']!));
+      // Handle direct URLs with token parameter
+      if (uri.queryParameters.containsKey('token')) {
+        onSuccess(CounterToken.fromString(uri.queryParameters['token']!));
       } else {
         if (onError != null) {
           onError!();
         } else {
           throw Exception('Invalid code scanned.');
         }
-      }*/
+      }
     } catch (error) {
       FirebaseAnalytics.instance.logEvent(name: 'scan_fail', parameters: null);
       if (onError != null) {
