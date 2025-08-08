@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:contapersone/l10n/app_localizations.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:rxdart/subjects.dart';
 
@@ -190,7 +190,7 @@ class HistoryState extends State<History> {
                     ),
                     IconTheme(
                       data:
-                          IconThemeData(color: Theme.of(context).primaryColor),
+                          IconThemeData(color: Theme.of(context).colorScheme.primary),
                       child: ButtonBar(
                         buttonTextTheme: ButtonTextTheme.accent,
                         alignment: MainAxisAlignment.spaceBetween,
@@ -258,7 +258,7 @@ class HistoryState extends State<History> {
               children: [
                 TextSpan(
                   text: capacity != null ? '/$capacity' : '',
-                  style: TextStyle(color: Theme.of(context).primaryColor),
+                  style: TextStyle(color: Theme.of(context).colorScheme.primary),
                 ),
               ],
               style: TextStyle(fontSize: 25, color: Colors.black),
@@ -328,7 +328,7 @@ class HistoryState extends State<History> {
               },
               child: Text(
                 AppLocalizations.of(context)!.confirm,
-                style: TextStyle(color: Theme.of(context).primaryColor),
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
             ),
             TextButton(

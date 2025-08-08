@@ -5,7 +5,7 @@ import 'package:contapersone/stats_screen/stats_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:contapersone/l10n/app_localizations.dart';
 import 'package:vibration/vibration.dart';
 
 import '../common/auth.dart';
@@ -355,8 +355,8 @@ class _CounterScreenState extends State<CounterScreen> {
                       child: Icon(Icons.remove),
                       onPressed: () => _updateCounter(-1),
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.grey[300],
-                        onPrimary: Colors.grey[600],
+                        backgroundColor: Colors.grey[300],
+                        foregroundColor: Colors.grey[600],
                       ),
                     ),
                     flex: 3,
@@ -580,7 +580,7 @@ class _CounterScreenState extends State<CounterScreen> {
               },
               child: Text(
                 AppLocalizations.of(context)!.confirm,
-                style: TextStyle(color: Theme.of(context).primaryColor),
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
             ),
             TextButton(

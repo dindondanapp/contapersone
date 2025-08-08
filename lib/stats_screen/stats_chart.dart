@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:contapersone/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -128,12 +128,13 @@ class _StatsChartState extends State<StatsChart> {
 
     return SfCartesianChart(
       enableAxisAnimation: false,
-      series: _buildChartSeries().toList(),
+      series: _buildChartSeries().toList()
+          as List<CartesianSeries<dynamic, dynamic>>,
       primaryXAxis: DateTimeAxis(
         intervalType: DateTimeIntervalType.minutes,
         dateFormat: DateFormat.Hm(),
-        zoomPosition: zoomPosition,
-        zoomFactor: zoomFactor,
+        initialZoomPosition: zoomPosition ?? 1,
+        initialZoomFactor: zoomFactor ?? 1,
         labelStyle: TextStyle(color: Colors.grey, fontSize: 12),
         title: AxisTitle(
           text: timeString,
@@ -145,7 +146,7 @@ class _StatsChartState extends State<StatsChart> {
         minimum: lowerLimit,
         maximum: upperLimit,
         labelStyle: TextStyle(
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).colorScheme.primary,
           fontWeight: FontWeight.bold,
           fontSize: 14,
         ),
@@ -186,7 +187,7 @@ class _StatsChartState extends State<StatsChart> {
         animationDuration: 0,
         decimalPlaces: 0,
         elevation: 0,
-        color: Theme.of(context).primaryColor,
+        color: Theme.of(context).colorScheme.primary,
         textStyle: TextStyle(
           color: Colors.white,
         ),
@@ -218,7 +219,7 @@ class _StatsChartState extends State<StatsChart> {
             minimum: lowerLimit,
             maximum: upperLimit,
             labelStyle: TextStyle(
-              color: Theme.of(context).primaryColor,
+              color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.bold,
               fontSize: 14,
             ),
@@ -243,7 +244,7 @@ class _StatsChartState extends State<StatsChart> {
       dataSource: totalTimeSeries.points,
       xValueMapper: (point, _) => point.time,
       yValueMapper: (point, _) => point.count,
-      color: Theme.of(context).primaryColor,
+      color: Theme.of(context).colorScheme.primary,
       width: 4,
       legendItemText: AppLocalizations.of(context)!.chartTotalLabel,
       name: AppLocalizations.of(context)!.chartTotalLabel,

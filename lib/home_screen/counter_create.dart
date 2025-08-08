@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:contapersone/l10n/app_localizations.dart';
 
 /// A simple form to create a new counter, possibly specifying capacity
 class CounterCreateForm extends StatelessWidget {

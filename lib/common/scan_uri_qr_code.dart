@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:contapersone/l10n/app_localizations.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 /// Asynchronously open a scanning interface from the provided [context] to
@@ -76,7 +76,7 @@ class _ScanScreenState extends State<_ScanScreen> {
         key: qrKey,
         onQRViewCreated: _onQRViewCreated,
         overlay: QrScannerOverlayShape(
-          borderColor: Theme.of(context).primaryColor,
+          borderColor: Theme.of(context).colorScheme.primary,
           borderRadius: 10,
           borderLength: 40,
           borderWidth: 5,

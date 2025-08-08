@@ -9,9 +9,9 @@ import 'package:contapersone/common/palette.dart';
 import 'package:contapersone/stats_screen/stats_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:contapersone/l10n/app_localizations.dart';
 import 'package:rxdart/subjects.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:universal_html/html.dart' as html;
 
 import '../common/auth.dart';
@@ -188,8 +188,8 @@ class StatsScreenState extends State<StatsScreen> {
     final RenderBox box =
         _shareButtonKey.currentContext?.findRenderObject() as RenderBox;
 
-    await Share.shareFiles(
-      [file.path],
+    await Share.shareXFiles(
+      [XFile(file.path)],
       sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
     );
   }

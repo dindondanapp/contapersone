@@ -1,15 +1,14 @@
 import 'package:contapersone/common/auth.dart';
 import 'package:contapersone/common/entities.dart';
 import 'package:contapersone/common/show_error_dialog.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:contapersone/l10n/app_localizations.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../common/palette.dart';
 import '../counter_screen/counter_screen.dart';
@@ -159,25 +158,26 @@ class _ShareScreenState extends State<ShareScreen> {
   }
 
   Future<String> _shortDynamicLink(String uriString) async {
-    final DynamicLinkParameters parameters = DynamicLinkParameters(
-      uriPrefix: 'https://dindondan.page.link',
-      link: Uri.parse(uriString),
-      androidParameters: AndroidParameters(
-          packageName: 'app.dindondan.contapersone',
-          minimumVersion: 0,
-          fallbackUrl: Uri.parse(uriString)),
-      iosParameters: IOSParameters(
-          bundleId: 'app.dindondan.contapersone',
-          appStoreId: '1513235116',
-          minimumVersion: '0.0.0',
-          fallbackUrl: Uri.parse(uriString)),
-    );
+    return '';
+    // final DynamicLinkParameters parameters = DynamicLinkParameters(
+    //   uriPrefix: 'https://dindondan.page.link',
+    //   link: Uri.parse(uriString),
+    //   androidParameters: AndroidParameters(
+    //       packageName: 'app.dindondan.contapersone',
+    //       minimumVersion: 0,
+    //       fallbackUrl: Uri.parse(uriString)),
+    //   iosParameters: IOSParameters(
+    //       bundleId: 'app.dindondan.contapersone',
+    //       appStoreId: '1513235116',
+    //       minimumVersion: '0.0.0',
+    //       fallbackUrl: Uri.parse(uriString)),
+    // );
 
-    ShortDynamicLink shortLink = await FirebaseDynamicLinks.instance
-        .buildShortLink(parameters)
-        .timeout(Duration(seconds: 10));
+    // ShortDynamicLink shortLink = await FirebaseDynamicLinks.instance
+    //     .buildShortLink(parameters)
+    //     .timeout(Duration(seconds: 10));
 
-    return shortLink.shortUrl.toString();
+    // return shortLink.shortUrl.toString();
   }
 
   Widget _buildShareButtons() {
@@ -211,9 +211,11 @@ class _ShareScreenState extends State<ShareScreen> {
         IconButton(
           icon: Icon(Icons.share),
           onPressed: _url != ''
-              ? () => Share.share(
-                  '${AppLocalizations.of(context)!.shareDialogMessage} $_url',
-                  subject: AppLocalizations.of(context)!.shareDialogSubject)
+              ? () => Share.shareXFiles([
+                    XFile(
+                      '${AppLocalizations.of(context)!.shareDialogMessage} $_url',
+                    )
+                  ], subject: AppLocalizations.of(context)!.shareDialogSubject)
               : null,
         ),
       ]);

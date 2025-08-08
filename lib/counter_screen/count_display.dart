@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:contapersone/l10n/app_localizations.dart';
 
 import '../common/entities.dart';
 
@@ -138,7 +138,7 @@ class CountDisplay extends StatelessWidget {
       child: Card(
         margin: EdgeInsets.zero,
         elevation: 1,
-        color: Theme.of(context).primaryColor,
+        color: Theme.of(context).colorScheme.primary,
         child: Container(
           padding: EdgeInsets.all(10),
           child: Column(
@@ -244,7 +244,7 @@ class CountDisplay extends StatelessWidget {
               TextSpan(
                 text: capacity != null ? '/$capacity' : '',
                 style: TextStyle(
-                    fontSize: 50, color: Theme.of(context).primaryColor),
+                    fontSize: 50, color: Theme.of(context).colorScheme.primary),
               ),
             ],
             style: TextStyle(fontSize: 50, color: color),

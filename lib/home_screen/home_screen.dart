@@ -2,10 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contapersone/common/show_error_dialog.dart';
 import 'package:contapersone/home_screen/counter_join.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:contapersone/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_location_href/window_location_href.dart';
 
@@ -63,24 +62,24 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       });
 
-      FirebaseDynamicLinks.instance.onLink
-          .listen((PendingDynamicLinkData dynamicLink) async {
-        final Uri deepLink = dynamicLink.link;
-        _followDeepLink(deepLink);
-      });
+      // FirebaseDynamicLinks.instance.onLink
+      //     .listen((PendingDynamicLinkData dynamicLink) async {
+      //   final Uri deepLink = dynamicLink.link;
+      //   _followDeepLink(deepLink);
+      // });
     }
   }
 
   Future<Uri?> _initDynamicLinks() async {
     print("Checking for deep links.");
-    final PendingDynamicLinkData? data =
-        await FirebaseDynamicLinks.instance.getInitialLink();
+    // final PendingDynamicLinkData? data =
+    //     await FirebaseDynamicLinks.instance.getInitialLink();
 
-    if (data?.link == null) {
-      return null;
-    } else {
-      return data!.link;
-    }
+    // if (data?.link == null) {
+    //   return null;
+    // } else {
+    //   return data!.link;
+    // }
   }
 
   void _followDeepLink(Uri uri) {
