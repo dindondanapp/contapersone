@@ -97,7 +97,7 @@ class HistoryState extends State<History> {
                       CounterToken.fromString(doc.id),
                       lastUpdated: doc.data()['lastUpdated'],
                       total: doc.data()['total'],
-                      capacity: doc.data()['capacity'],
+                      capacity: doc.data()['capacity'] ?? null,
                       creator: doc.data()['creator'],
                       subcounters: subcounters,
                     );
@@ -189,8 +189,8 @@ class HistoryState extends State<History> {
                       subtitle: subtitle,
                     ),
                     IconTheme(
-                      data:
-                          IconThemeData(color: Theme.of(context).colorScheme.primary),
+                      data: IconThemeData(
+                          color: Theme.of(context).colorScheme.primary),
                       child: ButtonBar(
                         buttonTextTheme: ButtonTextTheme.accent,
                         alignment: MainAxisAlignment.spaceBetween,
@@ -241,8 +241,8 @@ class HistoryState extends State<History> {
 
   Widget _buildCounterTotal({
     required int total,
-    required int capacity,
-    required Timestamp lastUpdated,
+    int? capacity,
+    Timestamp? lastUpdated,
     String subtitle = '',
   }) {
     final timeString = lastUpdated == null
@@ -258,7 +258,8 @@ class HistoryState extends State<History> {
               children: [
                 TextSpan(
                   text: capacity != null ? '/$capacity' : '',
-                  style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.primary),
                 ),
               ],
               style: TextStyle(fontSize: 25, color: Colors.black),
