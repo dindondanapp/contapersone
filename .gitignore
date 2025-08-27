@@ -30,6 +30,7 @@
 .pub-cache/
 .pub/
 /build/
+/ios/build/
 .l10n-untranslated.json
 
 # Web related
