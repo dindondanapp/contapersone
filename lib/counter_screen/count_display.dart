@@ -224,7 +224,8 @@ class CountDisplay extends StatelessWidget {
     bool disconnected = false,
     bool reverse = false,
   }) {
-    Color color = disconnected ? Colors.grey : Colors.black;
+    Color color =
+        disconnected ? Colors.grey : Theme.of(context).colorScheme.onSurface;
     if (capacity != null) {
       if (count >= capacity) {
         color = Colors.red;

@@ -53,7 +53,6 @@ class _ShareScreenState extends State<ShareScreen> {
           },
         ),
       ),
-      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Center(
           child: Container(
@@ -77,6 +76,7 @@ class _ShareScreenState extends State<ShareScreen> {
                       Container(
                         constraints: BoxConstraints(maxWidth: 200),
                         margin: EdgeInsets.all(10),
+                        color: Colors.white,
                         child: _url != ''
                             ? QrImageView(data: _url, version: QrVersions.auto)
                             : Container(
@@ -153,7 +153,6 @@ class _ShareScreenState extends State<ShareScreen> {
           child: SelectableText(
             _url,
             maxLines: 1,
-            toolbarOptions: ToolbarOptions(copy: true, selectAll: true),
           ),
         ),
         IconButton(
@@ -167,7 +166,6 @@ class _ShareScreenState extends State<ShareScreen> {
           child: SelectableText(
             _url,
             maxLines: 1,
-            toolbarOptions: ToolbarOptions(copy: true, selectAll: true),
           ),
         ),
         IconButton(

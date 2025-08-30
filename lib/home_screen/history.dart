@@ -262,7 +262,8 @@ class HistoryState extends State<History> {
                       TextStyle(color: Theme.of(context).colorScheme.primary),
                 ),
               ],
-              style: TextStyle(fontSize: 25, color: Colors.black),
+              style: TextStyle(
+                  fontSize: 25, color: Theme.of(context).colorScheme.onSurface),
             ),
             textAlign: TextAlign.center,
           ),
