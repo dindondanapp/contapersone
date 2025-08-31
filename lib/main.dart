@@ -1,9 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:contapersone/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'common/extensions.dart';
 import 'common/palette.dart';
 import 'home_screen/home_screen.dart';
 
@@ -31,15 +30,20 @@ class MyApp extends StatelessWidget {
         onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          primarySwatch: Palette.primary.toMaterialColor(),
-          buttonTheme: ButtonThemeData(
-            buttonColor: Palette.primary,
-          ),
-          //buttonColor: Palette.primary,
-          //accentColor: Palette.primary,
-          //appBarTheme: AppBarTheme.of(context).copyWith(li: Brightness.dark),
-          // TODO : Remove
+          useMaterial3: false,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Palette.primary,
+            brightness: Brightness.light,
+          ).copyWith(primary: Palette.primary),
         ),
+        darkTheme: ThemeData(
+          useMaterial3: false,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Palette.primary,
+            brightness: Brightness.dark,
+          ).copyWith(primary: Palette.primary),
+        ),
+        themeMode: ThemeMode.system,
         initialRoute: '/',
         routes: {
           '/': (context) => HomeScreen(),

@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 
 // This file containes miscellaneous entities that are needed across multiple screens
 
@@ -43,7 +42,7 @@ class CounterData {
   final CounterToken token;
   final Timestamp lastUpdated;
   final int total;
-  final int capacity;
+  final int? capacity;
   final String creator;
   final List<SubcounterData> subcounters;
 
@@ -51,7 +50,7 @@ class CounterData {
     this.token, {
     required this.lastUpdated,
     required this.total,
-    required this.capacity,
+    this.capacity,
     required this.creator,
     required this.subcounters,
   });

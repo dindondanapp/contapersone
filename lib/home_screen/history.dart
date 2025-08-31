@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:contapersone/l10n/app_localizations.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:rxdart/subjects.dart';
 
@@ -97,7 +97,7 @@ class HistoryState extends State<History> {
                       CounterToken.fromString(doc.id),
                       lastUpdated: doc.data()['lastUpdated'],
                       total: doc.data()['total'],
-                      capacity: doc.data()['capacity'],
+                      capacity: doc.data()['capacity'] ?? null,
                       creator: doc.data()['creator'],
                       subcounters: subcounters,
                     );
@@ -189,8 +189,8 @@ class HistoryState extends State<History> {
                       subtitle: subtitle,
                     ),
                     IconTheme(
-                      data:
-                          IconThemeData(color: Theme.of(context).primaryColor),
+                      data: IconThemeData(
+                          color: Theme.of(context).colorScheme.primary),
                       child: ButtonBar(
                         buttonTextTheme: ButtonTextTheme.accent,
                         alignment: MainAxisAlignment.spaceBetween,
@@ -241,8 +241,8 @@ class HistoryState extends State<History> {
 
   Widget _buildCounterTotal({
     required int total,
-    required int capacity,
-    required Timestamp lastUpdated,
+    int? capacity,
+    Timestamp? lastUpdated,
     String subtitle = '',
   }) {
     final timeString = lastUpdated == null
@@ -258,10 +258,12 @@ class HistoryState extends State<History> {
               children: [
                 TextSpan(
                   text: capacity != null ? '/$capacity' : '',
-                  style: TextStyle(color: Theme.of(context).primaryColor),
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.primary),
                 ),
               ],
-              style: TextStyle(fontSize: 25, color: Colors.black),
+              style: TextStyle(
+                  fontSize: 25, color: Theme.of(context).colorScheme.onSurface),
             ),
             textAlign: TextAlign.center,
           ),
@@ -328,7 +330,7 @@ class HistoryState extends State<History> {
               },
               child: Text(
                 AppLocalizations.of(context)!.confirm,
-                style: TextStyle(color: Theme.of(context).primaryColor),
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
             ),
             TextButton(

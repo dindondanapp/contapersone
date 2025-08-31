@@ -2,12 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contapersone/common/show_error_dialog.dart';
 import 'package:contapersone/home_screen/counter_join.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:contapersone/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_location_href/window_location_href.dart';
+import 'package:app_links/app_links.dart';
+import 'dart:async';
 
 import '../common/auth.dart';
 import '../common/entities.dart';
@@ -36,6 +37,9 @@ class _HomeScreenState extends State<HomeScreen> {
       (_auth.status == AuthStatus.loggedIn ||
           _auth.status == AuthStatus.loggedInAnonymously);
 
+  late AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -56,31 +60,29 @@ class _HomeScreenState extends State<HomeScreen> {
         _followDeepLink(webUri);
       }
     } else {
-      // Handle firebase dynamic links
-      _initDynamicLinks().then((Uri? uri) {
-        if (uri != null) {
-          _followDeepLink(uri);
-        }
-      });
-
-      FirebaseDynamicLinks.instance.onLink
-          .listen((PendingDynamicLinkData dynamicLink) async {
-        final Uri deepLink = dynamicLink.link;
-        _followDeepLink(deepLink);
-      });
+      // Initialize app links for deep linking
+      _initAppLinks();
     }
   }
 
-  Future<Uri?> _initDynamicLinks() async {
-    print("Checking for deep links.");
-    final PendingDynamicLinkData? data =
-        await FirebaseDynamicLinks.instance.getInitialLink();
+  Future<void> _initAppLinks() async {
+    print("Initializing app links.");
+    _appLinks = AppLinks();
 
-    if (data?.link == null) {
-      return null;
-    } else {
-      return data!.link;
+    // Check if app was launched from a link
+    final appLink = await _appLinks.getInitialLink();
+    if (appLink != null) {
+      print("Found initial app link: $appLink");
+      _followDeepLink(appLink);
     }
+
+    // Listen to all incoming links when app is already running
+    _linkSubscription = _appLinks.uriLinkStream.listen((Uri uri) {
+      print("Received app link: $uri");
+      _followDeepLink(uri);
+    }, onError: (err) {
+      print("App link error: $err");
+    });
   }
 
   void _followDeepLink(Uri uri) {
@@ -288,6 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _linkSubscription?.cancel();
     super.dispose();
     _capacityController.dispose();
     _auth.dispose();

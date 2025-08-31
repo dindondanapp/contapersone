@@ -1,15 +1,14 @@
 import 'package:contapersone/common/auth.dart';
 import 'package:contapersone/common/entities.dart';
 import 'package:contapersone/common/show_error_dialog.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:contapersone/l10n/app_localizations.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../common/palette.dart';
 import '../counter_screen/counter_screen.dart';
@@ -54,7 +53,6 @@ class _ShareScreenState extends State<ShareScreen> {
           },
         ),
       ),
-      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Center(
           child: Container(
@@ -78,6 +76,7 @@ class _ShareScreenState extends State<ShareScreen> {
                       Container(
                         constraints: BoxConstraints(maxWidth: 200),
                         margin: EdgeInsets.all(10),
+                        color: Colors.white,
                         child: _url != ''
                             ? QrImageView(data: _url, version: QrVersions.auto)
                             : Container(
@@ -98,12 +97,8 @@ class _ShareScreenState extends State<ShareScreen> {
                       _buildShareButtons()
                     ],
                   ),
-                  widget.startCounterButton == null ||
-                          !widget.startCounterButton
-                      ? Divider()
-                      : Container(),
-                  widget.startCounterButton == null ||
-                          !widget.startCounterButton
+                  !widget.startCounterButton ? Divider() : Container(),
+                  !widget.startCounterButton
                       ? ElevatedButton.icon(
                           onPressed: () {
                             _startSubcounter(counterId: widget.token);
@@ -134,13 +129,11 @@ class _ShareScreenState extends State<ShareScreen> {
   void _buildDynamicLink() async {
     try {
       print("Generating link…");
-      final uriString =
-          'https://dindondan.app/contapersone/web?token=${widget.token}';
-      String link = kIsWeb
-          ? _manualDynamicLink(uriString)
-          : await _shortDynamicLink(uriString);
+      // Generate direct link that works with Universal Links and App Links
+      final link =
+          'https://dindondan.app/contapersone/web/?token=${widget.token}';
       setState(() {
-        _url = link.toString();
+        _url = link;
         print("Link generated: $_url");
       });
     } catch (error) {
@@ -153,33 +146,6 @@ class _ShareScreenState extends State<ShareScreen> {
     }
   }
 
-  String _manualDynamicLink(String uriString) {
-    final encodedUri = Uri.encodeComponent(uriString);
-    return 'https://dindondan.page.link/?link=$encodedUri&apn=app.dindondan.contapersone&afl=$encodedUri&ibi=app.dindondan.contapersone&ifl=$encodedUri&isi=1513235116';
-  }
-
-  Future<String> _shortDynamicLink(String uriString) async {
-    final DynamicLinkParameters parameters = DynamicLinkParameters(
-      uriPrefix: 'https://dindondan.page.link',
-      link: Uri.parse(uriString),
-      androidParameters: AndroidParameters(
-          packageName: 'app.dindondan.contapersone',
-          minimumVersion: 0,
-          fallbackUrl: Uri.parse(uriString)),
-      iosParameters: IOSParameters(
-          bundleId: 'app.dindondan.contapersone',
-          appStoreId: '1513235116',
-          minimumVersion: '0.0.0',
-          fallbackUrl: Uri.parse(uriString)),
-    );
-
-    ShortDynamicLink shortLink = await FirebaseDynamicLinks.instance
-        .buildShortLink(parameters)
-        .timeout(Duration(seconds: 10));
-
-    return shortLink.shortUrl.toString();
-  }
-
   Widget _buildShareButtons() {
     if (kIsWeb) {
       return Row(children: [
@@ -187,7 +153,6 @@ class _ShareScreenState extends State<ShareScreen> {
           child: SelectableText(
             _url,
             maxLines: 1,
-            toolbarOptions: ToolbarOptions(copy: true, selectAll: true),
           ),
         ),
         IconButton(
@@ -201,7 +166,6 @@ class _ShareScreenState extends State<ShareScreen> {
           child: SelectableText(
             _url,
             maxLines: 1,
-            toolbarOptions: ToolbarOptions(copy: true, selectAll: true),
           ),
         ),
         IconButton(
@@ -211,9 +175,9 @@ class _ShareScreenState extends State<ShareScreen> {
         IconButton(
           icon: Icon(Icons.share),
           onPressed: _url != ''
-              ? () => Share.share(
-                  '${AppLocalizations.of(context)!.shareDialogMessage} $_url',
-                  subject: AppLocalizations.of(context)!.shareDialogSubject)
+              ? () => Share.shareUri(
+                    Uri.parse(_url),
+                  )
               : null,
         ),
       ]);
