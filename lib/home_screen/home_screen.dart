@@ -57,7 +57,9 @@ class _HomeScreenState extends State<HomeScreen> {
       final webUri = Uri.tryParse(href ?? "");
       if (webUri != null && webUri.queryParameters['token'] != null) {
         print("Found web uri with token.");
-        _followDeepLink(webUri);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _followDeepLink(webUri);
+        });
       }
     } else {
       // Initialize app links for deep linking
@@ -73,7 +75,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final appLink = await _appLinks.getInitialLink();
     if (appLink != null) {
       print("Found initial app link: $appLink");
-      _followDeepLink(appLink);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _followDeepLink(appLink);
+      });
     }
 
     // Listen to all incoming links when app is already running

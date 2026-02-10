@@ -27,7 +27,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get scanQrButton => 'Escanea el código QR';
 
   @override
-  String get scanQrWebNotice => 'Pídale al creador del contador que le envíe el link o descargue la versión móvil del Shared Counter de la App Store o Play Store para enmarcar el código QR';
+  String get scanQrWebNotice =>
+      'Pídale al creador del contador que le envíe el link o descargue la versión móvil del Shared Counter de la App Store o Play Store para enmarcar el código QR';
 
   @override
   String get historyTitle => 'Conteos pasados';
@@ -36,13 +37,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noHistoryNotice => 'Tus contadores pasados aparecerán aquí.';
 
   @override
-  String get historyLoadingError => 'Se produjo un error al cargar los contadores pasados.';
+  String get historyLoadingError =>
+      'Se produjo un error al cargar los contadores pasados.';
 
   @override
   String get historyDeleteConfirmTitle => 'Eliminar el contador';
 
   @override
-  String get historyDeleteConfirmMessage => '¿Realmente desea eliminar el contador de contadores pasados ? La operación es irreversible. ';
+  String get historyDeleteConfirmMessage =>
+      '¿Realmente desea eliminar el contador de contadores pasados ? La operación es irreversible. ';
 
   @override
   String get tryAgain => 'Intenta otra vez';
@@ -69,37 +72,44 @@ class AppLocalizationsEs extends AppLocalizations {
   String get parishSignOut => 'Cerrar sesión';
 
   @override
-  String get createCounterErrorTitle => 'No se pudo crear el contador compartido';
+  String get createCounterErrorTitle =>
+      'No se pudo crear el contador compartido';
 
   @override
-  String get createCounterErrorMessage => 'Comprueba tu conexión de red y vuelve a intentarlo.';
+  String get createCounterErrorMessage =>
+      'Comprueba tu conexión de red y vuelve a intentarlo.';
 
   @override
   String get accountErrorTitle => 'Error de conexión';
 
   @override
-  String get accountErrorMessage => 'No se pudo obtener la información de tu cuenta.\n\nSi el problema persiste, toca \"salir\" e intente iniciar sesión nuevamente.';
+  String get accountErrorMessage =>
+      'No se pudo obtener la información de tu cuenta.\n\nSi el problema persiste, toca \"salir\" e intente iniciar sesión nuevamente.';
 
   @override
   String get networkErrorTitle => 'Error de conexión';
 
   @override
-  String get networkErrorMessage => 'No se pudo conectar con el servidor. Comprueba tu conexión de red e inténtalo de nuevo.';
+  String get networkErrorMessage =>
+      'No se pudo conectar con el servidor. Comprueba tu conexión de red e inténtalo de nuevo.';
 
   @override
   String get incompleteSignUpErrorTitle => 'Registro incompleto';
 
   @override
-  String get incompleteSignUpErrorMessage => 'Parece que no ha completado el registro.\n\nPara acceder debe proporcionar algunos datos. Toca \"continua\" para terminar de acceder a los servicios web y completar el registro.';
+  String get incompleteSignUpErrorMessage =>
+      'Parece que no ha completado el registro.\n\nPara acceder debe proporcionar algunos datos. Toca \"continua\" para terminar de acceder a los servicios web y completar el registro.';
 
   @override
-  String get webAppDownloadBanner => 'Está utilizando la aplicación de la versión web. Si tiene un dispositivo Android o iOS, ¡descargue la versión nativa!';
+  String get webAppDownloadBanner =>
+      'Está utilizando la aplicación de la versión web. Si tiene un dispositivo Android o iOS, ¡descargue la versión nativa!';
 
   @override
   String get infoScreenTitle => 'Informaciones';
 
   @override
-  String get infoScreenText => 'Shared Counter es la herramienta sencilla y eficaz para contar los accesos a eventos, negocios, celebraciones religiosas y mucho más, incluso la presencia de múltiples accesos.\n\nPara empezar, crea un nuevo contador, especificando opcionalmente la capacidad. Luego, puede compartir el cuento con otros dispositivos, por ejemplo, para monitorear múltiples entradas al mismo tiempo, a través de un link o un código QR. Siempre tendrás bajo control el cuento total de todos los dispositivos, sincronizados en tiempo real.\n\nEl servicio fue creado en particular para monitorear el acceso a la iglesia, pero ahora está disponible gratuitamente para todos. Si estás a cargo de una parroquia puedes acceder al\"Área reservada para parroquias\", para tener acceso a estadísticas de uso y otros servicios útiles en el portal web DinDonDan.\n\nShared Counter es un proyecto open source ofrecido de forma gratuita por la asociación DinDonDan App.';
+  String get infoScreenText =>
+      'Shared Counter es la herramienta sencilla y eficaz para contar los accesos a eventos, negocios, celebraciones religiosas y mucho más, incluso la presencia de múltiples accesos.\n\nPara empezar, crea un nuevo contador, especificando opcionalmente la capacidad. Luego, puede compartir el cuento con otros dispositivos, por ejemplo, para monitorear múltiples entradas al mismo tiempo, a través de un link o un código QR. Siempre tendrás bajo control el cuento total de todos los dispositivos, sincronizados en tiempo real.\n\nEl servicio fue creado en particular para monitorear el acceso a la iglesia, pero ahora está disponible gratuitamente para todos. Si estás a cargo de una parroquia puedes acceder al\"Área reservada para parroquias\", para tener acceso a estadísticas de uso y otros servicios útiles en el portal web DinDonDan.\n\nShared Counter es un proyecto open source ofrecido de forma gratuita por la asociación DinDonDan App.';
 
   @override
   String get donateButton => 'Apóyenos con una donación';
@@ -159,7 +169,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get shareScreenTitle => 'Comparte el contador';
 
   @override
-  String get shareQrCodeCaption => 'Escanea el código QR con todos los dispositivos con los que quieras contar';
+  String get shareQrCodeCaption =>
+      'Escanea el código QR con todos los dispositivos con los que quieras contar';
 
   @override
   String get orShareScreenCaption => 'O comparte el link:';
@@ -168,10 +179,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get startOnThisDevice => 'Comenza en este dispositivo';
 
   @override
-  String get shareLinkCreationErrorTitle => 'No se pudo obtener el link para compartir';
+  String get shareLinkCreationErrorTitle =>
+      'No se pudo obtener el link para compartir';
 
   @override
-  String get shareLinkCreationErrorMessage => 'Comprueba tu conexión de red y vuelve a intentarlo.';
+  String get shareLinkCreationErrorMessage =>
+      'Comprueba tu conexión de red y vuelve a intentarlo.';
 
   @override
   String get shareDialogMessage => 'Inicia el contador compartido';
@@ -207,31 +220,39 @@ class AppLocalizationsEs extends AppLocalizations {
   String get forgotPasswordButton => 'Olvidé la password';
 
   @override
-  String get signInReservedWarning => '¡Advertencia! El inicio de sesión está reservado para las parroquias.';
+  String get signInReservedWarning =>
+      '¡Advertencia! El inicio de sesión está reservado para las parroquias.';
 
   @override
-  String get signInFormCaption => 'Para recopilar estadísticas de conteo para tu parroquia, inicia sesión con tu cuenta DinDonDan:';
+  String get signInFormCaption =>
+      'Para recopilar estadísticas de conteo para tu parroquia, inicia sesión con tu cuenta DinDonDan:';
 
   @override
-  String get signInUnknownErrorMessage => 'Un error desconocido a ocurrido. Vuelve a intentarlo más tarde y, si el problema persiste, escribe a feedback@dindondan.app.';
+  String get signInUnknownErrorMessage =>
+      'Un error desconocido a ocurrido. Vuelve a intentarlo más tarde y, si el problema persiste, escribe a feedback@dindondan.app.';
 
   @override
-  String get signInInvalidEmailError => 'La dirección de correo electrónico es inválida. Comprueba que esté escrito correctamente y vuelve a intentarlo.';
+  String get signInInvalidEmailError =>
+      'La dirección de correo electrónico es inválida. Comprueba que esté escrito correctamente y vuelve a intentarlo.';
 
   @override
   String get signInWrongPasswordError => 'La password ingresada es incorrecta.';
 
   @override
-  String get signInUserNotFoundError => 'Esta dirección no coincide con ningún usuario.';
+  String get signInUserNotFoundError =>
+      'Esta dirección no coincide con ningún usuario.';
 
   @override
-  String get signInUserDisabledError => 'Este usuario ha sido inhabilitado. Para obtener más informaciones, escribe a feedback@dindondan.app.';
+  String get signInUserDisabledError =>
+      'Este usuario ha sido inhabilitado. Para obtener más informaciones, escribe a feedback@dindondan.app.';
 
   @override
-  String get signInTooManyAttemptsError => 'Has hecho demasiados intentos. Intenta más tarde.';
+  String get signInTooManyAttemptsError =>
+      'Has hecho demasiados intentos. Intenta más tarde.';
 
   @override
-  String get signInNetworkError => 'No se pudo conectar al servidor. Comprueba tu conexión de red y vuelve a intentarlo.';
+  String get signInNetworkError =>
+      'No se pudo conectar al servidor. Comprueba tu conexión de red y vuelve a intentarlo.';
 
   @override
   String get statsScreenTitle => 'Estadísticas';
@@ -264,7 +285,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get resetConfirmTitle => 'Reinicia la cuenta';
 
   @override
-  String get resetConfirmMessage => '¿Realmente quieres reiniciar el recuento? Eliminará irreversiblemente todos los datos relacionados con este recuento para todos los usuarios, incluidas las estadísticas. Los usuarios con los que haya compartido el recuento podrán seguir teniendo acceso.';
+  String get resetConfirmMessage =>
+      '¿Realmente quieres reiniciar el recuento? Eliminará irreversiblemente todos los datos relacionados con este recuento para todos los usuarios, incluidas las estadísticas. Los usuarios con los que haya compartido el recuento podrán seguir teniendo acceso.';
 
   @override
   String second(num num) {

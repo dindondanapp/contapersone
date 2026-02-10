@@ -21,13 +21,15 @@ class AppLocalizationsIt extends AppLocalizations {
   String get capacityHint => 'Capienza (facoltativa)';
 
   @override
-  String get scanQrCaption => 'Partecipa ad un contapersone condiviso esistente';
+  String get scanQrCaption =>
+      'Partecipa ad un contapersone condiviso esistente';
 
   @override
   String get scanQrButton => 'Inquadra il codice QR';
 
   @override
-  String get scanQrWebNotice => 'Chiedi al creatore del contapersone di inviarti il link, oppure scarica la versione mobile di Contapersone da App Store o Play Store per inquadrare il codice QR';
+  String get scanQrWebNotice =>
+      'Chiedi al creatore del contapersone di inviarti il link, oppure scarica la versione mobile di Contapersone da App Store o Play Store per inquadrare il codice QR';
 
   @override
   String get historyTitle => 'Conteggi passati';
@@ -36,13 +38,15 @@ class AppLocalizationsIt extends AppLocalizations {
   String get noHistoryNotice => 'I tuoi conteggi passati appariranno qui.';
 
   @override
-  String get historyLoadingError => 'Si è verificato un errore nel caricamento dei conteggi passati.';
+  String get historyLoadingError =>
+      'Si è verificato un errore nel caricamento dei conteggi passati.';
 
   @override
   String get historyDeleteConfirmTitle => 'Elimina il conteggio';
 
   @override
-  String get historyDeleteConfirmMessage => 'Vuoi davvero eliminare il conteggio dai conteggi passati? L\'operazione è irreversibile.';
+  String get historyDeleteConfirmMessage =>
+      'Vuoi davvero eliminare il conteggio dai conteggi passati? L\'operazione è irreversibile.';
 
   @override
   String get tryAgain => 'Riprova';
@@ -69,37 +73,44 @@ class AppLocalizationsIt extends AppLocalizations {
   String get parishSignOut => 'Disconnetti';
 
   @override
-  String get createCounterErrorTitle => 'Impossibile creare il contapersone condiviso';
+  String get createCounterErrorTitle =>
+      'Impossibile creare il contapersone condiviso';
 
   @override
-  String get createCounterErrorMessage => 'Verifica la connessione di rete e riprova.';
+  String get createCounterErrorMessage =>
+      'Verifica la connessione di rete e riprova.';
 
   @override
   String get accountErrorTitle => 'Errore di connessione';
 
   @override
-  String get accountErrorMessage => 'Non è stato possibile ottenere i dati del tuo account.\n\nSe il problema persiste tocca \"esci\" e prova a ripetere l\'accesso.';
+  String get accountErrorMessage =>
+      'Non è stato possibile ottenere i dati del tuo account.\n\nSe il problema persiste tocca \"esci\" e prova a ripetere l\'accesso.';
 
   @override
   String get networkErrorTitle => 'Errore di connessione';
 
   @override
-  String get networkErrorMessage => 'Non è stato possibile connettersi al server. Controlla la connessione di rete e riprova.';
+  String get networkErrorMessage =>
+      'Non è stato possibile connettersi al server. Controlla la connessione di rete e riprova.';
 
   @override
   String get incompleteSignUpErrorTitle => 'Registrazione incompleta';
 
   @override
-  String get incompleteSignUpErrorMessage => 'Sembra che tu non abbia completato la registrazione.\n\nPer accedere devi fornire ancora alcuni dati. Tocca \"continua\" per concludere accedere ai servizi web e completare la registrazione.';
+  String get incompleteSignUpErrorMessage =>
+      'Sembra che tu non abbia completato la registrazione.\n\nPer accedere devi fornire ancora alcuni dati. Tocca \"continua\" per concludere accedere ai servizi web e completare la registrazione.';
 
   @override
-  String get webAppDownloadBanner => 'Stai usando l\'app in versione web. Se hai un dispositivo Android o iOS scarica la versione nativa!';
+  String get webAppDownloadBanner =>
+      'Stai usando l\'app in versione web. Se hai un dispositivo Android o iOS scarica la versione nativa!';
 
   @override
   String get infoScreenTitle => 'Informazioni';
 
   @override
-  String get infoScreenText => 'Contapersone è lo strumento semplice ed efficace per contare gli accessi a eventi, esercizi commerciali, celebrazioni religiose e tanto altro, anche i presenza di ingressi multipli.\n\nPer iniziare crea un nuovo contapersone, specificando facoltativamente la capienza. Potrai poi condividere il conteggio con altri dispositivi, ad esempio per monitorare più ingressi contemporaneamente, tramite un semplice link o un codice QR. Avrai sempre sotto controllo il conteggio totale di tutti i dispositivi, sincronizzato in tempo reale.\n\nIl servizio nasce in particolare per il monitoraggio degli accessi in chiesa, ma è ora disponibile liberamente per tutti. Se sei responsabile di una parrocchia puoi accedere all\'\"Area riservata parrocchie\", per avere accesso alle statistiche di utilizzo e ad altri utili servizi sul portale web di DinDonDan.\n\nContapersone è un progetto open source offerto gratuitamente dall\'associazione DinDonDan App.';
+  String get infoScreenText =>
+      'Contapersone è lo strumento semplice ed efficace per contare gli accessi a eventi, esercizi commerciali, celebrazioni religiose e tanto altro, anche i presenza di ingressi multipli.\n\nPer iniziare crea un nuovo contapersone, specificando facoltativamente la capienza. Potrai poi condividere il conteggio con altri dispositivi, ad esempio per monitorare più ingressi contemporaneamente, tramite un semplice link o un codice QR. Avrai sempre sotto controllo il conteggio totale di tutti i dispositivi, sincronizzato in tempo reale.\n\nIl servizio nasce in particolare per il monitoraggio degli accessi in chiesa, ma è ora disponibile liberamente per tutti. Se sei responsabile di una parrocchia puoi accedere all\'\"Area riservata parrocchie\", per avere accesso alle statistiche di utilizzo e ad altri utili servizi sul portale web di DinDonDan.\n\nContapersone è un progetto open source offerto gratuitamente dall\'associazione DinDonDan App.';
 
   @override
   String get donateButton => 'Sostienici con una donazione';
@@ -159,7 +170,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get shareScreenTitle => 'Condividi il conteggio';
 
   @override
-  String get shareQrCodeCaption => 'Inquadra il codice QR con tutti i dispositivi su cui vuoi eseguire il conteggio';
+  String get shareQrCodeCaption =>
+      'Inquadra il codice QR con tutti i dispositivi su cui vuoi eseguire il conteggio';
 
   @override
   String get orShareScreenCaption => 'Oppure condividi il link:';
@@ -168,10 +180,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get startOnThisDevice => 'Avvia su questo dispositivo';
 
   @override
-  String get shareLinkCreationErrorTitle => 'Impossibile ottenere il link di condivisione';
+  String get shareLinkCreationErrorTitle =>
+      'Impossibile ottenere il link di condivisione';
 
   @override
-  String get shareLinkCreationErrorMessage => 'Verifica la connessione di rete e riprova.';
+  String get shareLinkCreationErrorMessage =>
+      'Verifica la connessione di rete e riprova.';
 
   @override
   String get shareDialogMessage => 'Avvia il contapersone condiviso:';
@@ -207,31 +221,39 @@ class AppLocalizationsIt extends AppLocalizations {
   String get forgotPasswordButton => 'Ho dimenticato la password';
 
   @override
-  String get signInReservedWarning => 'Attenzione! Il login è riservato alle parrocchie.';
+  String get signInReservedWarning =>
+      'Attenzione! Il login è riservato alle parrocchie.';
 
   @override
-  String get signInFormCaption => 'Per raccogliere statistiche sui conteggi per la tua parrocchia accedi con il tuo account DinDonDan:';
+  String get signInFormCaption =>
+      'Per raccogliere statistiche sui conteggi per la tua parrocchia accedi con il tuo account DinDonDan:';
 
   @override
-  String get signInUnknownErrorMessage => 'Si è verificato un errore sconosciuto. Riprova più tardi e, se il problema persiste, scrivi a feedback@dindondan.app.';
+  String get signInUnknownErrorMessage =>
+      'Si è verificato un errore sconosciuto. Riprova più tardi e, se il problema persiste, scrivi a feedback@dindondan.app.';
 
   @override
-  String get signInInvalidEmailError => 'L\'indirizzo e-mail non è valido. Controlla che sia scritto correttamente e riprova.';
+  String get signInInvalidEmailError =>
+      'L\'indirizzo e-mail non è valido. Controlla che sia scritto correttamente e riprova.';
 
   @override
   String get signInWrongPasswordError => 'La password inserita è errata.';
 
   @override
-  String get signInUserNotFoundError => 'Questo indirizzo non corrisponde ad alcun utente.';
+  String get signInUserNotFoundError =>
+      'Questo indirizzo non corrisponde ad alcun utente.';
 
   @override
-  String get signInUserDisabledError => 'Questo utente è stato disabilitato. Per ulteriori informazioni scrivi a feedback@dindondan.app.';
+  String get signInUserDisabledError =>
+      'Questo utente è stato disabilitato. Per ulteriori informazioni scrivi a feedback@dindondan.app.';
 
   @override
-  String get signInTooManyAttemptsError => 'Hai effettuato troppi tentativi. Riprova più tardi.';
+  String get signInTooManyAttemptsError =>
+      'Hai effettuato troppi tentativi. Riprova più tardi.';
 
   @override
-  String get signInNetworkError => 'Impossibile connettersi al server. Verifica la connessione di rete e riprova.';
+  String get signInNetworkError =>
+      'Impossibile connettersi al server. Verifica la connessione di rete e riprova.';
 
   @override
   String get statsScreenTitle => 'Statistiche';
@@ -264,7 +286,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get resetConfirmTitle => 'Azzera il conteggio';
 
   @override
-  String get resetConfirmMessage => 'Vuoi davvero azzerare il conteggio? Eliminerai in modo irreversibile tutti i dati relativi a questo conteggio per tutti gli utenti, incluse le statistiche. Gli utenti con cui hai condiviso il conteggio potranno continuare accedere.';
+  String get resetConfirmMessage =>
+      'Vuoi davvero azzerare il conteggio? Eliminerai in modo irreversibile tutti i dati relativi a questo conteggio per tutti gli utenti, incluse le statistiche. Gli utenti con cui hai condiviso il conteggio potranno continuare accedere.';
 
   @override
   String second(num num) {

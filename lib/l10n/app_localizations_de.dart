@@ -12,7 +12,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get appTitle => 'DinDonDan Shared Counter';
 
   @override
-  String get createCounterCaption => 'Erstellen Sie einen neuen Zähler für gemeinsam genutzte Personen';
+  String get createCounterCaption =>
+      'Erstellen Sie einen neuen Zähler für gemeinsam genutzte Personen';
 
   @override
   String get createCounterButton => 'Neuen Personenzähler';
@@ -27,22 +28,26 @@ class AppLocalizationsDe extends AppLocalizations {
   String get scanQrButton => 'QR-Code scannen';
 
   @override
-  String get scanQrWebNotice => 'Bitten Sie den Ersteller des Personenzählers, Ihnen den Link zu senden, oder laden Sie die mobile Version des Shared Counter aus dem App Store oder Play Store herunter, um den QR-Code festzulegen';
+  String get scanQrWebNotice =>
+      'Bitten Sie den Ersteller des Personenzählers, Ihnen den Link zu senden, oder laden Sie die mobile Version des Shared Counter aus dem App Store oder Play Store herunter, um den QR-Code festzulegen';
 
   @override
   String get historyTitle => 'Vergangene Zählungen';
 
   @override
-  String get noHistoryNotice => 'Ihre vergangenen Zählungen werden hier angezeigt.';
+  String get noHistoryNotice =>
+      'Ihre vergangenen Zählungen werden hier angezeigt.';
 
   @override
-  String get historyLoadingError => 'Beim Laden vergangener Zählungen ist ein Fehler aufgetreten.';
+  String get historyLoadingError =>
+      'Beim Laden vergangener Zählungen ist ein Fehler aufgetreten.';
 
   @override
   String get historyDeleteConfirmTitle => 'Zählung löschen';
 
   @override
-  String get historyDeleteConfirmMessage => 'Möchten Sie die Zählung wirklich von früheren Zählungen löschen?  Die Operation ist irreversibel.';
+  String get historyDeleteConfirmMessage =>
+      'Möchten Sie die Zählung wirklich von früheren Zählungen löschen?  Die Operation ist irreversibel.';
 
   @override
   String get tryAgain => 'Versuch es noch einmal';
@@ -69,37 +74,44 @@ class AppLocalizationsDe extends AppLocalizations {
   String get parishSignOut => 'Ausloggen';
 
   @override
-  String get createCounterErrorTitle => 'Der Zähler für gemeinsam genutzte Personen konnte nicht erstellt werden';
+  String get createCounterErrorTitle =>
+      'Der Zähler für gemeinsam genutzte Personen konnte nicht erstellt werden';
 
   @override
-  String get createCounterErrorMessage => 'Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.';
+  String get createCounterErrorMessage =>
+      'Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.';
 
   @override
   String get accountErrorTitle => 'Verbindungsfehler';
 
   @override
-  String get accountErrorMessage => 'Ihre Kontoinformationen konnten nicht abgerufen werden.\n\nWenn das Problem weiterhin besteht, berühren Sie \"beenden\" und versuchen Sie erneut, sich anzumelden.';
+  String get accountErrorMessage =>
+      'Ihre Kontoinformationen konnten nicht abgerufen werden.\n\nWenn das Problem weiterhin besteht, berühren Sie \"beenden\" und versuchen Sie erneut, sich anzumelden.';
 
   @override
   String get networkErrorTitle => 'Verbindungsfehler';
 
   @override
-  String get networkErrorMessage => 'Konnte keine Verbindung zum Server herstellen.  Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.';
+  String get networkErrorMessage =>
+      'Konnte keine Verbindung zum Server herstellen.  Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.';
 
   @override
   String get incompleteSignUpErrorTitle => 'Unvollständige Registrierung';
 
   @override
-  String get incompleteSignUpErrorMessage => 'Es scheint, dass Sie die Registrierung nicht abgeschlossen haben.\n\nUm darauf zugreifen zu können, müssen Sie noch einige Daten angeben. Tippen Sie auf \"weiter\"um den Zugriff auf die Webdienste zu beenden un die Registrierung abzuschließen.';
+  String get incompleteSignUpErrorMessage =>
+      'Es scheint, dass Sie die Registrierung nicht abgeschlossen haben.\n\nUm darauf zugreifen zu können, müssen Sie noch einige Daten angeben. Tippen Sie auf \"weiter\"um den Zugriff auf die Webdienste zu beenden un die Registrierung abzuschließen.';
 
   @override
-  String get webAppDownloadBanner => 'Sie verwenden die Webversions-App.  Wenn Sie ein Android- oder iOS-Gerät haben, laden Sie die native Version herunter!';
+  String get webAppDownloadBanner =>
+      'Sie verwenden die Webversions-App.  Wenn Sie ein Android- oder iOS-Gerät haben, laden Sie die native Version herunter!';
 
   @override
   String get infoScreenTitle => 'Informationen';
 
   @override
-  String get infoScreenText => 'Shared Counter ist das einfache und effektive Instrument, um den Zugang zu Veranstaltungen, Unternehmen, religiösen Festen und vielem mehr zu zählen, selbst wenn mehrere Eingänge vorhanden sind.\n\nErstellen Sie zunächst einen neuen Personenzähler, in dem Sie optional die Kapazität angeben können. Sie können die Anzahl dann mit anderen Geräten teilen, um beispielsweise mehrere Eingänge gleichzeitig über einen einfachen Link oder einen QR-Code zu überwachen.  Sie haben immer die Gesamtzahl aller Geräte unter Kontrolle, die in Echtzeit synchronisiert sind.\n\nDer Dienst wurde speziell für die Überwachung des Zugangs zur Kirche geschaffen, ist aber jetzt für alle frei verfügbar. Wenn Sie für eine Kirche verantwortlich sind, können Sie auf den\"Reservierten Bereich für Kirche\" zugreifen, um Zugriff auf Nutzungsstatistiken und andere nützliche Dienste auf dem DinDonDan-Webportal zu erhalten.\n\nShared Counter ist ein Open-Source-Projekt, das von der DinDonDan App Association kostenlos angeboten wird.';
+  String get infoScreenText =>
+      'Shared Counter ist das einfache und effektive Instrument, um den Zugang zu Veranstaltungen, Unternehmen, religiösen Festen und vielem mehr zu zählen, selbst wenn mehrere Eingänge vorhanden sind.\n\nErstellen Sie zunächst einen neuen Personenzähler, in dem Sie optional die Kapazität angeben können. Sie können die Anzahl dann mit anderen Geräten teilen, um beispielsweise mehrere Eingänge gleichzeitig über einen einfachen Link oder einen QR-Code zu überwachen.  Sie haben immer die Gesamtzahl aller Geräte unter Kontrolle, die in Echtzeit synchronisiert sind.\n\nDer Dienst wurde speziell für die Überwachung des Zugangs zur Kirche geschaffen, ist aber jetzt für alle frei verfügbar. Wenn Sie für eine Kirche verantwortlich sind, können Sie auf den\"Reservierten Bereich für Kirche\" zugreifen, um Zugriff auf Nutzungsstatistiken und andere nützliche Dienste auf dem DinDonDan-Webportal zu erhalten.\n\nShared Counter ist ein Open-Source-Projekt, das von der DinDonDan App Association kostenlos angeboten wird.';
 
   @override
   String get donateButton => 'Unterstützen Sie uns mit einer Spende';
@@ -159,7 +171,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get shareScreenTitle => 'Teilen Sie die Anzahl';
 
   @override
-  String get shareQrCodeCaption => 'Scannen Sie den QR-Code mit allen Geräten, auf die Sie zählen möchten';
+  String get shareQrCodeCaption =>
+      'Scannen Sie den QR-Code mit allen Geräten, auf die Sie zählen möchten';
 
   @override
   String get orShareScreenCaption => 'Oder teilen Sie den Link:';
@@ -168,13 +181,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get startOnThisDevice => 'Starten Sie auf diesem Gerät';
 
   @override
-  String get shareLinkCreationErrorTitle => 'Der Link konnte nicht abgerufen werden';
+  String get shareLinkCreationErrorTitle =>
+      'Der Link konnte nicht abgerufen werden';
 
   @override
-  String get shareLinkCreationErrorMessage => 'Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.';
+  String get shareLinkCreationErrorMessage =>
+      'Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.';
 
   @override
-  String get shareDialogMessage => 'Starten Sie den Zähler für gemeinsam genutzte Personen:';
+  String get shareDialogMessage =>
+      'Starten Sie den Zähler für gemeinsam genutzte Personen:';
 
   @override
   String get shareDialogSubject => 'DinDonDan Shared Counter';
@@ -207,31 +223,39 @@ class AppLocalizationsDe extends AppLocalizations {
   String get forgotPasswordButton => 'Ich habe das Passwort vergessen';
 
   @override
-  String get signInReservedWarning => 'Warnung!  Der Login ist für Pfarreien reserviert.';
+  String get signInReservedWarning =>
+      'Warnung!  Der Login ist für Pfarreien reserviert.';
 
   @override
-  String get signInFormCaption => 'Melden Sie sich mit Ihrem DinDonDan-Konto an, um Zählstatistiken für Ihre Kirche zu sammeln:';
+  String get signInFormCaption =>
+      'Melden Sie sich mit Ihrem DinDonDan-Konto an, um Zählstatistiken für Ihre Kirche zu sammeln:';
 
   @override
-  String get signInUnknownErrorMessage => 'Ein unbekannter Fehler ist aufgetreten.  Bitte versuchen Sie es später erneut. Wenn das Problem weiterhin besteht, schreiben Sie an feedback@dindondan.app.';
+  String get signInUnknownErrorMessage =>
+      'Ein unbekannter Fehler ist aufgetreten.  Bitte versuchen Sie es später erneut. Wenn das Problem weiterhin besteht, schreiben Sie an feedback@dindondan.app.';
 
   @override
-  String get signInInvalidEmailError => 'Die e-mail Adresse ist ungültig. Überprüfen Sie, ob es richtig geschrieben ist, und versuchen Sie es erneut.';
+  String get signInInvalidEmailError =>
+      'Die e-mail Adresse ist ungültig. Überprüfen Sie, ob es richtig geschrieben ist, und versuchen Sie es erneut.';
 
   @override
   String get signInWrongPasswordError => 'Das eingegebene Passwort ist falsch.';
 
   @override
-  String get signInUserNotFoundError => 'Diese Adresse stimmt mit keinem Benutzer überein.';
+  String get signInUserNotFoundError =>
+      'Diese Adresse stimmt mit keinem Benutzer überein.';
 
   @override
-  String get signInUserDisabledError => 'Dieser Benutzer wurde deaktiviert.  Für weitere Informationen schreiben Sie an feedback@dindondan.app.';
+  String get signInUserDisabledError =>
+      'Dieser Benutzer wurde deaktiviert.  Für weitere Informationen schreiben Sie an feedback@dindondan.app.';
 
   @override
-  String get signInTooManyAttemptsError => 'Sie haben zu viele Versuche unternommen. Versuchen Sie später.';
+  String get signInTooManyAttemptsError =>
+      'Sie haben zu viele Versuche unternommen. Versuchen Sie später.';
 
   @override
-  String get signInNetworkError => 'Die Verbindung zum Server kann nicht hergestellt werden.  Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.';
+  String get signInNetworkError =>
+      'Die Verbindung zum Server kann nicht hergestellt werden.  Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.';
 
   @override
   String get statsScreenTitle => 'Statistiken';
@@ -264,7 +288,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get resetConfirmTitle => 'Personenzähler zurücksetzen';
 
   @override
-  String get resetConfirmMessage => 'Möchten Sie den Zähler wirklich zurücksetzen? Sie werden alle Daten zu dieser Zählung für alle Benutzer, einschließlich Statistiken, unwiderruflich löschen. Benutzer, mit denen Sie die Zählung geteilt haben, können sich weiterhin anmelden.';
+  String get resetConfirmMessage =>
+      'Möchten Sie den Zähler wirklich zurücksetzen? Sie werden alle Daten zu dieser Zählung für alle Benutzer, einschließlich Statistiken, unwiderruflich löschen. Benutzer, mit denen Sie die Zählung geteilt haben, können sich weiterhin anmelden.';
 
   @override
   String second(num num) {
